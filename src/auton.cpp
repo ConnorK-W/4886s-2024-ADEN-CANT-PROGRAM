@@ -447,7 +447,7 @@ drive_straight(-65, 75, 300);
 turn_pid(153, -1, 1);
 lift.spinToPosition(60 * 4, ROT_DEG, 200, VEL_RPM, false);
 drive_full.spinFor(DIR_FWD, 1300, TIME_MSEC, 80, VEL_PCT);
-turn_pid(-40, -1, 1);
+turn_pid(-0, -1, 1);
 drive_straight(-1000, 50, 100000);
 
 
