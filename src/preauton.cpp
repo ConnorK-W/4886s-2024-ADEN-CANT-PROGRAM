@@ -5,7 +5,7 @@ void pre_auton(void) {
     imu.calibrate();
 
     int *sides;
-    const char *autons[8] = {"FullAWP", "RedRush", "RedQuad", "BlueQuad", "BlueRush", "SKILLS", "ElimsBlue", "ElimsRed"};
+    const char *autons[11] = {"AWP_Red", "AWP_Blue", "Red_Rush_Rings", "Blue_Rush_Rings", "Red_Rush_Goal", "Blue_Rush_Goal", "Red_Quad", "Blue_Quad", "Quad_Clear_Red", "Quad_Clear_Blue", "SKILLS"};
 
     // Create GUI - none of this is important, just for looks
     B_SCRN.clearScreen();

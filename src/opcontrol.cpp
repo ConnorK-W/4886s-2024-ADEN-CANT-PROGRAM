@@ -23,7 +23,8 @@ void opcontrol(void) {
     bool do_neutral_line_up = false;
 
     const int LIFT_BUFFER = 110;
-
+    
+    Smith_MechL.set(0);
     int liftHeight = 0;
     bool liftOT = 0;
     bool liftSA = 0;
@@ -73,10 +74,10 @@ void opcontrol(void) {
                 liftOT = 0;
             } 
             else if (liftHeight == 2) {
-                lift.spinToPosition(40 * 4, ROT_DEG, 100, VEL_PCT, false);
+                lift.spinToPosition(68 * 4, ROT_DEG, 100, VEL_PCT, false);
             } 
             else if (liftHeight == 3) {
-                lift.spinToPosition(164 * 4, ROT_DEG, 100, VEL_PCT, false);
+                lift.spinToPosition(188 * 4, ROT_DEG, 100, VEL_PCT, false);
                 if (liftOT == 0){
                     intakeHigh.setStopping(vex::brakeType::coast);
                     liftOT = 1;

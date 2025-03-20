@@ -1,7 +1,7 @@
 #include "../include/main.h"
 
 // Which auton will run
-int auton_mode = SKILLS;
+int auton_mode = ELIMS_BLUE;
 // Heading robot should follow
 float target_heading = 0;
 
