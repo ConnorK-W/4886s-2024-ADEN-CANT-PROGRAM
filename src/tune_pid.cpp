@@ -75,7 +75,6 @@ void tune_fast_pid() {
     while (true) {
         // drive_r.setStopping(vex::coast);
         // drive_l.setStopping(vex::coast);
-        master.rumble(".");
         opdrive(TSA, 1, SENSITIVITY);
         if (BTN_R1.PRESSED) {
             target_heading = imu_rotation();

@@ -7,7 +7,7 @@
 
 
 // Direction controll
-#define DRIVE_STRAIGHT_DIR_KP 3.3
+#define DRIVE_STRAIGHT_DIR_KP 3.0
 #define DRIVE_STRAIGHT_DIR_KI 0.00
 #define DRIVE_STRAIGHT_DIR_KD 8.275
 
@@ -23,6 +23,6 @@
 
 
 // turn_pid() consts
-#define TURN_PID_KP 0.75
+#define TURN_PID_KP 8.0
 #define TURN_PID_KI 0.0005
-#define TURN_PID_KD 2.6
+#define TURN_PID_KD 5.0

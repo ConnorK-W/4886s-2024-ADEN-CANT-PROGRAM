@@ -3,9 +3,9 @@
 void pre_auton(void) {
     // Calibrate inertial
     imu.calibrate();
-
+    intake_lift.set(0);
     int *sides;
-    const char *autons[11] = {"AWP_Red", "AWP_Blue", "Red_Rush_Rings", "Blue_Rush_Rings", "Red_Rush_Goal", "Blue_Rush_Goal", "Red_Quad", "Blue_Quad", "Quad_Clear_Red", "Quad_Clear_Blue", "SKILLS"};
+    const char *autons[9] = {"AWP_Red", "AWP_Blue", "Red_Rush_Rings", "Blue_Rush_Rings", "Red_Rush_Goal", "Blue_Rush_Goal", "Red_Quad", "Blue_Quad", "SKILLS"};
 
     // Create GUI - none of this is important, just for looks
     B_SCRN.clearScreen();
@@ -36,8 +36,8 @@ void pre_auton(void) {
         // Update auton type
         if (sides[X] == LEFT) {
             auton_mode++;
-            if (auton_mode > ELIMS_RED)
-                auton_mode = FULL_AWP;
+            if (auton_mode > SKILLS)
+                auton_mode = AWP_Red;
             B_SCRN.setCursor(B_SCRN_Y * 3 / 2, 1);
             B_SCRN.clearLine();
             B_SCRN.print("%s", autons[auton_mode]);

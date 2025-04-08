@@ -4,11 +4,10 @@
 
 // Driver macros
 void opcontrol(void) {
-                    lift.setStopping(vex::brakeType::coast);
-
+    
+    lift.setStopping(vex::brakeType::coast);
     drive_l.stop(vex::brakeType::coast);
     drive_r.stop(vex::brakeType::coast);
-    intake.stop(vex::brakeType::brake);
     colorSort.setLightPower(100, PCT_PCT);
     colorSort.setLight(vex::ledState::on);
 
@@ -25,11 +24,12 @@ void opcontrol(void) {
     const int LIFT_BUFFER = 110;
     
     Smith_MechL.set(0);
-    int liftHeight = 0;
+    int liftHeight = 1;
     bool liftOT = 0;
     bool liftSA = 0;
     intake_lift.set(0);
     bool sort = 1;
+
 
     while (lift.current(PCT_PCT) < 95) {
         lift.spin(DIR_REV, 90, PCT_PCT);
@@ -47,7 +47,7 @@ void opcontrol(void) {
         Brain.Screen.drawImageFromFile("Graduation.png", 0, 0);
 
         if (BTN_L2.pressing()) {
-            lift.spinToPosition(280 * 4, ROT_DEG, 100, VEL_PCT, false);
+            lift.spinToPosition(235 * 3, ROT_DEG, 100, VEL_PCT, false);
             liftSA = 1;
         }
         if (BTN_L1.PRESSED)
@@ -69,17 +69,26 @@ void opcontrol(void) {
         }
         if (liftSA == 0) {
             if (liftHeight == 1) {
-                lift.spinToPosition(3 * 4, ROT_DEG, 100, VEL_PCT, false);
+                lift.spinToPosition(5 * 3, ROT_DEG, 100, VEL_PCT, false);
                 lift.setStopping(vex::brakeType::coast);
                 liftOT = 0;
             } 
             else if (liftHeight == 2) {
-                lift.spinToPosition(68 * 4, ROT_DEG, 100, VEL_PCT, false);
+                lift.spinToPosition(53 * 3, ROT_DEG, 100, VEL_PCT, false);
             } 
             else if (liftHeight == 3) {
-                lift.spinToPosition(188 * 4, ROT_DEG, 100, VEL_PCT, false);
+                lift.spinToPosition(172 * 3, ROT_DEG, 100, VEL_PCT, false);
                 if (liftOT == 0){
-                    intakeHigh.setStopping(vex::brakeType::coast);
+                    intakeHigh.spinFor(DIR_REV, 130, TIME_MSEC, 100, VEL_PCT);
+                    master.rumble(".");
+                    liftOT = 1;
+                }
+            }
+            else if (liftHeight == -1) {
+                lift.spinToPosition(300 * 3, ROT_DEG, 100, VEL_PCT, false);
+                if (liftOT == 0){
+                    intakeHigh.spinFor(DIR_REV, 100, TIME_MSEC, 100, VEL_PCT);
+                    master.rumble(".");
                     liftOT = 1;
                 }
             }
@@ -93,14 +102,15 @@ void opcontrol(void) {
         // Smith Mech
         if (BTN_B.PRESSED)
             Smith_MechR.set(!Smith_MechR.value());
-        // Intake lift
-
+        // Smith Mech
+        if (BTN_UP.PRESSED)
+            liftHeight=-1;
         // AWS in skills
         if (BTN_RIGHT.PRESSED) {
             lift.spinToPosition(168 * 4, ROT_DEG, 150, VEL_RPM);
             wait(150, TIME_MSEC);
             drive_full.spinFor(DIR_REV, 300, TIME_MSEC, 50, VEL_PCT);
-            lift.spinToPosition(-21 * 4, ROT_DEG, 200, VEL_RPM);    
+            lift.spinToPosition(0 * 4, ROT_DEG, 200, VEL_RPM);    
             lift.resetPosition();
             mogo_clamp.set(1);
         }

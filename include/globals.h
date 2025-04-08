@@ -4,14 +4,16 @@
 #define DRIVE_REV_TO_IN (DRIVE_GEARING * PI * MED_OMNI_DIAM)
 #define WHEEL_TO_WHEEL_DIST (11.5)
 
-#define FULL_AWP 0
-#define RED_RUSH 1
-#define RED_QUAD 2
-#define BLUE_QUAD 3
-#define BLUE_RUSH 4
-#define SKILLS 5
-#define ELIMS_BLUE 6
-#define ELIMS_RED 7
+#define AWP_Red 0
+#define AWP_Blue 1
+#define Red_Rush_Rings 2
+#define Blue_Rush_Rings 3
+#define Red_Rush_Goal 4
+#define Blue_Rush_Goal 5
+#define Red_Quad 6
+#define Blue_Quad 7
+#define SKILLS 8
+
 
 // Operator control modes
 #define TNK 0
@@ -29,11 +31,11 @@
 // Correct inertial sensor error
 #define IMU_CORRECTION (0.9964)
 // Height in pixels of default characters on brain
-#define CHAR_HI 20
-#define CHAR_WI 12
+#define CHAR_HI 40
+#define CHAR_WI 24
 
 // Multiplier for turn sensitivty
-#define SENSITIVITY 0.60
+#define SENSITIVITY 0.50
 
 // Global variable declarations
 extern int auton_mode;
