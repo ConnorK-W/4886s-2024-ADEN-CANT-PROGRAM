@@ -23,6 +23,6 @@
 
 
 // turn_pid() consts
-#define TURN_PID_KP 8.0
+#define TURN_PID_KP 0.75
 #define TURN_PID_KI 0.0005
-#define TURN_PID_KD 50.0
+#define TURN_PID_KD 3.0

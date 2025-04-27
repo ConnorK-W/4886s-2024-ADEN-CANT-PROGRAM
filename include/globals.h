@@ -29,13 +29,13 @@
 #define DOWN 2
 
 // Correct inertial sensor error
-#define IMU_CORRECTION (0.9964)
+#define IMU_CORRECTION (0.99888889)
 // Height in pixels of default characters on brain
 #define CHAR_HI 40
 #define CHAR_WI 24
 
 // Multiplier for turn sensitivty
-#define SENSITIVITY 0.50
+#define SENSITIVITY 0.70
 
 // Global variable declarations
 extern int auton_mode;

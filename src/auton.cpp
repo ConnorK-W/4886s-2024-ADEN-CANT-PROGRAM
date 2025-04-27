@@ -96,36 +96,34 @@ lift.spinToPosition(150 * 4, ROT_DEG, 150, VEL_RPM, false);
 
     case Red_Rush_Rings: {
 
-lift.spin(DIR_REV, 20, PCT_PCT);
+lift.spinToPosition(80 * 3, ROT_DEG, 150, VEL_RPM, false);
 intakeLow.spin(DIR_FWD, 100, PCT_PCT);
 Smith_MechL.set(1);
 drive_straight(43, 70, 100);
 turn_pid(-40, -1, 1);
-drive_straight(-25, 50, 50);
+drive_straight(-28, 50, 50);
 mogo_clamp.set(1);
 vex::thread t1 (red_sort);
 Smith_MechL.set(0);
 wait(200, TIME_MSEC);
 turn_pid(-30, -1, 1);
-drive_straight(25, 13, 100);
-drive_straight(-10, 75, 100);
-turn_pid(-87, -1, 1);
-reset_imu_rotation();
-drive_straight(30, 75, 200);
-turn_pid(-90, -1, 1);
-drive_straight(19, 75, 100);
+drive_straight(35, 25, 100);
+drive_straight(-5, 75, 100);
+turn_pid(-60, -1, 1);
+drive_straight(35, 75, 100);
+drive_full.spinFor(DIR_FWD, 500, TIME_MSEC, 40, VEL_PCT);
+drive_straight(-6, 75, 100);
+drive_turn(60, -10, 40, 75);
+turn_pid(-180, -1, 1);
+drive_straight(35, 75, 100);
 intake_lift.set(1);
-lift.resetPosition();
-lift.spinToPosition(37 * 4, ROT_DEG, 200, VEL_RPM);
-drive_straight(12, 15, 100);
+drive_straight(25, 75, 100);
 intake_lift.set(0);
-turn_pid(90, -1, 1);
-drive_straight(2, 30, 100);
-wait(500, TIME_MSEC);
+drive_straight(-3, 75, 100);
+turn_pid(-90, -1, 1);
+lift.spinToPosition(180 * 3, ROT_DEG, 150, VEL_RPM, false);
+drive_straight(8, 75, 100);
 t1.interrupt();
-intake.spinFor(-180, ROT_DEG, 100, VEL_PCT, false);
-lift.spinToPosition(200 * 4, ROT_DEG, 150, VEL_RPM);
-
 
         break;
     }
@@ -196,143 +194,186 @@ turn_pid(90, -1, 1);
 
     case Blue_Rush_Goal: {
 
-lift.spinToPosition(145 * 4, ROT_DEG, 150, VEL_RPM, false);
-drive_straight(40, 75, 100);
-lift.spinToPosition(195 * 4, ROT_DEG, 200, VEL_RPM, false);
-wait(200, TIME_MSEC);
-drive_straight(-7, 30, 70);
-turn_pid(-75, -1, 1);
-// goal 2
-drive_straight(-21, 30, 70);
-lift.spinToPosition(-45 * 4, ROT_DEG, 200, VEL_RPM, false);
+// 157.5
+drive_straight(-46, 75, 120);
 mogo_clamp.set(1);
-turn_pid(-10, -1, 1);
-vex::thread t1 (blue_sort);
-drive_straight(29, 75, 70);
-// ring 3
-turn_pid(-45, -1, 1);
-Smith_MechR.set(1);
-drive_straight(27, 75, 70);
-drive_turn(-110, -10, 40, 75, false);
-lift.resetPosition();
-Smith_MechR.set(0);
-drive_turn(100, -10, 40, 75, true);
-drive_full.spinFor(DIR_FWD, 1000, TIME_MSEC, 100, VEL_PCT);
-drive_straight(-25, 75, 70);
-turn_pid(180, -1, 1);
+wait(150, TIME_MSEC);
+drive_straight(3, 75, 100);
+turn_pid(50, -1, 1);
+intake.spin(DIR_FWD, 100, VEL_PCT);
+drive_straight(7, 75, 100);
+intakeHigh.stop();
+turn_pid(-115, -1, 1);
+drive_straight(-5, 75, 100);
 mogo_clamp.set(0);
-drive_straight(10, 75, 70);
-turn_pid(175, -1, 1);
+drive_straight(5, 75, 100);
+turn_pid(180, -1, 1);
+drive_straight(-23, 75, 100);
+mogo_clamp.set(1);
+wait(150, TIME_MSEC);
+turn_pid(-80, -1, 1);
+vex::thread t1 (blue_sort);
+drive_straight(33, 75, 100);
+turn_pid(60, -1, 1);
+drive_full.spinFor(DIR_FWD, 1000, TIME_MSEC, 400, VEL_RPM);
+drive_straight(-17, 75, 100);
+Smith_MechL.set(1);
+intakeLow.stop();
+drive_straight(5, 75, 100);
+drive_turn(150, 10, 40, 75, false);
 t1.interrupt();
+intake.stop();
+lift.spinToPosition(164 * 3, ROT_DEG, 150, VEL_RPM, false);
+drive_straight(50, 40, 100);
+lift.spinToPosition(180 * 3, ROT_DEG, 150, VEL_RPM, false);
+
 
         break;
     }
 
     case Red_Rush_Goal: {
-
-lift.spinToPosition(145 * 4, ROT_DEG, 150, VEL_RPM, false);
-drive_straight(40, 75, 100);
-lift.spinToPosition(195 * 4, ROT_DEG, 200, VEL_RPM, false);
-wait(200, TIME_MSEC);
-drive_straight(-7, 30, 70);
-turn_pid(75, -1, 1);
-// goal 2
-drive_straight(-21, 30, 70);
-lift.spinToPosition(-45 * 4, ROT_DEG, 200, VEL_RPM, false);
+        
+drive_straight(-46, 75, 120);
 mogo_clamp.set(1);
-turn_pid(10, -1, 1);
-vex::thread t1 (red_sort);
-drive_straight(29, 75, 70);
-// ring 3
-turn_pid(45, -1, 1);
-Smith_MechL.set(1);
-drive_straight(27, 75, 70);
-drive_turn(110, 10, 40, 75, false);
-lift.resetPosition();
-Smith_MechL.set(0);
-drive_turn(-100, 10, 40, 75, true);
-drive_full.spinFor(DIR_FWD, 1000, TIME_MSEC, 100, VEL_PCT);
-drive_straight(-25, 75, 70);
-turn_pid(-180, -1, 1);
+wait(150, TIME_MSEC);
+drive_straight(3, 75, 100);
+turn_pid(-50, -1, 1);
+intake.spin(DIR_FWD, 100, VEL_PCT);
+drive_straight(7, 75, 100);
+intakeHigh.stop();
+turn_pid(115, -1, 1);
+drive_straight(-5, 75, 100);
 mogo_clamp.set(0);
-drive_straight(10, 75, 70);
-turn_pid(-175, -1, 1);
+drive_straight(5, 75, 100);
+turn_pid(-180, -1, 1);
+drive_straight(-23, 75, 100);
+mogo_clamp.set(1);
+wait(150, TIME_MSEC);
+turn_pid(80, -1, 1);
+vex::thread t1 (red_sort);
+drive_straight(33, 75, 100);
+turn_pid(-50, -1, 1);
+drive_full.spinFor(DIR_FWD, 1000, TIME_MSEC, 400, VEL_RPM);
+drive_straight(-17, 75, 100);
+Smith_MechR.set(1);
+intakeLow.stop();
+drive_straight(5, 75, 100);
+drive_turn(-150, 10, 40, 75, false);
 t1.interrupt();
+intake.stop();
+lift.spinToPosition(164 * 3, ROT_DEG, 150, VEL_RPM, false);
+drive_straight(50, 40, 100);
+lift.spinToPosition(180 * 3, ROT_DEG, 150, VEL_RPM, false);
 
         break;
     }
 
     case Red_Quad: {
-
+// spin to 332.5
 lift.spinToPosition(164 * 3, ROT_DEG, 150, VEL_RPM, false);
 drive_straight(4, 50, 50);
 wait(250, TIME_MSEC);
 // pickup ring 2 with smith mech
-drive_straight(-35.5, 50, 50);
-lift.spinToPosition(-35 * 3, ROT_DEG, 150, VEL_RPM, false);
-wait(100, TIME_MSEC);
+drive_straight(-42, 40, 100);
+lift.spinToPosition(70 * 3, ROT_DEG, 150, VEL_RPM, false);
 mogo_clamp.set(1);
+wait(300, TIME_MSEC);
 vex::thread t1 (red_sort);
 // quad stack
-turn_pid(160, -1, 1);
+turn_pid(145, -1, 1);
+drive_straight(13, 60, 100);
+turn_pid(-28, -1, 1);
 drive_straight(16, 60, 100);
-turn_pid(-30, -1, 1);
-drive_straight(14, 60, 100);
-turn_pid(-115, -1, 1);
-drive_straight(20, 75, 100);
-drive_straight(-5, 50, 100);
-turn_pid(42, -1, 1);
-drive_straight(25, 40, 100);
-drive_full.spinFor(DIR_FWD, 600, TIME_MSEC, 60, VEL_PCT);
-drive_straight(-25, 30, 100);
-turn_pid(-90, -1, 1);
+drive_straight(-2, 60, 100);
+// Single ring
+turn_pid(-110, -1, 1);
+drive_straight(15, 40, 100);
+turn_pid(40, -1, 1);
+drive_straight(35, 75, 100);
+drive_full.spinFor(DIR_FWD, 700, TIME_MSEC, 400, VEL_RPM);
+drive_straight(-10, 75, 100);
+turn_pid(-110, -1, 1);
 intake_lift.set(1);
-drive_straight(70, 30, 100);
+drive_straight(54, 75, 100);
 intake_lift.set(0);
-turn_pid(-100, -1, 1);
-turn_pid(90, -1, 1);
-
-
+turn_pid(-90, -1, 1);
+lift.spinToPosition(120 * 3, ROT_DEG, 150, VEL_RPM, false);
+drive_full.spinFor(DIR_FWD, 800, TIME_MSEC, 20, VEL_PCT);
+lift.spinToPosition(180 * 3, ROT_DEG, 150, VEL_RPM, false);
+t1.interrupt();
 
         break;
     }
 
     case Blue_Quad: {
 
-lift.spinToPosition(164 * 4, ROT_DEG, 150, VEL_RPM, false);
+lift.spinToPosition(164 * 3, ROT_DEG, 150, VEL_RPM, false);
 drive_straight(4, 50, 50);
 wait(250, TIME_MSEC);
 // pickup ring 2 with smith mech
-drive_straight(-35.5, 50, 50);
-lift.spinToPosition(-50 * 4, ROT_DEG, 150, VEL_RPM, false);
-wait(100, TIME_MSEC);
+drive_straight(-44, 40, 100);
+lift.spinToPosition(70 * 3, ROT_DEG, 150, VEL_RPM, false);
 mogo_clamp.set(1);
+wait(300, TIME_MSEC);
 vex::thread t1 (blue_sort);
 // quad stack
-turn_pid(-167, -1, 1);
-Smith_MechR.set(1);
-drive_straight(15.5, 60, 100);
-wait(200, TIME_MSEC);
-turn_pid(-33, -1, 1);
+turn_pid(-153, -1, 1);
+drive_straight(11.5, 60, 100);
 turn_pid(35, -1, 1);
-drive_straight(-17, 45, 100);
-// pickup the rings
-Smith_MechR.set(0);
-wait(300, TIME_MSEC);
-turn_pid(35, -1, 1);
-drive_straight(14, 30, 100);
-drive_turn(175, 13, 50, 75, false);
+drive_straight(16, 60, 100);
+drive_straight(-4, 60, 100);
+// Single ring
+turn_pid(110, -1, 1);
+drive_straight(15, 40, 100);
+turn_pid(-40, -1, 1);
+drive_straight(35, 75, 100);
+drive_full.spinFor(DIR_FWD, 700, TIME_MSEC, 400, VEL_RPM);
+drive_straight(-10, 75, 100);
+turn_pid(110, -1, 1);
+drive_straight(35, 75, 100);
 intake_lift.set(1);
-drive_straight(34, 75, 100);
 drive_straight(5, 30, 100);
 intake_lift.set(0);
 turn_pid(90, -1, 1);
-turn_pid(-95, -1, 1);
-Smith_MechL.set(1);
-lift.resetPosition();
-drive_straight(58, 75, 100);
-drive_turn(180, 9, 75, 200, false);
+lift.spinToPosition(120 * 3, ROT_DEG, 150, VEL_RPM, false);
+drive_full.spinFor(DIR_FWD, 700, TIME_MSEC, 30, VEL_PCT);
+lift.spinToPosition(180 * 3, ROT_DEG, 150, VEL_RPM, false);
+t1.interrupt();
 
+        /*
+// spin to 26.5
+lift.spinToPosition(164 * 3, ROT_DEG, 150, VEL_RPM, false);
+drive_straight(4, 50, 50);
+wait(250, TIME_MSEC);
+// pickup ring 2 with smith mech
+drive_straight(-40, 40, 100);
+lift.spinToPosition(70 * 3, ROT_DEG, 150, VEL_RPM, false);
+mogo_clamp.set(1);
+wait(300, TIME_MSEC);
+vex::thread t1 (blue_sort);
+// quad stack
+turn_pid(-155, -1, 1);
+drive_straight(12, 60, 100);
+turn_pid(45, -1, 1);
+drive_straight(16, 60, 100);
+drive_straight(-2, 60, 100);
+// Single ring
+turn_pid(110, -1, 1);
+drive_straight(15, 40, 100);
+turn_pid(-50, -1, 1);
+drive_straight(30, 75, 100);
+drive_full.spinFor(DIR_FWD, 700, TIME_MSEC, 400, VEL_RPM);
+drive_straight(-10, 75, 100);
+turn_pid(120, -1, 1);
+intake_lift.set(1);
+drive_straight(54, 75, 100);
+intake_lift.set(0);
+turn_pid(90, -1, 1);
+lift.spinToPosition(120 * 3, ROT_DEG, 150, VEL_RPM, false);
+drive_full.spinFor(DIR_FWD, 500, TIME_MSEC, 30, VEL_PCT);
+lift.spinToPosition(180 * 3, ROT_DEG, 150, VEL_RPM, false);
+t1.interrupt();
+*/
         break;
     }
 
@@ -455,34 +496,48 @@ drive_straight(-1000, 50, 100000);
 
 void blue_sort() {
     intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+    int antiJamTime = 0;
     while (true){
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
         intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
-        if (intakeHigh.velocity(VEL_PCT) < 5 ){
+        if (intakeHigh.velocity(VEL_PCT) < 1)
+            antiJamTime ++;
+        if (intakeHigh.velocity(VEL_PCT) > 1)
+            antiJamTime = 0;
+        if (antiJamTime == 10){
             intakeHigh.spinFor(DIR_REV, 200, TIME_MSEC, 100, VEL_PCT);
             intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
             wait(200, TIME_MSEC);
+            antiJamTime = 0;            
         }
+
         if (colorSort.isNearObject() && colorSort.color() == vex::color::red) {
-            intake.spinFor(DIR_REV, 1000, TIME_MSEC, 100, VEL_PCT);
+            intake.spinFor(DIR_REV, 150, TIME_MSEC, 100, VEL_PCT);
         }
     }
 }
 
 void red_sort() {
     intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+    int antiJamTime = 0;
     while (true){
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
         intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
-        if (intakeHigh.velocity(VEL_PCT) < 5 ){
+        if (intakeHigh.velocity(VEL_PCT) < 1)
+            antiJamTime ++;
+        if (intakeHigh.velocity(VEL_PCT) > 1)
+            antiJamTime = 0;
+        if (antiJamTime == 10){
             intakeHigh.spinFor(DIR_REV, 200, TIME_MSEC, 100, VEL_PCT);
             intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
             wait(200, TIME_MSEC);
+            antiJamTime = 0;            
         }
 
         if (colorSort.isNearObject() && colorSort.color() == vex::color::blue){
-            intake.spinFor(DIR_REV, 1000, TIME_MSEC, 100, VEL_PCT);
+            intake.spinFor(DIR_REV, 150, TIME_MSEC, 100, VEL_PCT);
 
         }
+        wait(20, TIME_MSEC);
     }
 }

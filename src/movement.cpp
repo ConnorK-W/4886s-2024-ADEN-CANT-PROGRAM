@@ -169,8 +169,8 @@ void turn_pid(float degrees, float ratio, int direction, int waitTime) {
     // float ratio = (radius - WHEEL_TO_WHEEL_DIST) / radius;
 
     target_heading += degrees;
-    //PID drive_pid = PID(TURN_PID_KP, TURN_PID_KI, TURN_PID_KD);
-    PID drive_pid = PID(move_kp, move_ki, move_kd);
+    PID drive_pid = PID(TURN_PID_KP, TURN_PID_KI, TURN_PID_KD);
+    //PID drive_pid = PID(move_kp, move_ki, move_kd);
 
     float speed_l;
     float speed_r;
@@ -178,7 +178,7 @@ void turn_pid(float degrees, float ratio, int direction, int waitTime) {
     int time_still = 0;
     int time = totalTime.time();
     while (time_still < 60) {
-        if (within_range(imu_rotation(), target_heading, 0.1))
+        if (within_range(imu_rotation(), target_heading, 1.5))
             time_still += MSEC_PER_TICK;
         else
             time_still = 0;

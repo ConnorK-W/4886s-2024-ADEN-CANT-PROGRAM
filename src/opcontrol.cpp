@@ -47,7 +47,7 @@ void opcontrol(void) {
         Brain.Screen.drawImageFromFile("Graduation.png", 0, 0);
 
         if (BTN_L2.pressing()) {
-            lift.spinToPosition(235 * 3, ROT_DEG, 100, VEL_PCT, false);
+            lift.spinToPosition(310 * 3, ROT_DEG, 100, VEL_PCT, false);
             liftSA = 1;
         }
         if (BTN_L1.PRESSED)
@@ -85,7 +85,7 @@ void opcontrol(void) {
                 }
             }
             else if (liftHeight == -1) {
-                lift.spinToPosition(300 * 3, ROT_DEG, 100, VEL_PCT, false);
+                lift.spinToPosition(250 * 3, ROT_DEG, 100, VEL_PCT, false);
                 if (liftOT == 0){
                     intakeHigh.spinFor(DIR_REV, 100, TIME_MSEC, 100, VEL_PCT);
                     master.rumble(".");
@@ -107,10 +107,10 @@ void opcontrol(void) {
             liftHeight=-1;
         // AWS in skills
         if (BTN_RIGHT.PRESSED) {
-            lift.spinToPosition(168 * 4, ROT_DEG, 150, VEL_RPM);
+            lift.spinToPosition(224 * 3, ROT_DEG, 150, VEL_RPM);
             wait(150, TIME_MSEC);
             drive_full.spinFor(DIR_REV, 300, TIME_MSEC, 50, VEL_PCT);
-            lift.spinToPosition(0 * 4, ROT_DEG, 200, VEL_RPM);    
+            lift.spinToPosition(0 * 3, ROT_DEG, 200, VEL_RPM);    
             lift.resetPosition();
             mogo_clamp.set(1);
         }
@@ -135,18 +135,6 @@ void opcontrol(void) {
 
     }
 
-    /*
-                if (BTN_L1.PRESSED) {
-                    lift.setTimeout(1250, vex::msec);
-                    lift.spinToPosition(700, ROT_DEG, 100, VEL_PCT, false);
-                }
-
-                if (BTN_L2.PRESSED) {
-                    lift.setTimeout(1250, vex::msec);
-                    lift.spinToPosition(0, ROT_DEG, 100, VEL_PCT, false);
-                }
-                */
-    // Shifted
 }
 }
 
@@ -164,8 +152,8 @@ void opdrive(int control_mode, float drive_mod, float turn_mod) {
     case TSA:
         float lspeed = LEFT_STICK_Y;
         float rspeed = (RIGHT_STICK_X * turn_mod);
-        drive_r.spin(DIR_FWD, (lspeed - rspeed) * drive_mod, VEL_PCT);
-        drive_l.spin(DIR_FWD, (lspeed + rspeed) * drive_mod, VEL_PCT);
+        drive_r.spin(DIR_FWD, (lspeed - rspeed) * drive_mod / 8, VLT_VLT);
+        drive_l.spin(DIR_FWD, (lspeed + rspeed) * drive_mod / 8, VLT_VLT);
         break;
     }
 }

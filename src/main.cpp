@@ -11,7 +11,7 @@
 
 vex::competition Competition;
 
-#define TEST_FUNCS
+//#define TEST_FUNCS
 #ifdef TEST_FUNCS
 const bool run_main = false;
 #else
