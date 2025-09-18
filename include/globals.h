@@ -1,18 +1,15 @@
 // Drive gear ratio
 #define DRIVE_GEARING (GEAR_36 / GEAR_48)
 // Connversion factor from motor revolutions to inches travelled
-#define DRIVE_REV_TO_IN (DRIVE_GEARING * PI * MED_OMNI_DIAM)
-#define WHEEL_TO_WHEEL_DIST (11.5)
+#define DRIVE_REV_TO_IN (DRIVE_GEARING * PI * SML_OMNI_DIAM)
+#define WHEEL_TO_WHEEL_DIST (10.5)
 
-#define AWP_Red 0
-#define AWP_Blue 1
-#define Red_Rush_Rings 2
-#define Blue_Rush_Rings 3
-#define Red_Rush_Goal 4
-#define Blue_Rush_Goal 5
-#define Red_Quad 6
-#define Blue_Quad 7
-#define SKILLS 8
+#define AWP 0
+#define RightSimple 1
+#define RightComplex 2
+#define LeftSimple 3
+#define LeftComplex 4
+#define SKILLS 5
 
 
 // Operator control modes
@@ -35,7 +32,7 @@
 #define CHAR_WI 24
 
 // Multiplier for turn sensitivty
-#define SENSITIVITY 0.70
+#define SENSITIVITY 0.60
 
 // Global variable declarations
 extern int auton_mode;

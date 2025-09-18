@@ -120,6 +120,7 @@
 #define PORT18 vex::PORT18
 #define PORT19 vex::PORT19
 #define PORT20 vex::PORT20
+#define PORT21 vex::PORT21
 
 // Shorthand parameters
 #define DIR_FWD vex::directionType::fwd

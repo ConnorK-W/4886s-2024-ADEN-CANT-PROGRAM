@@ -12,13 +12,11 @@ extern vex::motor drive_l4;
 
 extern vex::motor intakeLow;
 extern vex::motor intakeHigh;
-extern vex::motor intakeMid;
+extern vex::motor intakeMed;
 extern vex::motor lift;
 
-extern vex::digital_out mogo_clamp;
-extern vex::digital_out Smith_MechL;
-extern vex::digital_out Smith_MechR;
-extern vex::digital_out intake_lift;
+extern vex::digital_out stopper;
+extern vex::digital_out tounge;
 extern vex::inertial imu;
 extern vex::optical colorSort;
 extern vex::vision::signature red_ring;
@@ -31,4 +29,4 @@ extern vex::timer totalTime;
 extern vex::motor_group drive_r;
 extern vex::motor_group drive_l;
 extern vex::motor_group drive_full;
-extern vex::motor_group intake;
+extern vex::motor_group intakeFull;

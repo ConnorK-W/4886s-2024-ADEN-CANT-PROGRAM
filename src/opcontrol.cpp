@@ -23,20 +23,14 @@ void opcontrol(void) {
 
     const int LIFT_BUFFER = 110;
     
-    Smith_MechL.set(0);
+    tounge.set(0);
     int liftHeight = 1;
     bool liftOT = 0;
     bool liftSA = 0;
-    intake_lift.set(0);
+    stopper.set(0);
     bool sort = 1;
 
 
-    while (lift.current(PCT_PCT) < 95) {
-        lift.spin(DIR_REV, 90, PCT_PCT);
-    }
-    wait(100, TIME_MSEC);
-    lift.resetPosition();
-    lift.stop();
 
 
     while (1) {
@@ -47,7 +41,7 @@ void opcontrol(void) {
         Brain.Screen.drawImageFromFile("Graduation.png", 0, 0);
 
         if (BTN_L2.pressing()) {
-            lift.spinToPosition(310 * 3, ROT_DEG, 100, VEL_PCT, false);
+            lift.spinToPosition(265 * 3, ROT_DEG, 100, VEL_PCT, false);
             liftSA = 1;
         }
         if (BTN_L1.PRESSED)
@@ -59,62 +53,15 @@ void opcontrol(void) {
 
 
 
-        // To reset the lift
-        if (BTN_DOWN.PRESSED) {
-            while (lift.current(PCT_PCT) < 95) {
-                lift.spin(DIR_REV, 85, PCT_PCT);
-                wait(100, TIME_MSEC);
-            }
-            lift.resetPosition();
+        // tounge
+        if (BTN_Y.PRESSED) {
+            tounge.set(!tounge.value());
         }
-        if (liftSA == 0) {
-            if (liftHeight == 1) {
-                lift.spinToPosition(5 * 3, ROT_DEG, 100, VEL_PCT, false);
-                lift.setStopping(vex::brakeType::coast);
-                liftOT = 0;
-            } 
-            else if (liftHeight == 2) {
-                lift.spinToPosition(53 * 3, ROT_DEG, 100, VEL_PCT, false);
-            } 
-            else if (liftHeight == 3) {
-                lift.spinToPosition(172 * 3, ROT_DEG, 100, VEL_PCT, false);
-                if (liftOT == 0){
-                    intakeHigh.spinFor(DIR_REV, 130, TIME_MSEC, 100, VEL_PCT);
-                    master.rumble(".");
-                    liftOT = 1;
-                }
-            }
-            else if (liftHeight == -1) {
-                lift.spinToPosition(250 * 3, ROT_DEG, 100, VEL_PCT, false);
-                if (liftOT == 0){
-                    intakeHigh.spinFor(DIR_REV, 100, TIME_MSEC, 100, VEL_PCT);
-                    master.rumble(".");
-                    liftOT = 1;
-                }
-            }
-        }
-
-        // MOGO Mech
-        if (BTN_Y.PRESSED){
-            mogo_clamp.set(!mogo_clamp.value());
-            intakeHigh.spinFor(-60, ROT_DEG, 100, VEL_PCT);
-        }
-        // Smith Mech
+        
+        // stopper
         if (BTN_B.PRESSED)
-            Smith_MechR.set(!Smith_MechR.value());
-        // Smith Mech
-        if (BTN_UP.PRESSED)
-            liftHeight=-1;
-        // AWS in skills
-        if (BTN_RIGHT.PRESSED) {
-            lift.spinToPosition(224 * 3, ROT_DEG, 150, VEL_RPM);
-            wait(150, TIME_MSEC);
-            drive_full.spinFor(DIR_REV, 300, TIME_MSEC, 50, VEL_PCT);
-            lift.spinToPosition(0 * 3, ROT_DEG, 200, VEL_RPM);    
-            lift.resetPosition();
-            mogo_clamp.set(1);
-        }
-
+            stopper.set(!stopper.value());
+        
         // Toggles chase neutral post
         //if (BTN_RIGHT.PRESSED)
         //do_neutral_line_up = !do_neutral_line_up;
@@ -127,12 +74,22 @@ void opcontrol(void) {
 
     // Intake
     intakeLow.spin(DIR_FWD, (btn_r1() - btn_r2()) * BTN_TO_PCT, VEL_PCT);
-    if (!BTN_X.pressing()){    
-        intakeHigh.spin(DIR_FWD, (btn_r1() - btn_r2()) * BTN_TO_PCT, VEL_PCT);
+
+
+    if (BTN_L1.pressing()){
+        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
+    }
+    if (BTN_L2.pressing()){
+        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
+        stopper.set(1);
     }
     else {
-                    intakeLow.spin(DIR_FWD, 12, VLT_VLT);
-
+        stopper.set(0);
+    }
+    if (!BTN_L1.pressing() && !BTN_L2.pressing()){
+        intakeHigh.stop();
     }
 
 }
@@ -152,8 +109,8 @@ void opdrive(int control_mode, float drive_mod, float turn_mod) {
     case TSA:
         float lspeed = LEFT_STICK_Y;
         float rspeed = (RIGHT_STICK_X * turn_mod);
-        drive_r.spin(DIR_FWD, (lspeed - rspeed) * drive_mod / 8, VLT_VLT);
-        drive_l.spin(DIR_FWD, (lspeed + rspeed) * drive_mod / 8, VLT_VLT);
+        drive_r.spin(DIR_FWD, (lspeed - rspeed) * drive_mod / 10, VLT_VLT);
+        drive_l.spin(DIR_FWD, (lspeed + rspeed) * drive_mod / 10, VLT_VLT);
         break;
     }
 }

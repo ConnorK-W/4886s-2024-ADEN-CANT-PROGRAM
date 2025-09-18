@@ -8,16 +8,31 @@ void tune_dir_pid() {
     while (imu.isCalibrating())
         vex::wait(20, vex::msec);
     master.rumble(".");
-
     const float TUNER = 0.025;
+    // Make PID objects
+    PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID dir = PID(DRIVE_STRAIGHT_DIR_KP, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
 
     while (true) {
+        // Enable opcontrol
         opdrive(TSA, 1, SENSITIVITY);
+        // Toggle pid movement on y press
         if (BTN_Y.PRESSED) {
             target_heading = imu_rotation();
-            drive_straight(80, 65, 256);
+            // Go back to opcontrol if y pressed again
+            while (!BTN_Y.PRESSED) {
+                // Drive forward  300 rpm
+                drive_r.spin(DIR_FWD, 300 + rd.adjust(300, drive_r.velocity(VEL_RPM)) - dir.adjust(target_heading, imu_rotation()), VEL_RPM);
+                drive_l.spin(DIR_FWD, 300 + ld.adjust(300, drive_l.velocity(VEL_RPM)) + dir.adjust(target_heading, imu_rotation()), VEL_RPM);
+                wait(20, vex::msec);
+            }
         }
-        B_SCRN.printAt(8, 8, "\n%f\n\n", imu_rotation());
+        // Enable pid tuning
+        dir.tune_kP(btn_up() - btn_down(), TUNER);
+        dir.tune_kI(btn_x() - btn_b(), TUNER);
+        dir.tune_kD(btn_right() - btn_left(), TUNER);
+
         wait(20, vex::msec);
     }
 }
@@ -50,6 +65,7 @@ void tune_accel_pid() {
         }
         // Enable pid tuning
         ld.tune_kP(btn_up() - btn_down(), TUNER);
+        ld.tune_kI(btn_x() - btn_b(), TUNER);
         ld.tune_kD(btn_right() - btn_left(), TUNER);
         rd.tune_kP(btn_up() - btn_down(), TUNER);
         rd.tune_kI(btn_x() - btn_b(), TUNER);

@@ -1,7 +1,7 @@
 #include "../include/main.h"
 
 // Which auton will run
-int auton_mode = Red_Rush_Rings;
+int auton_mode = RightComplex;
 // Heading robot should follow
 float target_heading = 0;
 

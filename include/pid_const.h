@@ -1,9 +1,9 @@
 // PID constants
 
 // drive_straight() consts acceleration
-#define DRIVE_STRAIGHT_DL_KP 0.855
+#define DRIVE_STRAIGHT_DL_KP 0.155
 #define DRIVE_STRAIGHT_DL_KI 0.0
-#define DRIVE_STRAIGHT_DL_KD 2.6
+#define DRIVE_STRAIGHT_DL_KD 0.650
 
 
 // Direction controll
@@ -23,6 +23,6 @@
 
 
 // turn_pid() consts
-#define TURN_PID_KP 0.75
-#define TURN_PID_KI 0.0005
-#define TURN_PID_KD 3.0
+#define TURN_PID_KP 0.325
+#define TURN_PID_KI 0.00
+#define TURN_PID_KD 1.225
