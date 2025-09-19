@@ -26,30 +26,28 @@ lift.resetPosition();
 
 vex::thread t1 (intake);
 drive_straight(28, 50, 70);
-turn_pid(45, -1, 1);
-drive_turn(-30, -52, 10, 75, false);
-turn_pid(50, -1, 1);
-drive_straight(16, 15, 100);
+turn_pid(40, -1, 1);
+drive_straight(27, 15, 100);
+drive_turn(25, 22, 20, 75, false);
+drive_straight(3, 15, 100);
 tounge.set(1);
 wait(500, TIME_MSEC);
-drive_straight(-20, 30, 100);
+drive_straight(-20, 50, 100);
 turn_pid(73, -1, 1);
-drive_straight(39, 30, 100);
-turn_pid(43, -1, 1);
-drive_straight(-10, 30, 100);
-drive_full.spinFor(DIR_REV, 300, TIME_MSEC, 40, VEL_PCT);
-intakeFull.spin(DIR_FWD, 100, VEL_PCT);
-drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 40, VEL_PCT);
+drive_straight(40, 50, 100);
+turn_pid(45, -1, 1);
+drive_straight(-12, 50, 100);
+intakeFull.spin(DIR_FWD, 12, VLT_VLT);
+drive_full.spinFor(DIR_REV, 1800, TIME_MSEC, 15, VEL_PCT);
 intakeHigh.stop();
-drive_straight(33, 50, 100);
-drive_full.spin(DIR_FWD, 1, VLT_VLT);
+drive_straight(31, 50, 100);
+drive_full.spin(DIR_FWD, 2, VLT_VLT);
 wait(1000, TIME_MSEC);
-drive_straight(-33, 50, 100);
-intakeFull.spin(DIR_FWD, 100, VEL_PCT);
+drive_straight(-33, 60, 100);
+intakeFull.spin(DIR_FWD, 12, VLT_VLT);
 drive_full.spinFor(DIR_REV, 2000, TIME_MSEC, 40, VEL_PCT);
-
-
-
+drive_straight(10, 50, 100);
+drive_full.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
 
 t1.interrupt();
 
