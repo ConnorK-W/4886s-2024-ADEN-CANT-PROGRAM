@@ -44,23 +44,15 @@ void opcontrol(void) {
             lift.spinToPosition(265 * 3, ROT_DEG, 100, VEL_PCT, false);
             liftSA = 1;
         }
-        if (BTN_L1.PRESSED)
-            liftHeight = liftHeight + 1;
-        if (BTN_L2.PRESSED)
-            liftHeight = 1;
-        if (BTN_LEFT.PRESSED)
-            sort = !sort;
-
 
 
         // tounge
         if (BTN_Y.PRESSED) {
             tounge.set(!tounge.value());
         }
-        
-        // stopper
-        if (BTN_B.PRESSED)
+        if (BTN_L2.PRESSED) {
             stopper.set(!stopper.value());
+        }
         
         // Toggles chase neutral post
         //if (BTN_RIGHT.PRESSED)
@@ -80,15 +72,7 @@ void opcontrol(void) {
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
         intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
     }
-    if (BTN_L2.pressing()){
-        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
-        stopper.set(1);
-    }
-    else {
-        stopper.set(0);
-    }
-    if (!BTN_L1.pressing() && !BTN_L2.pressing()){
+    if (!BTN_L1.pressing()){
         intakeHigh.stop();
     }
 
