@@ -1,7 +1,7 @@
 // Drive gear ratio
 #define DRIVE_GEARING (GEAR_36 / GEAR_48)
 // Connversion factor from motor revolutions to inches travelled
-#define DRIVE_REV_TO_IN (DRIVE_GEARING * PI * SML_OMNI_DIAM)
+#define DRIVE_REV_TO_IN (DRIVE_GEARING * PI * MED_OMNI_DIAM)
 #define WHEEL_TO_WHEEL_DIST (10.5)
 
 #define AWP 0

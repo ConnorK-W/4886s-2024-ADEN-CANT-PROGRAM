@@ -6,13 +6,14 @@
 
 #define DRIVE_INSERT vex::gearSetting::ratio6_1
 #define INTAKE_INSERT vex::gearSetting::ratio6_1
+#define ARM_INSERT vex::gearSetting::ratio_66_3200
 
 vex::brain Brain;
 vex::controller master;
 
 vex::motor drive_r1 = vex::motor(PORT11, DRIVE_INSERT, false);
-vex::motor drive_r2 = vex::motor(PORT12, DRIVE_INSERT, false);
-vex::motor drive_r3 = vex::motor(PORT13, DRIVE_INSERT, true);
+vex::motor drive_r2 = vex::motor(PORT12, DRIVE_INSERT, true);
+vex::motor drive_r3 = vex::motor(PORT13, DRIVE_INSERT, false);
 // vex::motor drive_r4 = vex::motor(PORT4, DRIVE_INSERT, true);
 
 vex::motor drive_l1 = vex::motor(PORT14, DRIVE_INSERT, false);
@@ -21,19 +22,18 @@ vex::motor drive_l3 = vex::motor(PORT16, DRIVE_INSERT, true);
 // vex::motor drive_l4 = vex::motor(PORT8, DRIVE_INSERT, false);
 
 // Subsystem 3
-vex::motor intakeLow = vex::motor(PORT2, INTAKE_INSERT, true);
-vex::motor intakeHigh = vex::motor(PORT1, INTAKE_INSERT, false);
-
-vex::motor lift = vex::motor(PORT20, vex::gearSetting::ratio18_1, false);
+vex::motor intakeLow = vex::motor(PORT21, INTAKE_INSERT, true);
+vex::motor intakeHigh = vex::motor(PORT7, INTAKE_INSERT, true);
+vex::motor arm = vex::motor(PORT1, vex::gearSetting::ratio18_1, true);
 
 // 3 Wire Ports
-vex::digital_out stopper = vex::digital_out(PORTB);
-vex::digital_out tounge = vex::digital_out(PORTA);
-//vex::digital_out PTO = vex::digital_out(PORTC);
+vex::digital_out finger = vex::digital_out(PORTA);
+vex::digital_out tounge = vex::digital_out(PORTC);
+vex::digital_out lift = vex::digital_out(PORTB);
 
 
 // Sensors
-vex::inertial imu = vex::inertial(PORT18);
+vex::inertial imu = vex::inertial(PORT2);
 vex::optical colorSort = vex::optical(PORT11);
 vex::timer totalTime = vex::timer();
 

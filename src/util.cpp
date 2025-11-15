@@ -110,11 +110,6 @@ void graph_pid() {
     }
 }
 
-void lift_limit_torque() {
-    if (lift.torque() >= 0) {
-        lift.stop();
-    }
-}
     
 
 

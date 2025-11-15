@@ -26,7 +26,6 @@ void pre_auton(void) {
     // Print currently selected mode
     B_SCRN.print("%s", autons[auton_mode]);
 
-    lift.resetPosition();
     colorSort.setLightPower(100, PCT_PCT);
     colorSort.setLight(vex::ledState::on);
     

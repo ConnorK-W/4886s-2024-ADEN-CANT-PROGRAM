@@ -12,11 +12,11 @@ extern vex::motor drive_l4;
 
 extern vex::motor intakeLow;
 extern vex::motor intakeHigh;
-extern vex::motor intakeMed;
-extern vex::motor lift;
+extern vex::motor arm;
 
-extern vex::digital_out stopper;
+extern vex::digital_out finger;
 extern vex::digital_out tounge;
+extern vex::digital_out lift;
 extern vex::inertial imu;
 extern vex::optical colorSort;
 extern vex::vision::signature red_ring;

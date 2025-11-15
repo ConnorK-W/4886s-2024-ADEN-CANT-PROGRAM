@@ -5,12 +5,12 @@
 // Driver macros
 void opcontrol(void) {
     
-    lift.setStopping(vex::brakeType::coast);
     drive_l.stop(vex::brakeType::coast);
     drive_r.stop(vex::brakeType::coast);
     colorSort.setLightPower(100, PCT_PCT);
     colorSort.setLight(vex::ledState::on);
 
+    arm.resetPosition();
 
     bool shifted = false;
     void red_sort(void);
@@ -27,7 +27,7 @@ void opcontrol(void) {
     int liftHeight = 1;
     bool liftOT = 0;
     bool liftSA = 0;
-    stopper.set(0);
+    finger.set(0);
     bool sort = 1;
 
 
@@ -40,18 +40,13 @@ void opcontrol(void) {
 
         Brain.Screen.drawImageFromFile("Graduation.png", 0, 0);
 
-        if (BTN_L2.pressing()) {
-            lift.spinToPosition(265 * 3, ROT_DEG, 100, VEL_PCT, false);
-            liftSA = 1;
-        }
-
 
         // tounge
         if (BTN_Y.PRESSED) {
             tounge.set(!tounge.value());
         }
         if (BTN_L2.PRESSED) {
-            stopper.set(!stopper.value());
+            finger.set(!finger.value());
         }
         
         // Toggles chase neutral post
@@ -70,11 +65,26 @@ void opcontrol(void) {
 
     if (BTN_L1.pressing()){
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
+        arm.spinToPosition(120 * 3, ROT_DEG, 100, VEL_PCT, false);
+
+        
+    }
+    if (BTN_A.PRESSED) {
+        lift.set(!lift.value());
     }
     if (!BTN_L1.pressing()){
-        intakeHigh.stop();
+        arm.spinToPosition(0 * 3, ROT_DEG, 100, VEL_PCT, false);
     }
+
+    if (BTN_RIGHT.PRESSED) {
+            while (arm.current(PCT_PCT) < 95) {
+                arm.spin(DIR_REV, 85, PCT_PCT);
+                wait(100, TIME_MSEC);
+            }
+            arm.resetPosition();
+
+        }
+
 
 }
 }
@@ -93,8 +103,8 @@ void opdrive(int control_mode, float drive_mod, float turn_mod) {
     case TSA:
         float lspeed = LEFT_STICK_Y;
         float rspeed = (RIGHT_STICK_X * turn_mod);
-        drive_r.spin(DIR_FWD, (lspeed - rspeed) * drive_mod / 10, VLT_VLT);
-        drive_l.spin(DIR_FWD, (lspeed + rspeed) * drive_mod / 10, VLT_VLT);
+        drive_r.spin(DIR_FWD, (lspeed - rspeed) * drive_mod / 8, VLT_VLT);
+        drive_l.spin(DIR_FWD, (lspeed + rspeed) * drive_mod / 8, VLT_VLT);
         break;
     }
 }
