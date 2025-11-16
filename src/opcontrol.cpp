@@ -9,7 +9,9 @@ void opcontrol(void) {
     drive_r.stop(vex::brakeType::coast);
     colorSort.setLightPower(100, PCT_PCT);
     colorSort.setLight(vex::ledState::on);
+    arm.stop(vex::brakeType::coast);
 
+    arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
     arm.resetPosition();
 
     bool shifted = false;
@@ -64,16 +66,20 @@ void opcontrol(void) {
 
 
     if (BTN_L1.pressing()){
-        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        arm.spinToPosition(120 * 3, ROT_DEG, 100, VEL_PCT, false);
-
+        arm.spinToPosition(140 * 3, ROT_DEG, 100, VEL_PCT, false);
+        intakeLow.spin(DIR_REV, 100, VEL_PCT);
+    }
+    if (BTN_X.pressing()){
+        arm.spinToPosition(140 * 3, ROT_DEG, 50, VEL_PCT, false);
+        intakeLow.spin(DIR_REV, 100, VEL_PCT);
         
     }
     if (BTN_A.PRESSED) {
         lift.set(!lift.value());
     }
-    if (!BTN_L1.pressing()){
-        arm.spinToPosition(0 * 3, ROT_DEG, 100, VEL_PCT, false);
+    if (!BTN_L1.pressing() && !BTN_X.pressing()){
+        if (arm.position(ROT_DEG) > 40)
+        arm.spinToPosition(8 * 3, ROT_DEG, 100, VEL_PCT, false);
     }
 
     if (BTN_RIGHT.PRESSED) {
