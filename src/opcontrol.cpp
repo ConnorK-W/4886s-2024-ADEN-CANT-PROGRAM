@@ -11,8 +11,10 @@ void opcontrol(void) {
     colorSort.setLight(vex::ledState::on);
     arm.stop(vex::brakeType::coast);
 
+    intakeLow.spin(DIR_REV, 100, VEL_PCT);
     arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
     arm.resetPosition();
+    intakeLow.stop();
 
     bool shifted = false;
     void red_sort(void);
@@ -29,7 +31,9 @@ void opcontrol(void) {
     int liftHeight = 1;
     bool liftOT = 0;
     bool liftSA = 0;
-    finger.set(0);
+    finger.set(1);
+    lift.set(1);
+    tounge.set(0);
     bool sort = 1;
 
 
@@ -50,6 +54,17 @@ void opcontrol(void) {
         if (BTN_L2.PRESSED) {
             finger.set(!finger.value());
         }
+        if (BTN_A.PRESSED) {
+        lift.set(!lift.value());
+        }
+        if (BTN_RIGHT.PRESSED) {
+            while (arm.current(PCT_PCT) < 95) {
+                arm.spin(DIR_REV, 85, PCT_PCT);
+                wait(100, TIME_MSEC);
+            }
+            arm.resetPosition();
+
+        }
         
         // Toggles chase neutral post
         //if (BTN_RIGHT.PRESSED)
@@ -62,38 +77,33 @@ void opcontrol(void) {
         wait(20, vex::msec);
 
     // Intake
-    intakeLow.spin(DIR_FWD, (btn_r1() - btn_r2()) * BTN_TO_PCT, VEL_PCT);
 
-
+    if (BTN_R1.pressing()){
+        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+    }
+    if (BTN_R2.pressing()){
+        intakeLow.spin(DIR_REV, 100, VEL_PCT);
+    }
     if (BTN_L1.pressing()){
         arm.spinToPosition(140 * 3, ROT_DEG, 100, VEL_PCT, false);
-        intakeLow.spin(DIR_REV, 100, VEL_PCT);
+        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
     }
     if (BTN_X.pressing()){
-        arm.spinToPosition(140 * 3, ROT_DEG, 50, VEL_PCT, false);
-        intakeLow.spin(DIR_REV, 100, VEL_PCT);
-        
+        arm.spinToPosition(140 * 3, ROT_DEG, 35, VEL_PCT, false);
+        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
     }
-    if (BTN_A.PRESSED) {
-        lift.set(!lift.value());
-    }
-    if (!BTN_L1.pressing() && !BTN_X.pressing()){
-        if (arm.position(ROT_DEG) > 40)
+    if (!BTN_L1.pressing() && !BTN_X.pressing() && arm.position(ROT_DEG) > 40){
         arm.spinToPosition(8 * 3, ROT_DEG, 100, VEL_PCT, false);
+        intakeLow.spin(DIR_REV, 100, VEL_PCT);
+    }
+    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_X.pressing()){
+        intakeLow.stop();
     }
 
-    if (BTN_RIGHT.PRESSED) {
-            while (arm.current(PCT_PCT) < 95) {
-                arm.spin(DIR_REV, 85, PCT_PCT);
-                wait(100, TIME_MSEC);
-            }
-            arm.resetPosition();
 
-        }
-
-
+    }
 }
-}
+
 
 
 void opdrive(int control_mode, float drive_mod, float turn_mod) {
