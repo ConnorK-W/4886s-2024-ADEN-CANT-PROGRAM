@@ -17,6 +17,7 @@ extern vex::motor arm;
 extern vex::digital_out finger;
 extern vex::digital_out tounge;
 extern vex::digital_out lift;
+extern vex::digital_out hood;
 extern vex::inertial imu;
 extern vex::optical colorSort;
 extern vex::vision::signature red_ring;

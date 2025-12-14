@@ -87,10 +87,15 @@ void opcontrol(void) {
     if (BTN_L1.pressing()){
         arm.spinToPosition(140 * 3, ROT_DEG, 100, VEL_PCT, false);
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        hood.set(1);
     }
     if (BTN_X.pressing()){
         arm.spinToPosition(140 * 3, ROT_DEG, 35, VEL_PCT, false);
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        hood.set(1);
+    }
+    if (!BTN_L1.pressing() && !BTN_X.pressing()){
+        hood.set(0);
     }
     if (!BTN_L1.pressing() && !BTN_X.pressing() && arm.position(ROT_DEG) > 40){
         arm.spinToPosition(8 * 3, ROT_DEG, 100, VEL_PCT, false);

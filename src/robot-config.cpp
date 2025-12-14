@@ -27,9 +27,10 @@ vex::motor intakeHigh = vex::motor(PORT7, INTAKE_INSERT, true);
 vex::motor arm = vex::motor(PORT1, vex::gearSetting::ratio18_1, true);
 
 // 3 Wire Ports
-vex::digital_out finger = vex::digital_out(PORTC);
-vex::digital_out tounge = vex::digital_out(PORTB);
-vex::digital_out lift = vex::digital_out(PORTA);
+vex::digital_out finger = vex::digital_out(PORTA);
+vex::digital_out tounge = vex::digital_out(PORTC);
+vex::digital_out lift = vex::digital_out(PORTB);
+vex::digital_out hood = vex::digital_out(PORTD);
 
 
 // Sensors
