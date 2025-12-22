@@ -22,7 +22,6 @@
 #include "robot-config.h"
 #include "opcontrol.h"
 #include "tune_pid.h"
-#include "vision.h"
 
 
 // Main function declarations

@@ -20,10 +20,7 @@ extern vex::digital_out lift;
 extern vex::digital_out hood;
 extern vex::inertial imu;
 extern vex::optical colorSort;
-extern vex::vision::signature red_ring;
-extern vex::vision::signature blue_ring;
-extern vex::vision::signature neutral_post;
-extern vex::vision vision1;
+extern vex::aivision vis;
 extern vex::timer totalTime;
 
 

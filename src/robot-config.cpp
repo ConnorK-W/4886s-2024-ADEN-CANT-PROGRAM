@@ -38,14 +38,9 @@ vex::inertial imu = vex::inertial(PORT3);
 vex::optical colorSort = vex::optical(PORT11);
 vex::timer totalTime = vex::timer();
 
-vex::vision::signature red_ring = vex::vision::signature (3, 7579, 10923, 9251, -891, -433, -662, 4, 0);
-vex::vision::signature blue_ring = vex::vision::signature (2, -3329, -2595, -2962, 5431, 6685, 6058, 5.8, 0);
-vex::vision::signature neutral_post = vex::vision::signature(1, -841, 1, -420, -4645, -3667, -4156, 4.4, 0);
-
-vex::vision vision1 = vex::vision(PORT20, 17, red_ring, blue_ring, neutral_post);
+vex::aivision vis = vex::aivision(PORT7);
 
 vex::motor_group drive_r = vex::motor_group(drive_r1, drive_r2, drive_r3);
 vex::motor_group drive_l = vex::motor_group(drive_l1, drive_l2, drive_l3);
 vex::motor_group drive_full = vex::motor_group(drive_r1, drive_r2, drive_r3, drive_l1, drive_l2, drive_l3);
 vex::motor_group intakeFull = vex::motor_group(intakeLow, intakeHigh);
-
