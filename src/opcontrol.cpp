@@ -17,6 +17,7 @@ void opcontrol(void) {
     intakeLow.stop();
 
     bool shifted = false;
+    bool intaking = 0;
     void red_sort(void);
     void blue_sort(void);
 
@@ -37,6 +38,7 @@ void opcontrol(void) {
     bool sort = 1;
 
 
+    intakeLow.stop();
 
 
     while (1) {
@@ -80,6 +82,7 @@ void opcontrol(void) {
 
     if (BTN_R1.pressing()){
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        intaking = 1;
     }
     if (BTN_R2.pressing()){
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
@@ -94,15 +97,20 @@ void opcontrol(void) {
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
         hood.set(1);
     }
-    if (!BTN_L1.pressing() && !BTN_X.pressing()){
+    if (BTN_B.pressing()){
+        arm.spinToPosition(140 * 3, ROT_DEG, 15, VEL_PCT, false);
+        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        hood.set(1);
+    }
+    if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing()){
         hood.set(0);
     }
-    if (!BTN_L1.pressing() && !BTN_X.pressing() && arm.position(ROT_DEG) > 40){
+    if (!BTN_L1.pressing() && !BTN_X.pressing()  && !BTN_B.pressing() && arm.position(ROT_DEG) > 40){
         arm.spinToPosition(8 * 3, ROT_DEG, 100, VEL_PCT, false);
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
     }
-    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_X.pressing()){
-        intakeLow.stop();
+    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing() && intaking == 1){
+        intakeLow.spin(DIR_FWD, 5, VEL_PCT);
     }
 
 
