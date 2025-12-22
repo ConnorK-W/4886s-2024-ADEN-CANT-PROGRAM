@@ -25,8 +25,14 @@ int main() {
         pre_auton();
     }
     else {
-        vis.takeSnapshot(vex::aivision::ALL_OBJECTS);
-        B_SCRN.print(vis.largestObject.centerX);
+        vis.colorDetection(false);
+        vis.modelDetection(true);
+        while (1) {
+            vis.takeSnapshot(vex::aivision::ALL_AIOBJS);
+            B_SCRN.clearScreen();
+            B_SCRN.printAt(20, 20, "%d", vis.largestObject.centerX);
+            wait(20, vex::msec);
+        }
 
         // imu.calibrate();
         // master.ButtonLeft.pressed(tune_fast_pid);
