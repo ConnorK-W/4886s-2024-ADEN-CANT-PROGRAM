@@ -15,15 +15,16 @@ void test_vision();
 int main() {
     vex::competition Competition;
 
-    test_aivision();
-
-    Competition.autonomous(autonomous);
-    Competition.drivercontrol(opcontrol);
-    pre_auton();
+    // test_aivision();
+    //
+    // Competition.autonomous(autonomous);
+    // Competition.drivercontrol(opcontrol);
+    // pre_auton();
 
     // imu.calibrate();
-    // master.ButtonLeft.pressed(tune_fast_pid);
+    // master.ButtonLeft.pressed(tune_goal_pid);
     // master.ButtonRight.pressed(autonomous);
+    tune_goal_pid();
 
     while (true) {
         wait(20, vex::msec);
@@ -68,16 +69,16 @@ void test_aivision() {
 
 void test_vision() {
     // Init
-    vex::vision::signature yellow = vex::vision::signature(1, 2159, 3375, 2766, -4481, -4079, -4280, 7.4, 0);
+    vex::vision::signature test_yellow = vex::vision::signature(1, 2159, 3375, 2766, -4481, -4079, -4280, 7.4, 0);
     vex::vision test_vis = vex::vision(PORT4);
 
     // Configure
     test_vis.setBrightness(50);
-    test_vis.setSignature(yellow);
+    test_vis.setSignature(test_yellow);
 
     // Logic
     while (1) {
-        test_vis.takeSnapshot(yellow);
+        test_vis.takeSnapshot(test_yellow);
 
         B_SCRN.clearScreen();
 

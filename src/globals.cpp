@@ -19,3 +19,4 @@ vex::color color = vex::color::red;
 float move_kp = 0, move_ki = 0, move_kd = 0;
 float drive_accel_kp = DRIVE_STRAIGHT_DIR_KP, drive_accel_ki = DRIVE_STRAIGHT_DIR_KI, drive_accel_kd = DRIVE_STRAIGHT_DIR_KD;
 float drive_dir_kp = 0, drive_dir_ki = 0, drive_dir_kd = 0;
+float drive_goal_kp = DRIVE_STRAIGHT_TOWARD_GOAL_KP, drive_goal_ki = DRIVE_STRAIGHT_TOWARD_GOAL_KI, drive_goal_kd = DRIVE_STRAIGHT_TOWARD_GOAL_KD;

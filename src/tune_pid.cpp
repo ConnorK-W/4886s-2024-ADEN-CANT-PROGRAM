@@ -37,6 +37,54 @@ void tune_dir_pid() {
     }
 }
 
+// Tunes side to side for drive straight towards goal
+void tune_goal_pid() {
+    lift.set(1);
+    // imu.calibrate();
+    // while (imu.isCalibrating())
+    //     vex::wait(20, vex::msec);
+    master.rumble(".");
+    const float TUNER = 0.025;
+    // Make PID objects
+    PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID dir = PID(DRIVE_STRAIGHT_TOWARD_GOAL_KP, DRIVE_STRAIGHT_TOWARD_GOAL_KI, DRIVE_STRAIGHT_TOWARD_GOAL_KD);
+
+    while (true) {
+        // Enable opcontrol
+        opdrive(TSA, 1, SENSITIVITY);
+        // Toggle pid movement on y press
+        if (BTN_Y.PRESSED) {
+            // target_heading = imu_rotation();
+            // Go back to opcontrol if y pressed again
+            while (1) {
+                aivis.takeSnapshot(yellow);
+                if (aivis.largestObject.exists)
+                    break;
+                wait(20, vex::msec);
+            }
+            while (!BTN_Y.PRESSED) {
+                aivis.takeSnapshot(yellow);
+
+                // Drive forward  300 rpm
+                int goal_x = 160;
+                if (aivis.largestObject.exists)
+                    goal_x = aivis.largestObject.centerX;
+                double dir_adj = dir.adjust(160, goal_x);
+                drive_r.spin(DIR_FWD, -100 + rd.adjust(-100, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
+                drive_l.spin(DIR_FWD, -100 + ld.adjust(-100, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
+                wait(20, vex::msec);
+            }
+        }
+        // Enable pid tuning
+        dir.tune_kP(btn_up() - btn_down(), TUNER);
+        dir.tune_kI(btn_x() - btn_b(), TUNER);
+        dir.tune_kD(btn_right() - btn_left(), TUNER);
+
+        wait(20, vex::msec);
+    }
+}
+
 // Tunes acceleration for drive straight
 void tune_accel_pid() {
     imu.calibrate();
@@ -107,14 +155,14 @@ void tune_fast_pid() {
         if (BTN_L1.PRESSED) {
             //target_heading = imu_rotation();
             vex::thread t(graph_pid);
-            drive_turn(-90, WHEEL_TO_WHEEL_DIST *2, 60, 60, true);
+            drive_turn(-90, WHEEL_TO_WHEEL_DIST * 2, 60, 60, true);
             // drive_straight(36, 66, 512);
             t.interrupt();
         }
         if (BTN_L2.PRESSED) {
             //target_heading = imu_rotation();
             vex::thread t(graph_pid);
-            drive_turn(90, WHEEL_TO_WHEEL_DIST *2, 60, 60, true);
+            drive_turn(90, WHEEL_TO_WHEEL_DIST * 2, 60, 60, true);
             // drive_straight(108, 72, 72);
             t.interrupt();
         }
