@@ -39,17 +39,6 @@ void tune_dir_pid() {
 
 // Tunes side to side for drive straight towards goal
 void tune_goal_pid() {
-    vex::thread t([] {
-        while (true) {
-            aivis.takeSnapshot(yellow);
-            while ((int)totalTime.time(vex::msec) % 20 != 0) {
-                wait(1, vex::msec);
-            }
-        }
-    });
-
-    t.detach();
-
     lift.set(1);
     master.rumble(".");
     const float TUNER = 0.025;
@@ -59,81 +48,97 @@ void tune_goal_pid() {
     PID dir = PID(DRIVE_STRAIGHT_TOWARD_GOAL_KP, DRIVE_STRAIGHT_TOWARD_GOAL_KI, DRIVE_STRAIGHT_TOWARD_GOAL_KD);
 
     // --- CONFIGURATION ---
-    float final_max_rpm = -300.0;  // Top speed when perfectly aligned
-    float aiming_cap_rpm = -30.0;  // Speed limit when not aligned (Safeguard)
-    float alignment_threshold = 40;// How many pixels off-center is "too far"
+    float final_max_rpm = -100.0;
+    float accel_base = 2.0; 
     
-    float accel_slow = 1.0;        // Acceleration when goal is NOT seen
-    float accel_fast = 4.0;        // Acceleration when goal IS seen
+    // SMOOTHING VARS
+    int last_known_x = 160;   // Remember where the goal was
+    int lost_frames = 0;      // specific counter for safety
     // ---------------------
 
     while (true) {
+        // Background processing
+        aivis.takeSnapshot(yellow);
+        
         opdrive(TSA, 1, SENSITIVITY);
 
         if (BTN_Y.PRESSED) {
             float current_vel = 0; 
             
             while (!BTN_Y.PRESSED) {
-                // Keep updating vision inside the loop too
+                aivis.takeSnapshot(yellow);
 
                 int goal_x = 160;
-                float current_accel = accel_slow;
-                bool locked_on = false;
+                bool has_target = aivis.largestObject.exists;
 
-                if (aivis.largestObject.exists) {
+                if (has_target) {
                     goal_x = aivis.largestObject.centerX;
-                    current_accel = accel_fast;
-                    locked_on = true;
+                    last_known_x = goal_x; // Update memory
+                    lost_frames = 0;
+                } else {
+                    // FIX 1: PERSISTENCE
+                    // If we blink for less than 10 frames (0.2s), keep aiming at the last spot
+                    if (lost_frames < 10) {
+                        goal_x = last_known_x;
+                        lost_frames++;
+                    } else {
+                        // If lost for too long, default to center (or stop turning)
+                        goal_x = 160; 
+                    }
                 }
 
-                // --- SAFEGUARD LOGIC ---
-                float active_speed_limit = final_max_rpm;
+                // FIX 2: SMOOTH SPEED SCALING (No jerky thresholds)
+                // Calculate error magnitude
+                float error = std::abs(160 - goal_x);
                 
-                // If the error is large (abs value > 40), cap the speed
-                // This forces it to slow down to fix the turn before driving far
-                // if (std::abs(160 - goal_x) > alignment_threshold) {
-                //     active_speed_limit = aiming_cap_rpm;
-                // }
-                // -----------------------
+                // Map error to speed percentage:
+                // If error is 0 -> 100% speed
+                // If error is 80 (far off) -> 20% speed
+                float speed_factor = 1.0 - (error / 100.0); 
+                
+                // Clamp factor between 0.2 and 1.0
+                if (speed_factor < 0.2) speed_factor = 0.2;
+                if (speed_factor > 1.0) speed_factor = 1.0;
+
+                // Calculate dynamic speed limit
+                float active_speed_limit = final_max_rpm * speed_factor;
 
                 // --- ACCELERATION LOGIC ---
-                // We accelerate towards 'active_speed_limit'
-                // Since velocities are negative, "greater than" means slower (closer to 0)
-                if (current_vel > active_speed_limit) {
-                    current_vel -= current_accel;
-                    // Clamp if we went past the limit
-                    if (current_vel < active_speed_limit) {
-                        current_vel = active_speed_limit;
-                    }
-                } 
-                // Deceleration logic (if we were going fast, but now need to slow down to aim)
-                else if (current_vel < active_speed_limit) {
-                     current_vel += 4.0; // Brake quickly to the aiming speed
+                // Smoothly ramp current_vel towards active_speed_limit
+                // (Using negative logic: -100 is "less than" -20)
+                
+                if (current_vel > active_speed_limit) { 
+                    // Accelerating (going more negative)
+                    current_vel -= accel_base; 
+                } else if (current_vel < active_speed_limit) { 
+                    // Decelerating (we are going too fast for our current turn angle)
+                    // We use a gentle brake (1.5x accel) rather than a hard slam
+                    current_vel += (accel_base * 1.5); 
                 }
 
-                // Calculate turn adjustments
-                double dir_adj = dir.adjust(160, goal_x);
+                // FIX 3: DEADBAND
+                // If error is tiny (within 5 pixels), don't turn at all to prevent wiggles
+                double dir_adj = 0;
+                if (error > 5) {
+                    dir_adj = dir.adjust(160, goal_x);
+                }
 
-                printf("%.3f at time %d", dir_adj, (int) totalTime.time(vex::msec));
                 drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
                 drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
 
-                while ((int)totalTime.time(vex::msec) % 20 != 0) {
-                    wait(1, vex::msec);
-                }
+                wait(20, vex::msec);
             }
-
-            // Stop when loop exits
-            wait(200, vex::msec); // Debounce button
+            
+            // drive_l.stop(vex::brakeType::brake);
+            // drive_r.stop(vex::brakeType::brake);
+            wait(200, vex::msec);
         }
 
         dir.tune_kP(btn_up() - btn_down(), TUNER);
         dir.tune_kI(btn_x() - btn_b(), TUNER);
         dir.tune_kD(btn_right() - btn_left(), TUNER);
 
-        while ((int)totalTime.time(vex::msec) % 20 != 0) {
-            wait(1, vex::msec);
-        }
+        wait(20, vex::msec);
     }
 }
 
