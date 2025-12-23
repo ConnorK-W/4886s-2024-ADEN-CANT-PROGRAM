@@ -60,8 +60,6 @@ void tune_goal_pid() {
                 // Allow exit from wait if Y is pressed again
                 if (BTN_Y.PRESSED) goto exit_pid; 
                 
-                drive_l.stop(vex::brakeType::brake);
-                drive_r.stop(vex::brakeType::brake);
                 wait(20, vex::msec);
             }
 
@@ -70,7 +68,7 @@ void tune_goal_pid() {
                 aivis.takeSnapshot(yellow);
 
                 int goal_x = 160;
-                float target_vel = -100.0; // Your desired test speed
+                float target_vel = -300.0; // Your desired test speed
 
                 if (aivis.largestObject.exists) {
                     goal_x = aivis.largestObject.centerX;
@@ -90,8 +88,6 @@ void tune_goal_pid() {
             }
             
             exit_pid:
-            drive_l.stop(vex::brakeType::brake);
-            drive_r.stop(vex::brakeType::brake);
             wait(200, vex::msec); // debounce
         }
 
