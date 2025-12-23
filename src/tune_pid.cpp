@@ -91,9 +91,9 @@ void tune_goal_pid() {
                 
                 // If the error is large (abs value > 40), cap the speed
                 // This forces it to slow down to fix the turn before driving far
-                if (std::abs(160 - goal_x) > alignment_threshold) {
-                    active_speed_limit = aiming_cap_rpm;
-                }
+                // if (std::abs(160 - goal_x) > alignment_threshold) {
+                //     active_speed_limit = aiming_cap_rpm;
+                // }
                 // -----------------------
 
                 // --- ACCELERATION LOGIC ---
@@ -114,6 +114,7 @@ void tune_goal_pid() {
                 // Calculate turn adjustments
                 double dir_adj = dir.adjust(160, goal_x);
 
+                printf("%.3f at time %d", dir_adj, (int) totalTime.time(vex::msec));
                 drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
                 drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
 
