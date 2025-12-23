@@ -43,65 +43,82 @@ void tune_goal_pid() {
     master.rumble(".");
     const float TUNER = 0.025;
 
-    // PID objects
     PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID dir = PID(DRIVE_STRAIGHT_TOWARD_GOAL_KP, DRIVE_STRAIGHT_TOWARD_GOAL_KI, DRIVE_STRAIGHT_TOWARD_GOAL_KD);
 
-    // --- ACCELERATION SETTINGS ---
-    float target_max_rpm = -100.0; // The final top speed
-    float accel_slow = 1.0;        // RPM to add per tick (Blind acceleration)
-    float accel_fast = 4.0;        // RPM to add per tick (Locked-on acceleration)
-    // -----------------------------
+    // --- CONFIGURATION ---
+    float final_max_rpm = -100.0;  // Top speed when perfectly aligned
+    float aiming_cap_rpm = -30.0;  // Speed limit when not aligned (Safeguard)
+    float alignment_threshold = 40;// How many pixels off-center is "too far"
+    
+    float accel_slow = 1.0;        // Acceleration when goal is NOT seen
+    float accel_fast = 4.0;        // Acceleration when goal IS seen
+    // ---------------------
 
     while (true) {
+        // BACKGROUND PROCESSING:
+        // By running this here, the data is fresh the instant you press Y
+        aivis.takeSnapshot(yellow);
+        
         opdrive(TSA, 1, SENSITIVITY);
 
         if (BTN_Y.PRESSED) {
-            // Reset velocity for the new run
             float current_vel = 0; 
-
-            // Loop until button pressed again to stop
+            
             while (!BTN_Y.PRESSED) {
+                // Keep updating vision inside the loop too
                 aivis.takeSnapshot(yellow);
 
                 int goal_x = 160;
-                float current_accel = accel_slow; // Default to slow acceleration
+                float current_accel = accel_slow;
+                bool locked_on = false;
 
-                // Vision Logic
                 if (aivis.largestObject.exists) {
                     goal_x = aivis.largestObject.centerX;
-                    current_accel = accel_fast;   // Switch to fast acceleration if we see it
+                    current_accel = accel_fast;
+                    locked_on = true;
                 }
+
+                // --- SAFEGUARD LOGIC ---
+                float active_speed_limit = final_max_rpm;
+                
+                // If the error is large (abs value > 40), cap the speed
+                // This forces it to slow down to fix the turn before driving far
+                if (std::abs(160 - goal_x) > alignment_threshold) {
+                    active_speed_limit = aiming_cap_rpm;
+                }
+                // -----------------------
 
                 // --- ACCELERATION LOGIC ---
-                // "No matter what, make it accelerate"
-                // Since target is negative (-100), we subtract to speed up
-                if (current_vel > target_max_rpm) {
+                // We accelerate towards 'active_speed_limit'
+                // Since velocities are negative, "greater than" means slower (closer to 0)
+                if (current_vel > active_speed_limit) {
                     current_vel -= current_accel;
-                    // Clamp to max speed so we don't overshoot
-                    if (current_vel < target_max_rpm) {
-                        current_vel = target_max_rpm;
+                    // Clamp if we went past the limit
+                    if (current_vel < active_speed_limit) {
+                        current_vel = active_speed_limit;
                     }
+                } 
+                // Deceleration logic (if we were going fast, but now need to slow down to aim)
+                else if (current_vel < active_speed_limit) {
+                     current_vel += 4.0; // Brake quickly to the aiming speed
                 }
-                // ---------------------------
 
+                // Calculate turn adjustments
                 double dir_adj = dir.adjust(160, goal_x);
 
-                // Apply the ramping 'current_vel' instead of hardcoded -100
                 drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
                 drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
 
                 wait(20, vex::msec);
             }
             
-            // Stop when loop exits
             drive_l.stop(vex::brakeType::brake);
             drive_r.stop(vex::brakeType::brake);
-            wait(200, vex::msec); // Debounce button
+            wait(200, vex::msec);
         }
 
-        // Enable pid tuning
         dir.tune_kP(btn_up() - btn_down(), TUNER);
         dir.tune_kI(btn_x() - btn_b(), TUNER);
         dir.tune_kD(btn_right() - btn_left(), TUNER);
