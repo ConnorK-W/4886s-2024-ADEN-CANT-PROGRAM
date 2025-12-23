@@ -25,13 +25,21 @@ int main() {
         pre_auton();
     }
     else {
-        vis.colorDetection(false);
-        vis.modelDetection(true);
+        vis.setBrightness(75);
+        // vis.setWifiMode(vex::vision::wifiMode::on);
         while (1) {
-            vis.takeSnapshot(vex::aivision::ALL_AIOBJS);
+            vis.takeSnapshot(yellow);
             B_SCRN.clearScreen();
-            B_SCRN.printAt(20, 20, "%d", vis.largestObject.centerX);
-            wait(20, vex::msec);
+            
+            if (vis.largestObject.exists) {
+                B_SCRN.printAt(20, 20, "X: %d   W: %d", vis.largestObject.centerX, vis.largestObject.width);
+                B_SCRN.printAt(20, 40, "Y: %d   H: %d", vis.largestObject.centerY, vis.largestObject.height);
+                B_SCRN.printAt(20, 60, "Count: %d", (int)vis.objectCount);
+            } else {
+                B_SCRN.printAt(20, 20, "No Yellow Found");
+            }
+            
+            wait(50, vex::msec);
         }
 
         // imu.calibrate();

@@ -20,7 +20,6 @@ extern vex::digital_out lift;
 extern vex::digital_out hood;
 extern vex::inertial imu;
 extern vex::optical colorSort;
-extern vex::aivision vis;
 extern vex::timer totalTime;
 
 
@@ -28,3 +27,6 @@ extern vex::motor_group drive_r;
 extern vex::motor_group drive_l;
 extern vex::motor_group drive_full;
 extern vex::motor_group intakeFull;
+
+extern vex::vision::signature yellow;
+extern vex::vision vis;
