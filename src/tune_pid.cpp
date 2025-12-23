@@ -42,57 +42,63 @@ void tune_goal_pid() {
     lift.set(1);
     master.rumble(".");
     const float TUNER = 0.025;
-    
+
+    // PID objects
     PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID dir = PID(DRIVE_STRAIGHT_TOWARD_GOAL_KP, DRIVE_STRAIGHT_TOWARD_GOAL_KI, DRIVE_STRAIGHT_TOWARD_GOAL_KD);
+
+    // --- ACCELERATION SETTINGS ---
+    float target_max_rpm = -100.0; // The final top speed
+    float accel_slow = 1.0;        // RPM to add per tick (Blind acceleration)
+    float accel_fast = 4.0;        // RPM to add per tick (Locked-on acceleration)
+    // -----------------------------
 
     while (true) {
         opdrive(TSA, 1, SENSITIVITY);
 
         if (BTN_Y.PRESSED) {
-            // --- 1. WAIT FOR VISION LOCK ---
-            // The robot won't move until it sees yellow
-            while (true) {
-                aivis.takeSnapshot(yellow);
-                if (aivis.largestObject.exists) break;
-                
-                // Allow exit from wait if Y is pressed again
-                if (BTN_Y.PRESSED) goto exit_pid; 
-                
-                drive_l.stop(vex::brakeType::brake);
-                drive_r.stop(vex::brakeType::brake);
-                wait(20, vex::msec);
-            }
+            // Reset velocity for the new run
+            float current_vel = 0; 
 
-            // --- 2. START MOVEMENT LOOP ---
+            // Loop until button pressed again to stop
             while (!BTN_Y.PRESSED) {
                 aivis.takeSnapshot(yellow);
 
                 int goal_x = 160;
-                float target_vel = -100.0; // Your desired test speed
+                float current_accel = accel_slow; // Default to slow acceleration
 
+                // Vision Logic
                 if (aivis.largestObject.exists) {
                     goal_x = aivis.largestObject.centerX;
-                } else {
-                    // SLOW START: If we lose the goal, drop speed to -20 
-                    // to give the robot time to find it again and rotate
-                    target_vel = -20.0; 
+                    current_accel = accel_fast;   // Switch to fast acceleration if we see it
                 }
 
+                // --- ACCELERATION LOGIC ---
+                // "No matter what, make it accelerate"
+                // Since target is negative (-100), we subtract to speed up
+                if (current_vel > target_max_rpm) {
+                    current_vel -= current_accel;
+                    // Clamp to max speed so we don't overshoot
+                    if (current_vel < target_max_rpm) {
+                        current_vel = target_max_rpm;
+                    }
+                }
+                // ---------------------------
+
                 double dir_adj = dir.adjust(160, goal_x);
-                
-                // Note: Using target_vel here allows the speed to be dynamic
-                drive_r.spin(DIR_FWD, target_vel + rd.adjust(target_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
-                drive_l.spin(DIR_FWD, target_vel + ld.adjust(target_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
-                
+
+                // Apply the ramping 'current_vel' instead of hardcoded -100
+                drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
+                drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
+
                 wait(20, vex::msec);
             }
             
-            exit_pid:
+            // Stop when loop exits
             drive_l.stop(vex::brakeType::brake);
             drive_r.stop(vex::brakeType::brake);
-            wait(200, vex::msec); // debounce
+            wait(200, vex::msec); // Debounce button
         }
 
         // Enable pid tuning
