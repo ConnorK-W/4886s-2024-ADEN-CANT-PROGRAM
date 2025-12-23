@@ -5,9 +5,7 @@
  */
 void drive_straight(float inches, float target_ips, float ipss, bool do_decel = true);
 
-
-
-/** SOEMTHING DO LATER
+/** 
  * @param inches distance to travel - postive or negative
  * @param target_ips goal for velocity - positive
  * @param ipss acceleration - positive

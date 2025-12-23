@@ -40,42 +40,61 @@ void tune_dir_pid() {
 // Tunes side to side for drive straight towards goal
 void tune_goal_pid() {
     lift.set(1);
-    // imu.calibrate();
-    // while (imu.isCalibrating())
-    //     vex::wait(20, vex::msec);
     master.rumble(".");
     const float TUNER = 0.025;
-    // Make PID objects
+    
     PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID dir = PID(DRIVE_STRAIGHT_TOWARD_GOAL_KP, DRIVE_STRAIGHT_TOWARD_GOAL_KI, DRIVE_STRAIGHT_TOWARD_GOAL_KD);
 
     while (true) {
-        // Enable opcontrol
         opdrive(TSA, 1, SENSITIVITY);
-        // Toggle pid movement on y press
+
         if (BTN_Y.PRESSED) {
-            // target_heading = imu_rotation();
-            // Go back to opcontrol if y pressed again
-            while (1) {
+            // --- 1. WAIT FOR VISION LOCK ---
+            // The robot won't move until it sees yellow
+            while (true) {
                 aivis.takeSnapshot(yellow);
-                if (aivis.largestObject.exists)
-                    break;
+                if (aivis.largestObject.exists) break;
+                
+                // Allow exit from wait if Y is pressed again
+                if (BTN_Y.PRESSED) goto exit_pid; 
+                
+                drive_l.stop(vex::brakeType::brake);
+                drive_r.stop(vex::brakeType::brake);
                 wait(20, vex::msec);
             }
+
+            // --- 2. START MOVEMENT LOOP ---
             while (!BTN_Y.PRESSED) {
                 aivis.takeSnapshot(yellow);
 
-                // Drive forward  300 rpm
                 int goal_x = 160;
-                if (aivis.largestObject.exists)
+                float target_vel = -100.0; // Your desired test speed
+
+                if (aivis.largestObject.exists) {
                     goal_x = aivis.largestObject.centerX;
+                } else {
+                    // SLOW START: If we lose the goal, drop speed to -20 
+                    // to give the robot time to find it again and rotate
+                    target_vel = -20.0; 
+                }
+
                 double dir_adj = dir.adjust(160, goal_x);
-                drive_r.spin(DIR_FWD, -100 + rd.adjust(-100, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
-                drive_l.spin(DIR_FWD, -100 + ld.adjust(-100, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
+                
+                // Note: Using target_vel here allows the speed to be dynamic
+                drive_r.spin(DIR_FWD, target_vel + rd.adjust(target_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
+                drive_l.spin(DIR_FWD, target_vel + ld.adjust(target_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
+                
                 wait(20, vex::msec);
             }
+            
+            exit_pid:
+            drive_l.stop(vex::brakeType::brake);
+            drive_r.stop(vex::brakeType::brake);
+            wait(200, vex::msec); // debounce
         }
+
         // Enable pid tuning
         dir.tune_kP(btn_up() - btn_down(), TUNER);
         dir.tune_kI(btn_x() - btn_b(), TUNER);

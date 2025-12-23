@@ -96,10 +96,11 @@ void drive_straight_toward_goal(float inches, float target_ips, float ipss, bool
         int goal_x;
 
         if (aivis.largestObject.exists) {
-            // compute correction value
+            // compute object center and requested adjustment
             goal_x = aivis.largestObject.centerX;
             pid_adjustment_dir = pid_dir.adjust(160, goal_x);
         } else {
+            // do not adjust if no goal is found
             pid_adjustment_dir = 0;
         }
 
@@ -121,7 +122,6 @@ void drive_straight_toward_goal(float inches, float target_ips, float ipss, bool
         // Maintain speed
         pid_adjustment_l = pid_drive_l.adjust(pos, pos_l);
         pid_adjustment_r = pid_drive_r.adjust(pos, pos_r);
-
 
         vel_rpm = ips / DRIVE_REV_TO_IN * 60;
 
