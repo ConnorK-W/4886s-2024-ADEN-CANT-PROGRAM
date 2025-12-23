@@ -38,10 +38,11 @@ vex::inertial imu = vex::inertial(PORT3);
 vex::optical colorSort = vex::optical(PORT11);
 vex::timer totalTime = vex::timer();
 
-vex::vision::signature yellow = vex::vision::signature(1, 2159, 3375, 2766, -4481, -4079, -4280, 7.4, 0);
-vex::vision vis = vex::vision(PORT7, 50, yellow);
+vex::aivision::colordesc yellow(1, 255, 175, 83, 20.00, 0.30);
+vex::aivision aivis = vex::aivision(PORT4);
 
 vex::motor_group drive_r = vex::motor_group(drive_r1, drive_r2, drive_r3);
 vex::motor_group drive_l = vex::motor_group(drive_l1, drive_l2, drive_l3);
 vex::motor_group drive_full = vex::motor_group(drive_r1, drive_r2, drive_r3, drive_l1, drive_l2, drive_l3);
 vex::motor_group intakeFull = vex::motor_group(intakeLow, intakeHigh);
+

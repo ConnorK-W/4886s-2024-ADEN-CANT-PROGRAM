@@ -5,6 +5,15 @@
  */
 void drive_straight(float inches, float target_ips, float ipss, bool do_decel = true);
 
+
+
+/** SOEMTHING DO LATER
+ * @param inches distance to travel - postive or negative
+ * @param target_ips goal for velocity - positive
+ * @param ipss acceleration - positive
+ */
+void drive_straight_toward_goal(float inches, float target_ips, float ipss, bool do_decel);
+
 /**
  * @param degrees changes target heading
  * @param turn_radius outer radius of the turn

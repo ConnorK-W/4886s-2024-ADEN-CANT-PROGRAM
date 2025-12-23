@@ -28,5 +28,6 @@ extern vex::motor_group drive_l;
 extern vex::motor_group drive_full;
 extern vex::motor_group intakeFull;
 
-extern vex::vision::signature yellow;
-extern vex::vision vis;
+extern vex::aivision::colordesc yellow(1, 255, 175, 83, 20.00, 0.30);
+extern vex::aivision aivis = vex::aivision(PORT4);
+

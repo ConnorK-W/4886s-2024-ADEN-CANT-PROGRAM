@@ -55,4 +55,3 @@ double PID::adjust(double setpoint, double sensor_value) {
 
     return (error * kP) + (sum * kI) + (deriv * kD);
 }
-
