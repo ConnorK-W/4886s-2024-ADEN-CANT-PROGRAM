@@ -6,7 +6,7 @@
 #define DRIVE_STRAIGHT_DL_KD 0.650
 
 // drive_straight_toward_goal() consts acceleration
-#define DRIVE_STRAIGHT_TOWARD_GOAL_KP (1.5)
+#define DRIVE_STRAIGHT_TOWARD_GOAL_KP (.4)
 #define DRIVE_STRAIGHT_TOWARD_GOAL_KI 0.0
 #define DRIVE_STRAIGHT_TOWARD_GOAL_KD (-5)
 

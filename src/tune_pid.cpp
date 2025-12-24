@@ -40,26 +40,25 @@ void tune_dir_pid() {
 // Tunes side to side for drive straight towards goal
 void tune_goal_pid() {
     lift.set(1);
-    master.rumble(".");
+    master.rumble("-"); // Changed rumble to single dash for "Fast"
     const float TUNER = 0.025;
 
     PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID dir = PID(DRIVE_STRAIGHT_TOWARD_GOAL_KP, DRIVE_STRAIGHT_TOWARD_GOAL_KI, DRIVE_STRAIGHT_TOWARD_GOAL_KD);
 
-    // --- CONFIGURATION ---
-    float final_max_rpm = -100.0;
-    float accel_base = 2.0; 
+    // --- AGGRESSIVE CONFIGURATION ---
+    float final_max_rpm = -300.0; // Increase this if your gear ratio allows (e.g. -200 or -600)
+    float accel_base = 8.0;       // INCREASED: 4x faster acceleration (was 2.0)
     
     // SMOOTHING VARS
-    int last_known_x = 160;   // Remember where the goal was
-    int lost_frames = 0;      // specific counter for safety
+    int last_known_x = 160;   
+    int lost_frames = 0;      
+    int loop_counter = 0;
     // ---------------------
 
     while (true) {
-        // Background processing
         aivis.takeSnapshot(yellow);
-        
         opdrive(TSA, 1, SENSITIVITY);
 
         if (BTN_Y.PRESSED) {
@@ -73,56 +72,56 @@ void tune_goal_pid() {
 
                 if (has_target) {
                     goal_x = aivis.largestObject.centerX;
-                    last_known_x = goal_x; // Update memory
+                    last_known_x = goal_x; 
                     lost_frames = 0;
                 } else {
-                    // FIX 1: PERSISTENCE
-                    // If we blink for less than 10 frames (0.2s), keep aiming at the last spot
+                    // Persistence logic
                     if (lost_frames < 10) {
                         goal_x = last_known_x;
                         lost_frames++;
                     } else {
-                        // If lost for too long, default to center (or stop turning)
                         goal_x = 160; 
                     }
                 }
 
-                // FIX 2: SMOOTH SPEED SCALING (No jerky thresholds)
-                // Calculate error magnitude
+                // --- AGGRESSIVE SPEED SCALING ---
                 float error = std::abs(160 - goal_x);
                 
-                // Map error to speed percentage:
-                // If error is 0 -> 100% speed
-                // If error is 80 (far off) -> 20% speed
-                float speed_factor = 1.0 - (error / 100.0); 
+                // CHANGE 1: Tolerance
+                // Old: (error / 100.0).  50px error = 50% speed (Slow)
+                // New: (error / 300.0).  50px error = 83% speed (Fast)
+                float speed_factor = 1.0 - (error / 300.0); 
                 
-                // Clamp factor between 0.2 and 1.0
-                if (speed_factor < 0.2) speed_factor = 0.2;
+                // CHANGE 2: Floor
+                // Never drop below 60% speed due to alignment. 
+                // We trust the PID to correct the heading while moving.
+                if (speed_factor < 0.6) speed_factor = 0.6;
                 if (speed_factor > 1.0) speed_factor = 1.0;
 
-                // Calculate dynamic speed limit
-                float active_speed_limit = final_max_rpm * speed_factor;
+                float active_speed_limit = 2 * final_max_rpm * speed_factor;
 
                 // --- ACCELERATION LOGIC ---
-                // Smoothly ramp current_vel towards active_speed_limit
-                // (Using negative logic: -100 is "less than" -20)
-                
+                // Negative values: -100 < -50
                 if (current_vel > active_speed_limit) { 
-                    // Accelerating (going more negative)
+                    // Accelerate hard
                     current_vel -= accel_base; 
                 } else if (current_vel < active_speed_limit) { 
-                    // Decelerating (we are going too fast for our current turn angle)
-                    // We use a gentle brake (1.5x accel) rather than a hard slam
-                    current_vel += (accel_base * 1.5); 
+                    // Brake hard (snap back to valid speed)
+                    current_vel += (accel_base * 2.0); 
                 }
 
-                // FIX 3: DEADBAND
-                // If error is tiny (within 5 pixels), don't turn at all to prevent wiggles
+                if (loop_counter % 5 == 0) {
+                    printf("Err: %.1f | Vel: %.1f | Limit: %.1f\n", error, current_vel, active_speed_limit);
+                }
+                loop_counter++;
+
+                // PID Calc
                 double dir_adj = 0;
                 if (error > 5) {
                     dir_adj = dir.adjust(160, goal_x);
                 }
 
+                // Apply
                 drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
                 drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
 
