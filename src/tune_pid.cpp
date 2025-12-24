@@ -48,8 +48,8 @@ void tune_goal_pid() {
     PID dir = PID(DRIVE_STRAIGHT_TOWARD_GOAL_KP, DRIVE_STRAIGHT_TOWARD_GOAL_KI, DRIVE_STRAIGHT_TOWARD_GOAL_KD);
 
     // --- AGGRESSIVE CONFIGURATION ---
-    float final_max_rpm = -300.0; // Increase this if your gear ratio allows (e.g. -200 or -600)
-    float accel_base = 8.0;       // INCREASED: 4x faster acceleration (was 2.0)
+    float final_max_rpm = -100.0; // Increase this if your gear ratio allows (e.g. -200 or -600)
+    float accel_base = 12.0;       // INCREASED: 4x faster acceleration (was 2.0)
     
     // SMOOTHING VARS
     int last_known_x = 160;   
@@ -63,50 +63,50 @@ void tune_goal_pid() {
 
         if (BTN_Y.PRESSED) {
             float current_vel = 0; 
+            last_known_x = 160;
+            lost_frames = 100;
+            int goal_x = 160;
+            int factor = 0;
             
             while (!BTN_Y.PRESSED) {
                 aivis.takeSnapshot(yellow);
-
-                int goal_x = 160;
+                
                 bool has_target = aivis.largestObject.exists;
 
                 if (has_target) {
                     goal_x = aivis.largestObject.centerX;
                     last_known_x = goal_x; 
                     lost_frames = 0;
+                    factor = 1;
                 } else {
-                    // Persistence logic
                     if (lost_frames < 10) {
                         goal_x = last_known_x;
                         lost_frames++;
+                        factor = 1; // KEEP FACTOR 1 while in "lost frames" buffer so it keeps turning briefly
                     } else {
                         goal_x = 160; 
+                        factor = 0;
                     }
                 }
 
-                // --- AGGRESSIVE SPEED SCALING ---
                 float error = std::abs(160 - goal_x);
-                
-                // CHANGE 1: Tolerance
-                // Old: (error / 100.0).  50px error = 50% speed (Slow)
-                // New: (error / 300.0).  50px error = 83% speed (Fast)
+                if (factor == 0) {
+                    error = 300.0; // Force high error for speed calculation
+                }
                 float speed_factor = 1.0 - (error / 300.0); 
                 
-                // CHANGE 2: Floor
-                // Never drop below 60% speed due to alignment. 
-                // We trust the PID to correct the heading while moving.
                 if (speed_factor < 0.6) speed_factor = 0.6;
                 if (speed_factor > 1.0) speed_factor = 1.0;
 
                 float active_speed_limit = 2 * final_max_rpm * speed_factor;
 
-                // --- ACCELERATION LOGIC ---
-                // Negative values: -100 < -50
+                if (factor == 0) {
+                    active_speed_limit = 0; 
+                }
+
                 if (current_vel > active_speed_limit) { 
-                    // Accelerate hard
                     current_vel -= accel_base; 
                 } else if (current_vel < active_speed_limit) { 
-                    // Brake hard (snap back to valid speed)
                     current_vel += (accel_base * 2.0); 
                 }
 
@@ -122,14 +122,12 @@ void tune_goal_pid() {
                 }
 
                 // Apply
-                drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
-                drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
+                drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - factor*dir_adj, VEL_RPM);
+                drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + factor*dir_adj, VEL_RPM);
 
                 wait(20, vex::msec);
             }
             
-            // drive_l.stop(vex::brakeType::brake);
-            // drive_r.stop(vex::brakeType::brake);
             wait(200, vex::msec);
         }
 
