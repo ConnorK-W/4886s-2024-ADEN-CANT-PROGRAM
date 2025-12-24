@@ -21,10 +21,16 @@ int main() {
     // Competition.drivercontrol(opcontrol);
     // pre_auton();
 
-    // imu.calibrate();
+    imu.calibrate();
+    while (imu.isCalibrating()) {
+        wait(20, vex::msec);
+    }
+
     // master.ButtonLeft.pressed(tune_goal_pid);
     // master.ButtonRight.pressed(autonomous);
-    tune_goal_pid();
+    // tune_biggoal_pid();
+
+    drive_straight_toward_goal(2000, 1);
 
     while (true) {
         wait(20, vex::msec);

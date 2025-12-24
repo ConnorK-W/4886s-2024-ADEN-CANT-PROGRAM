@@ -65,78 +65,113 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel) {
     }
 }
 
-// Use to drive straight toward goal
-void drive_straight_toward_goal(float inches, float target_ips, float ipss, bool do_decel) {
-    const int TICKS_PER_SEC = 50;
-    const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
+void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
+    // 1. SETUP CONFIGURATION BASED ON GOAL TYPE
+    if (target_small_goal) {
+        lift.set(1); // Small Goal: Lift Up
+    } else {
+        lift.set(0); // Big Goal: Lift Down
+    }
 
-    drive_r.stop(vex::brakeType::coast);
-    drive_l.stop(vex::brakeType::coast);
+    // Select PID Constants
+    PID dir = target_small_goal ? 
+        PID(DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KP, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KI, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KD) : 
+        PID(DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KI, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KD);
 
-    PID pid_drive_l = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
-    PID pid_drive_r = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
-    PID pid_dir = PID(DRIVE_STRAIGHT_TOWARD_GOAL_KP, DRIVE_STRAIGHT_TOWARD_GOAL_KI, DRIVE_STRAIGHT_TOWARD_GOAL_KD);
+    // Select Drive Constants (Aggressive Config)
+    float final_max_rpm = target_small_goal ? -200.0 : -600.0;
+    float accel_base    = target_small_goal ? 10.0 : 16.0;
 
-    float ips = 0, pos = 0;
-    float pos_start_l = pos_drive_l(), pos_start_r = pos_drive_r();
-    float pos_l, pos_r;
+    // Common Drive PIDs
+    PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
 
-    // adjusts velocity for positive/negative distances
-    float dir_mod = (inches > 0) ? 1 : -1;
+    // 2. INITIALIZE VARIABLES
+    vex::timer t;
+    t.clear();
 
-    float pid_adjustment_l;
-    float pid_adjustment_r;
-    float pid_adjustment_dir;
+    float current_vel = 0; 
+    int last_known_x = 160;   
+    int lost_frames = 100; // Start assumed lost to force safe initialization
+    int goal_x = 160;
+    int factor = 0;
 
-    float vel_rpm;
-
-    while (ips >= 0 && std::abs(pos_drive_l() - pos_start_l) < std::abs(inches)) {
-        aivis.takeSnapshot(yellow);
-
-        int goal_x;
-
-        if (aivis.largestObject.exists) {
-            // compute object center and requested adjustment
-            goal_x = aivis.largestObject.centerX;
-            pid_adjustment_dir = pid_dir.adjust(160, goal_x);
-        } else {
-            // do not adjust if no goal is found
-            pid_adjustment_dir = 0;
+    // 3. MAIN LOOP
+    while (t.time(vex::msec) < duration_msec) {
+        // Safety: Anti-tip check
+        if (imu.roll() >= 6) {
+            break; 
         }
 
-        // Handles getting to speed
-        if (std::abs(pos) + stop_dist(ips, ipss) >= std::abs(inches) && do_decel)
-            ips -= ipss / TICKS_PER_SEC;
-        else if (ips < target_ips)
-            ips += ipss / TICKS_PER_SEC;
-        else
-            ips = target_ips;
+        aivis.takeSnapshot(yellow);
+        bool has_target = aivis.largestObject.exists;
 
-        // Find expected position
-        pos += ips / TICKS_PER_SEC * dir_mod; // dir_mod adjusts for fwd/bwd
+        // Vision Filtering Logic
+        if (has_target) {
+            goal_x = aivis.largestObject.centerX;
+            last_known_x = goal_x; 
+            lost_frames = 0;
+            factor = 1;
+        } else {
+            // Buffer: Keep turning briefly if frame is dropped
+            if (lost_frames < 10) {
+                goal_x = last_known_x;
+                lost_frames++;
+                factor = 1; 
+            } else {
+                goal_x = 160; 
+                factor = 0;
+            }
+        }
 
-        // Update actual positions
-        pos_l = pos_drive_l() - pos_start_l;
-        pos_r = pos_drive_r() - pos_start_r;
+        // Speed Calculation (Slow down if not centered)
+        float error = std::abs(160 - goal_x);
+        if (factor == 0) {
+            error = 300.0; // Force high error -> low speed if target lost
+        }
+        
+        float speed_factor = 1.0 - (error / 300.0); 
+        
+        // Clamp speed factor
+        if (speed_factor < 0.6) speed_factor = 0.6;
+        if (speed_factor > 1.0) speed_factor = 1.0;
 
-        // Maintain speed
-        pid_adjustment_l = pid_drive_l.adjust(pos, pos_l);
-        pid_adjustment_r = pid_drive_r.adjust(pos, pos_r);
+        float active_speed_limit = 2 * final_max_rpm * speed_factor;
 
-        vel_rpm = ips / DRIVE_REV_TO_IN * 60;
+        if (factor == 0) {
+            active_speed_limit = 0; 
+        }
 
-        drive_l.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_l + pid_adjustment_dir, VEL_RPM);
-        drive_r.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_r - pid_adjustment_dir, VEL_RPM);
+        // Acceleration Ramp
+        if (current_vel > active_speed_limit) { 
+            current_vel -= accel_base; 
+        } else if (current_vel < active_speed_limit) { 
+            current_vel += (accel_base * 2.0); 
+        }
 
-        wait(MSEC_PER_TICK, vex::msec);
+        // PID Calculation
+        double dir_adj = 0;
+        if (error > 5) {
+            dir_adj = dir.adjust(160, goal_x);
+        }
+
+        // Motor Application
+        drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - factor*dir_adj, VEL_RPM);
+        drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + factor*dir_adj, VEL_RPM);
+
+        // Get current actual RPM
+        double actual_L = drive_l.velocity(VEL_RPM);
+        double actual_R = drive_r.velocity(VEL_RPM);
+        
+        // Print to the debug terminal (L: <val> R: <val>)
+        printf("L: %.2f  R: %.2f\n", actual_L, actual_R);
+        
+        wait(20, vex::msec);
     }
-    if (do_decel) {
-        drive_r.stop(vex::brakeType::brake);
-        drive_l.stop(vex::brakeType::brake);
-    } else {
-        drive_r.stop(vex::brakeType::coast);
-        drive_l.stop(vex::brakeType::coast);
-    }
+
+    // 4. STOP
+    drive_r.stop(vex::brakeType::brake);
+    drive_l.stop(vex::brakeType::brake);
 }
 
 // TODO: get rid of reversed and just use a negative outer_radius

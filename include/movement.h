@@ -5,12 +5,12 @@
  */
 void drive_straight(float inches, float target_ips, float ipss, bool do_decel = true);
 
-/** 
- * @param inches distance to travel - postive or negative
- * @param target_ips goal for velocity - positive
- * @param ipss acceleration - positive
+/**
+ * Drives straight towards a goal using vision tracking for a set duration.
+ * @param duration_msec The duration to drive in milliseconds.
+ * @param target_small_goal If true: targets Small Goal (Lift UP, Slower). If false: targets Big Goal (Lift DOWN, Faster).
  */
-void drive_straight_toward_goal(float inches, float target_ips, float ipss, bool do_decel);
+void drive_straight_toward_goal(int duration_msec, bool target_small_goal);
 
 /**
  * @param degrees changes target heading
