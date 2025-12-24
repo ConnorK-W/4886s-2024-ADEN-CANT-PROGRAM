@@ -1,7 +1,7 @@
 #include "../include/main.h"
 
 // Which auton will run
-int auton_mode = RightSimple;
+int auton_mode = AWP;
 // Heading robot should follow
 float target_heading = 0;
 

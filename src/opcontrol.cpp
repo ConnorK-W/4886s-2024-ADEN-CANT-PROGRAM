@@ -33,7 +33,7 @@ void opcontrol(void) {
     bool liftOT = 0;
     bool liftSA = 0;
     finger.set(1);
-    lift.set(1);
+    lift.set(0);
     tounge.set(0);
     bool sort = 1;
 

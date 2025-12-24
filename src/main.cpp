@@ -15,13 +15,10 @@ void test_vision();
 int main() {
     vex::competition Competition;
 
-    // test_aivision();
-    //
-    // Competition.autonomous(autonomous);
-    // Competition.drivercontrol(opcontrol);
-    // pre_auton();
+    Competition.autonomous(autonomous);
+    Competition.drivercontrol(opcontrol);
+    pre_auton();
 
-    imu.calibrate();
     while (imu.isCalibrating()) {
         wait(20, vex::msec);
     }
@@ -30,7 +27,8 @@ int main() {
     // master.ButtonRight.pressed(autonomous);
     // tune_biggoal_pid();
 
-    drive_straight_toward_goal(2000, 1);
+    // imu.calibrate();
+    // drive_straight_toward_goal(2000, 1);
 
     while (true) {
         wait(20, vex::msec);
