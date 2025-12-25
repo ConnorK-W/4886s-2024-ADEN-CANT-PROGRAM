@@ -18,36 +18,46 @@ void autonomous(void) {
     case AWP: {
         vex::thread t1(intake);
         lift.set(0);
-        drive_straight(41.5, 70, 100);
-        finger.set(1);
         tounge.set(1);
-        turn_pid(90, -1, 1);
-        drive_straight(10, 75, 50);
+        drive_straight((41.5-17+9.5), 70, 100);
+
+
+
+        // turn_pid(90, -1, 1);
+        // drive_straight(10, 75, 50);
+
+        // vex::thread turnTask([](){
+        //     finger.set(1);
+        //     tounge.set(1);
+        //     turn_pid(90, -1, 1);
+        // });
+        // wait(600, TIME_MSEC);
+        // turnTask.interrupt();
+
+        finger.set(1);
+        drive_turn(90, 14, 40, 75, false);
+
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(600, TIME_MSEC);
         // long goal
-        drive_straight_toward_goal(1200, 0);
+        drive_straight_toward_goal(1000, 0);
         tounge.set(0);
         scoring = 4;
         drive_full.spin(DIR_REV, 50, VEL_PCT);
-        wait(500, TIME_MSEC);
+        wait(400, TIME_MSEC);
+
         // middle goal
-        drive_straight(5, 70, 100);
+        drive_straight(7, 70, 50);
         scoring = 1;
-        drive_turn(135, 9, 40, 75, false);
-        drive_straight(14, 75, 100);
+        drive_turn(180, 11, 50, 75, false);
+        drive_turn(-90, -18, 27.5, 75, false);
+
+        drive_straight(40.5, 50, 75);
         tounge.set(1);
-        drive_straight(4, 75, 100);
         turn_pid(-45, -1, 1);
-        tounge.set(0);
-        lift.set(1);
-        drive_straight(39, 75, 50);
-        tounge.set(1);
-        drive_turn(45, 12, 20, 75, false);
-        turn_pid(-90, -1, 1);
         drive_straight_toward_goal(1000, 1);
         scoring = 3;
-        wait(500, TIME_MSEC);
+        wait(665, TIME_MSEC);
         scoring = 1;
         hood.set(0);
         lift.set(0);

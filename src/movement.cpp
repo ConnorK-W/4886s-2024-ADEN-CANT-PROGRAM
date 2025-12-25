@@ -80,7 +80,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
 
     // Select Drive Constants (Aggressive Config)
     float final_max_rpm = target_small_goal ? -200.0 : -600.0;
-    float accel_base    = target_small_goal ? 10.0 : 16.0;
+    float accel_base    = target_small_goal ? 10.0 : 14.0;
 
     // Common Drive PIDs
     PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
@@ -91,9 +91,9 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
     t.clear();
 
     float current_vel = 0; 
-    int last_known_x = 160;   
+    int last_known_x = 155;   
     int lost_frames = 100; // Start assumed lost to force safe initialization
-    int goal_x = 160;
+    int goal_x = 155;
     int factor = 0;
 
     // 3. MAIN LOOP
@@ -119,13 +119,13 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
                 lost_frames++;
                 factor = 1; 
             } else {
-                goal_x = 160; 
+                goal_x = 155; 
                 factor = 0;
             }
         }
 
         // Speed Calculation (Slow down if not centered)
-        float error = std::abs(160 - goal_x);
+        float error = std::abs(155 - goal_x);
         if (factor == 0) {
             error = 300.0; // Force high error -> low speed if target lost
         }
