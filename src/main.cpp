@@ -14,21 +14,34 @@ void test_vision();
 
 int main() {
     vex::competition Competition;
-
+     
+    // AUTON
     Competition.autonomous(autonomous);
     Competition.drivercontrol(opcontrol);
+    
     pre_auton();
-
-    while (imu.isCalibrating()) {
-        wait(20, vex::msec);
-    }
 
     // master.ButtonLeft.pressed(tune_goal_pid);
     // master.ButtonRight.pressed(autonomous);
-    // tune_biggoal_pid();
 
+    // CALIBRATE FOR TESTING FXNs
     // imu.calibrate();
-    // drive_straight_toward_goal(2000, 1);
+    // while (imu.isCalibrating()) {
+    //     wait(20, vex::msec);
+    // }    
+    // intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+    // lift.set(0);
+    // tounge.set(1);
+    // drive_straight(38, 75, 130);
+    // drive_turn(-45, -25, 50, 75);
+    // drive_full.spin(DIR_FWD, 4, VLT_VLT);
+    // wait(600, TIME_MSEC);
+    // // long goal
+    // drive_straight_toward_goal(1000, 0);
+    // tounge.set(0);
+    // hood.set(1);
+    // arm.spin(DIR_FWD, 100, VEL_PCT);
+    // drive_full.spin(DIR_REV, 50, VEL_PCT);
 
     while (true) {
         wait(20, vex::msec);

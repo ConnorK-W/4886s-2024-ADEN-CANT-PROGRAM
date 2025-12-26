@@ -1,5 +1,6 @@
 #include "../include/main.h"
 #include "stddefs.h"
+#include <cmath>
 
 // Oooh, this is a change!
 
@@ -66,12 +67,19 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel) {
 }
 
 void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
+    
+    int CAMERA_CENTER_OFFSET;
+    
     // 1. SETUP CONFIGURATION BASED ON GOAL TYPE
     if (target_small_goal) {
         lift.set(1); // Small Goal: Lift Up
+        CAMERA_CENTER_OFFSET = -20;
     } else {
         lift.set(0); // Big Goal: Lift Down
+        CAMERA_CENTER_OFFSET = -5;
     }
+
+    int TARGET_CENTER = 160 + CAMERA_CENTER_OFFSET;
 
     // Select PID Constants
     PID dir = target_small_goal ? 
@@ -91,9 +99,9 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
     t.clear();
 
     float current_vel = 0; 
-    int last_known_x = 155;   
+    int last_known_x = 160;   
     int lost_frames = 100; // Start assumed lost to force safe initialization
-    int goal_x = 155;
+    int goal_x = 160;
     int factor = 0;
 
     // 3. MAIN LOOP
@@ -119,13 +127,13 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
                 lost_frames++;
                 factor = 1; 
             } else {
-                goal_x = 155; 
+                goal_x = 160; 
                 factor = 0;
             }
         }
 
         // Speed Calculation (Slow down if not centered)
-        float error = std::abs(155 - goal_x);
+        float error = std::abs(TARGET_CENTER - goal_x);
         if (factor == 0) {
             error = 300.0; // Force high error -> low speed if target lost
         }
@@ -152,7 +160,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
         // PID Calculation
         double dir_adj = 0;
         if (error > 5) {
-            dir_adj = dir.adjust(160, goal_x);
+            dir_adj = dir.adjust(TARGET_CENTER, goal_x);
         }
 
         // Motor Application
@@ -319,3 +327,143 @@ void turn_pid(float degrees, float ratio, int direction, int waitTime) {
     drive_l.stop();
     wait(4, vex::msec); // without this, drive_straight() immediately after veers right
 }
+
+// Double Arc Implementation
+void drive_double_turn(float degrees1, float outer_radius1, float target_ips1, float ipss1,
+                       float degrees2, float outer_radius2, float target_ips2, float ipss2,
+                       bool reversed) {
+    const int TICKS_PER_SEC = 50;
+    const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
+
+    // --- TURN 1 ---
+    target_heading += degrees1; 
+
+    float ips = 0;
+    float outer_vel_rpm, inner_vel_rpm;
+    float outer_pos = 0, inner_pos;
+    float pos_start_l = pos_drive_l(), pos_start_r = pos_drive_r();
+    float pos_l, pos_r;
+    float degrees_remaining;
+
+    int rad_mod = (outer_radius1 > 0) ? -1 : 1;
+    float inner_radius = outer_radius1 + rad_mod * WHEEL_TO_WHEEL_DIST;
+    float radius_ratio = inner_radius / outer_radius1;
+    int dir_mod = (degrees1 > 0) ? 1 : -1;
+    
+    int stall_timer = 0;
+
+    // NOTE: Deceleration Logic Restored for distinct turns
+    while (ips >= 0) {
+        pos_l = pos_drive_l() - pos_start_l;
+        pos_r = pos_drive_r() - pos_start_r;
+        degrees_remaining = target_heading - imu_rotation();
+
+        // Handle deceleration for Turn 1
+        if (std::abs(degrees_remaining / RAD_TO_DEG * outer_radius1) - stop_dist(ips, ipss1) <= 0) {
+            ips -= ipss1 / TICKS_PER_SEC;
+        } else if (ips < target_ips1)
+            ips += ipss1 / TICKS_PER_SEC;
+        else
+            ips = target_ips1;
+
+        outer_vel_rpm = ips / DRIVE_REV_TO_IN * 60 * dir_mod * (-rad_mod);
+        inner_vel_rpm = outer_vel_rpm * radius_ratio;
+
+        outer_pos += ips / TICKS_PER_SEC;
+        inner_pos = outer_pos * radius_ratio;
+
+        if (outer_radius1 < 0) { // left is inner side
+            drive_l.spin(DIR_FWD, inner_vel_rpm, VEL_RPM);
+            drive_r.spin(DIR_FWD, outer_vel_rpm, VEL_RPM);
+        } else { // right is inner side
+            drive_l.spin(DIR_FWD, outer_vel_rpm, VEL_RPM);
+            drive_r.spin(DIR_FWD, inner_vel_rpm, VEL_RPM);
+        }
+
+        if (degrees_remaining * dir_mod < 0)
+            break;
+            
+        // Stall Detection Turn 1
+        if (std::abs(raw_vel_dl()) < 1.0 && std::abs(raw_vel_dr()) < 1.0) {
+            stall_timer += MSEC_PER_TICK;
+            if (stall_timer > 250) break;
+        } else {
+            stall_timer = 0;
+        }
+
+        wait(MSEC_PER_TICK, vex::msec);
+    }
+    
+    // --- TURN 2 ---
+    // Update heading for second part
+    target_heading += degrees2;
+    
+    // Recalculate geometry for Turn 2
+    rad_mod = (outer_radius2 > 0) ? -1 : 1;
+    inner_radius = outer_radius2 + rad_mod * WHEEL_TO_WHEEL_DIST;
+    radius_ratio = inner_radius / outer_radius2;
+    dir_mod = (degrees2 > 0) ? 1 : -1;
+    
+    // Reset start positions for Turn 2 tracking
+    pos_start_l = pos_drive_l(); 
+    pos_start_r = pos_drive_r();
+    outer_pos = 0;
+    inner_pos = 0;
+    
+    // Start Turn 2 from stop (or near stop) to ensure distinct motion
+    ips = 0;  
+    
+    stall_timer = 0; // Reset timer for Turn 2
+
+    while (ips >= 0) {
+        pos_l = pos_drive_l() - pos_start_l;
+        pos_r = pos_drive_r() - pos_start_r;
+        degrees_remaining = target_heading - imu_rotation();
+
+        // Handle Deceleration for end of Turn 2
+        // Calculate arc length remaining: degrees_remaining / 57.3 * radius
+        if (std::abs(degrees_remaining / RAD_TO_DEG * outer_radius2) - stop_dist(ips, ipss2) <= 0) {
+            ips -= ipss2 / TICKS_PER_SEC;
+        } else if (ips < target_ips2) {
+             // If second turn is faster, accelerate to it
+             if(ips < target_ips2) ips += ipss2 / TICKS_PER_SEC;
+        } else {
+             // If second turn is slower limit to it, OR if we are cruising
+             if(ips > target_ips2) ips = target_ips2; // simple hard clamp for now
+        }
+
+        // Failsafe for end of motion
+        if (ips < 5 && std::abs(degrees_remaining / RAD_TO_DEG * outer_radius2) < 2) break;
+
+        outer_vel_rpm = ips / DRIVE_REV_TO_IN * 60 * dir_mod * (-rad_mod);
+        inner_vel_rpm = outer_vel_rpm * radius_ratio;
+
+        outer_pos += ips / TICKS_PER_SEC;
+        inner_pos = outer_pos * radius_ratio;
+
+        if (outer_radius2 < 0) { // left is inner side
+            drive_l.spin(DIR_FWD, inner_vel_rpm, VEL_RPM);
+            drive_r.spin(DIR_FWD, outer_vel_rpm, VEL_RPM);
+        } else { // right is inner side
+            drive_l.spin(DIR_FWD, outer_vel_rpm, VEL_RPM);
+            drive_r.spin(DIR_FWD, inner_vel_rpm, VEL_RPM);
+        }
+
+        if (degrees_remaining * dir_mod < 0)
+            break;
+            
+        // Stall Detection Turn 2
+        if (std::abs(raw_vel_dl()) < 1.0 && std::abs(raw_vel_dr()) < 1.0) {
+            stall_timer += MSEC_PER_TICK;
+            if (stall_timer > 250) break;
+        } else {
+            stall_timer = 0;
+        }
+
+        wait(MSEC_PER_TICK, vex::msec);
+    }
+
+    drive_l.stop(vex::brakeType::brake);
+    drive_r.stop(vex::brakeType::brake);
+}
+

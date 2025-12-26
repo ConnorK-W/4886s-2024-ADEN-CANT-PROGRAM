@@ -44,29 +44,29 @@ void autonomous(void) {
         tounge.set(0);
         scoring = 4;
         drive_full.spin(DIR_REV, 50, VEL_PCT);
-        wait(400, TIME_MSEC);
+        wait(600, TIME_MSEC);
 
         // middle goal
-        drive_straight(7, 70, 50);
         scoring = 1;
-        drive_turn(180, 11, 50, 75, false);
-        drive_turn(-90, -18, 27.5, 75, false);
-
-        drive_straight(40.5, 50, 75);
+        drive_double_turn(93, 5, 22.5, 75, -16.5, -105, 30, 75, false);
         tounge.set(1);
-        turn_pid(-45, -1, 1);
+        // turn_pid(-25, -1, 1);
+        drive_turn(-30, -19 , 30, 50);
         drive_straight_toward_goal(1000, 1);
         scoring = 3;
-        wait(665, TIME_MSEC);
+        wait(730, TIME_MSEC);
         scoring = 1;
         hood.set(0);
         lift.set(0);
         t1.interrupt();
         arm.spin(DIR_REV, 100, VEL_PCT);
-        drive_straight(50, 75, 130);
-        lift.set(0);
-        turn_pid(-45, -1, 1);
-        drive_straight_toward_goal(700, 0);
+        drive_straight(39, 75, 130);
+        drive_turn(-45, -25, 50, 75);
+        drive_full.spin(DIR_FWD, 4, VLT_VLT);
+        wait(600, TIME_MSEC);
+        // long goal
+        drive_straight_toward_goal(1000, 0);
+        tounge.set(0);
         hood.set(1);
         arm.spin(DIR_FWD, 100, VEL_PCT);
         drive_full.spin(DIR_REV, 50, VEL_PCT);

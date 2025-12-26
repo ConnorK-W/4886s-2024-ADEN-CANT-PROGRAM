@@ -49,3 +49,22 @@ void straight_pid(float dist);
  * @param y vertical displacement
  */
 void swing_turn(float x, float y);
+
+/**
+ * @brief Drives two consecutive arcs without stopping in between
+ * 
+ * @param degrees1 changes target heading for first arc
+ * @param outer_radius1 outer radius of the first arc
+ * @param target_ips1 goal for velocity for first arc
+ * @param ipss1 acceleration for first arc
+ * 
+ * @param degrees2 changes target heading for second arc
+ * @param outer_radius2 outer radius of the second arc
+ * @param target_ips2 goal for velocity for second arc
+ * @param ipss2 acceleration for second arc
+ * 
+ * @param reversed are we moving backwards?
+ */
+void drive_double_turn(float degrees1, float outer_radius1, float target_ips1, float ipss1,
+                       float degrees2, float outer_radius2, float target_ips2, float ipss2,
+                       bool reversed = false);
