@@ -89,6 +89,7 @@ void opcontrol(void) {
     }
     if (BTN_L1.pressing()){
         arm.spinToPosition(140 * 3, ROT_DEG, 100, VEL_PCT, false);
+        // arm.spinToPosition(140 * 3, ROT_DEG, 35, VEL_PCT, false);
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
         hood.set(1);
     }
@@ -153,3 +154,4 @@ void imuTurn(int turnGoal){
     drive_full.stop();
 }
 */
+
