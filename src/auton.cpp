@@ -171,15 +171,15 @@ drive_straight(-29, 75, 50);
 
     case SKILLS: {
         vex::thread t1(intake);
-        lift.set(1);
-        drive_straight(41, 70, 100);
-        finger.set(1);
-        tounge.set(1);
-        turn_pid(-90, -1, 1);
-        drive_straight(10, 75, 50);
+        finger.set(1); // get finger out of way 
+        tounge.set(1); // open tounge
+        drive_straight((41.5-17+9.5-0.5), 70, 100); // straight
+        drive_turn(-90, -13, 40, 75, false); // arc toward goal
+
+
         scoring = 1;
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(700, TIME_MSEC);
+        wait(1500, TIME_MSEC);
         drive_full.spin(DIR_REV, 5, VLT_VLT);
         wait(100, TIME_MSEC);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
@@ -188,34 +188,29 @@ drive_straight(-29, 75, 50);
         wait(100, TIME_MSEC);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(500, TIME_MSEC);
-        drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(100, TIME_MSEC);
-        drive_full.spin(DIR_FWD, 6, VLT_VLT);
-        wait(800, TIME_MSEC);
-        drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(500, TIME_MSEC);
-        drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(100, TIME_MSEC);
+
         // long goal
-        drive_straight(-25, 30, 100);
-        drive_turn(-180, -12, 50, 75, false);
+        drive_straight_toward_goal(1300, false); // try lowering
+        drive_straight(5,30,75);
+        tounge.set(0);
+        drive_turn(180, 13, 50, 75, false);
         drive_straight(77, 60, 100);
         turn_pid(90, -1, 1);
         drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(1300, TIME_MSEC);
+        wait(1000, TIME_MSEC);
 
         // first goal
         drive_straight(9, 30, 100);
-        turn_pid(-90, -1, 1);
-        drive_straight(-13, 30, 100);
+        turn_pid(-90, -1, 1); 
+        tounge.set(1);
+        drive_straight_toward_goal(700, false);
         scoring = 5;
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
-        tounge.set(1);
         drive_straight(20, 30, 100);
         scoring = 1;
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(700, TIME_MSEC);
+        wait(1500, TIME_MSEC);
         drive_full.spin(DIR_REV, 5, VLT_VLT);
         wait(100, TIME_MSEC);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
@@ -224,15 +219,8 @@ drive_straight(-29, 75, 50);
         wait(100, TIME_MSEC);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(500, TIME_MSEC);
-        drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(100, TIME_MSEC);
-        drive_full.spin(DIR_FWD, 6, VLT_VLT);
-        wait(800, TIME_MSEC);
-        drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(500, TIME_MSEC);
-        drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(100, TIME_MSEC);
-        drive_straight(-30, 30, 100);
+        // score second goal
+        drive_straight_toward_goal(750, false); // try lowering 
         scoring = 6;
         drive_full.spinFor(DIR_REV, 2500, TIME_MSEC, 50, VEL_PCT);
         tounge.set(0);
@@ -240,8 +228,9 @@ drive_straight(-29, 75, 50);
         scoring = 0;
         drive_straight(-5, 10, 50);
 
-        // second half
-        drive_turn(90, 15, 50, 75, false);
+
+        // second half legacy going over
+        drive_turn(89, 15, 50, 75, false);
         drive_straight(88, 60, 100);
         drive_full.spin(DIR_FWD, 6, VLT_VLT);
         wait(1000, TIME_MSEC);
@@ -252,7 +241,7 @@ drive_straight(-29, 75, 50);
         drive_straight(8, 50, 100);
         scoring = 1;
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(700, TIME_MSEC);
+        wait(1500, TIME_MSEC);
         drive_full.spin(DIR_REV, 5, VLT_VLT);
         wait(100, TIME_MSEC);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
@@ -261,33 +250,29 @@ drive_straight(-29, 75, 50);
         wait(100, TIME_MSEC);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(500, TIME_MSEC);
-        drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(100, TIME_MSEC);
-        drive_full.spin(DIR_FWD, 6, VLT_VLT);
-        wait(800, TIME_MSEC);
-        drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(500, TIME_MSEC);
-        drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(100, TIME_MSEC);
-        drive_straight(-25, 30, 100);
-        drive_turn(-182, -12, 50, 75, false);
+
+        // long goal
+        drive_straight_toward_goal(1000, false); // try lowering
+        drive_straight(5,30,75);
+        tounge.set(0);
+        drive_turn(180, 13, 50, 75, false);
         drive_straight(77, 60, 100);
         turn_pid(90, -1, 1);
         drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(1400, TIME_MSEC);
+        wait(1000, TIME_MSEC);
 
-        // last goal
+        // first goal
         drive_straight(9, 30, 100);
-        turn_pid(-90, -1, 1);
-        drive_straight(-11.5, 30, 100);
+        turn_pid(-90, -1, 1); 
+        tounge.set(1);
+        drive_straight_toward_goal(700, false);
         scoring = 5;
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
-        // last match load
-        tounge.set(1);
+        // second match load
         drive_straight(20, 30, 100);
         scoring = 1;
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(700, TIME_MSEC);
+        wait(1500, TIME_MSEC);
         drive_full.spin(DIR_REV, 5, VLT_VLT);
         wait(100, TIME_MSEC);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
@@ -296,26 +281,18 @@ drive_straight(-29, 75, 50);
         wait(100, TIME_MSEC);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(500, TIME_MSEC);
-        drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(100, TIME_MSEC);
-        drive_full.spin(DIR_FWD, 6, VLT_VLT);
-        wait(800, TIME_MSEC);
-        drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(500, TIME_MSEC);
-        drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(100, TIME_MSEC);
-        drive_straight(-35, 30, 100);
+        // score second goal
+        drive_straight_toward_goal(750, false); // try lowering 
         scoring = 6;
         drive_full.spinFor(DIR_REV, 2500, TIME_MSEC, 50, VEL_PCT);
         tounge.set(0);
         drive_straight(5, 30, 100);
-        scoring = 8;
+        scoring = 1;
         drive_straight(-5, 10, 50);
-        drive_straight(1, 30, 100);
         drive_turn(80, 38, 50, 75, false);
-        drive_full.spinFor(DIR_FWD, 1050, TIME_MSEC, 50, VEL_PCT);
+        drive_full.spinFor(DIR_FWD, 1300, TIME_MSEC, 50, VEL_PCT);
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
-
+        drive_full.spinFor(DIR_REV, 200, TIME_MSEC, 50, VEL_PCT);
 
         break;
     }
