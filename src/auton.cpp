@@ -173,7 +173,7 @@ drive_straight(-29, 75, 50);
         vex::thread t1(intake);
         finger.set(1); // get finger out of way 
         tounge.set(1); // open tounge
-        drive_straight((41.5-17+9.5-0.5), 70, 100); // straight
+        drive_straight((41.5-17+9.5-0.25), 70, 100); // straight
         drive_turn(-90, -13, 40, 75, false); // arc toward goal
 
 
@@ -191,6 +191,7 @@ drive_straight(-29, 75, 50);
 
         // long goal
         drive_straight_toward_goal(1300, false); // try lowering
+        // reset_imu_rotation();  // reset rotation
         drive_straight(5,30,75);
         tounge.set(0);
         drive_turn(180, 12, 50, 75, false);
@@ -205,6 +206,7 @@ drive_straight(-29, 75, 50);
         tounge.set(1);
         drive_straight_toward_goal(700, false);
         scoring = 5;
+        // reset_imu_rotation();  // reset rotation
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
         drive_straight(20, 30, 100);
@@ -222,6 +224,7 @@ drive_straight(-29, 75, 50);
         // score second goal
         drive_straight_toward_goal(750, false); // try lowering 
         scoring = 6;
+        // reset_imu_rotation();  // reset rotation
         drive_full.spinFor(DIR_REV, 2500, TIME_MSEC, 50, VEL_PCT);
         tounge.set(0);
         drive_straight(5, 30, 100);
@@ -243,21 +246,21 @@ drive_straight(-29, 75, 50);
         // middle goal 
         scoring = 1;
         drive_turn(90, 5, 22.5, 75);
-        drive_straight(53, 12.5, 50);
-        tounge.set(1);
-        // turn_pid(-25, -1, 1);
-        drive_turn(-45, -19 , 30, 50);
-        hood.set(1);
+        drive_straight(55, 12.5, 50);
+        lift.set(1);
+        drive_turn(-45, -22 , 30, 50);
         drive_straight_toward_goal(1000, 1);
         scoring = 3;
+        reset_imu_rotation();  // reset rotation
         wait(2100, TIME_MSEC);
         lift.set(0);
         arm.spin(DIR_REV, 100, VEL_PCT);
         drive_straight(36, 75, 130);
+        tounge.set(1);
         scoring = 1;
         drive_turn(-45, -25, 50, 75);
 
-        // drive_straight(25, 50, 100);
+        // load from 3rd match tube
         scoring = 1;
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(1500, TIME_MSEC);
@@ -270,8 +273,9 @@ drive_straight(-29, 75, 50);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(500, TIME_MSEC);
 
-        // long goal
+        // third goal
         drive_straight_toward_goal(1000, false); // try lowering
+        reset_imu_rotation();  // reset rotation
         drive_straight(5,30,75);
         tounge.set(0);
         drive_turn(180, 12, 50, 75, false);
@@ -286,6 +290,7 @@ drive_straight(-29, 75, 50);
         tounge.set(1);
         drive_straight_toward_goal(700, false);
         scoring = 5;
+        reset_imu_rotation();  // reset rotation
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
         drive_straight(20, 30, 100);
@@ -303,14 +308,14 @@ drive_straight(-29, 75, 50);
         // score second goal
         drive_straight_toward_goal(750, false); // try lowering 
         scoring = 6;
+        reset_imu_rotation();  // reset rotation
         drive_full.spinFor(DIR_REV, 2500, TIME_MSEC, 50, VEL_PCT);
         tounge.set(0);
         drive_straight(5, 30, 100);
         scoring = 8;
         drive_straight(-5, 10, 50);
         drive_turn(80, 38, 50, 75, false);
-        drive_full.spinFor(DIR_FWD, 1300, TIME_MSEC, 50, VEL_PCT);
-        drive_full.spinFor(DIR_REV, 200, TIME_MSEC, 50, VEL_PCT);
+        drive_full.spinFor(DIR_FWD, 1200, TIME_MSEC, 50, VEL_PCT);
 
         break;
     }

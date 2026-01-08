@@ -11,13 +11,13 @@ void opcontrol(void) {
     colorSort.setLight(vex::ledState::on);
     arm.stop(vex::brakeType::coast);
 
-    intakeLow.spin(DIR_REV, 100, VEL_PCT);
+    // intakeLow.spin(DIR_REV, 100, VEL_PCT);
     arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
     arm.resetPosition();
     intakeLow.stop();
 
     bool shifted = false;
-    bool intaking = 0;
+    bool intaking = 1;
     void red_sort(void);
     void blue_sort(void);
 
@@ -33,12 +33,12 @@ void opcontrol(void) {
     bool liftOT = 0;
     bool liftSA = 0;
     finger.set(1);
-    lift.set(0);
+    lift.set(1);
     tounge.set(0);
     bool sort = 1;
 
 
-    intakeLow.stop();
+    intakeLow.spin(DIR_FWD, 5, VEL_PCT);
 
 
     while (1) {
@@ -88,8 +88,8 @@ void opcontrol(void) {
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
     }
     if (BTN_L1.pressing()){
-        arm.spinToPosition(140 * 3, ROT_DEG, 100, VEL_PCT, false);
-        // arm.spinToPosition(140 * 3, ROT_DEG, 35, VEL_PCT, false);
+        // arm.spinToPosition(140 * 3, ROT_DEG, 100, VEL_PCT, false);
+        arm.spinToPosition(140 * 3, ROT_DEG, 35, VEL_PCT, false);
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
         hood.set(1);
     }
@@ -154,4 +154,6 @@ void imuTurn(int turnGoal){
     drive_full.stop();
 }
 */
+
+
 
