@@ -85,7 +85,7 @@ void opcontrol(void) {
         intaking = 1;
     }
     if (BTN_R2.pressing()){
-        intakeLow.spin(DIR_REV, 100, VEL_PCT);
+        intakeLow.spin(DIR_REV, 50, VEL_PCT);
     }
     if (BTN_L1.pressing()){
         // arm.spinToPosition(140 * 3, ROT_DEG, 100, VEL_PCT, false);
