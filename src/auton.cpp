@@ -40,7 +40,7 @@ void autonomous(void) {
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(600, TIME_MSEC);
         // long goal
-        drive_straight_toward_goal(1000, 0);
+        drive_straight_toward_goal(1100, 0);
         tounge.set(0);
         scoring = 4;
         drive_full.spin(DIR_REV, 50, VEL_PCT);
@@ -60,7 +60,7 @@ void autonomous(void) {
         lift.set(0);
         t1.interrupt();
         arm.spin(DIR_REV, 100, VEL_PCT);
-        drive_straight(38, 75, 130);
+        drive_straight(34, 75, 130);
         drive_turn(-45, -25, 50, 75);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(600, TIME_MSEC);
