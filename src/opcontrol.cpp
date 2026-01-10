@@ -33,11 +33,11 @@ void opcontrol(void) {
     bool liftOT = 0;
     bool liftSA = 0;
     finger.set(1);
-    lift.set(1);
+    lift.set(0);
     tounge.set(0);
     bool sort = 1;
 
-
+    arm.resetPosition();
     intakeLow.spin(DIR_FWD, 5, VEL_PCT);
 
 
@@ -82,7 +82,6 @@ void opcontrol(void) {
 
     if (BTN_R1.pressing()){
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        intaking = 1;
     }
     if (BTN_R2.pressing()){
         intakeLow.spin(DIR_REV, 50, VEL_PCT);
@@ -110,7 +109,7 @@ void opcontrol(void) {
         arm.spinToPosition(8 * 3, ROT_DEG, 100, VEL_PCT, false);
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
     }
-    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing() && intaking == 1){
+    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing()){
         intakeLow.spin(DIR_FWD, 5, VEL_PCT);
     }
 
