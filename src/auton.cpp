@@ -40,15 +40,15 @@ void autonomous(void) {
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(600, TIME_MSEC);
         // long goal
-        drive_straight_toward_goal(1100, 0);
         tounge.set(0);
+        drive_straight_toward_goal(1100, 0);
         scoring = 4;
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         wait(600, TIME_MSEC);
 
         // middle goal
         scoring = 1;
-        drive_double_turn(93, 5, 25, 100, -16.5, -105, 30, 75, false);
+        drive_double_turn(93, 5, 25, 70, -16.5, -105, 30, 75, false);
         tounge.set(1);
         // turn_pid(-25, -1, 1);
         drive_turn(-30, -19 , 30, 50);
@@ -73,6 +73,65 @@ void autonomous(void) {
 
         break;
     }
+
+
+    case AWPPush: {
+        vex::thread t1(intake);
+        lift.set(0);
+        drive_straight(5, 30, 100);
+        tounge.set(1);
+        drive_straight(-63, 70, 100);
+
+
+
+        // turn_pid(90, -1, 1);
+        // drive_straight(10, 75, 50);
+
+        // vex::thread turnTask([](){
+        //     finger.set(1);
+        //     tounge.set(1);
+        //     turn_pid(90, -1, 1);
+        // });
+        // wait(600, TIME_MSEC);
+        // turnTask.interrupt();
+
+        finger.set(1);
+        drive_turn(-90, -14, 30, 75, false);
+
+        drive_full.spin(DIR_FWD, 4, VLT_VLT);
+        wait(700, TIME_MSEC);
+        // long goal
+        tounge.set(0);
+        drive_straight_toward_goal(1100, 0);
+        scoring = 4;
+        drive_full.spin(DIR_REV, 50, VEL_PCT);
+        wait(750, TIME_MSEC);
+
+        // middle goal
+        scoring = 1;
+        drive_double_turn(93, 5, 25, 100, -16.5, -105, 30, 75, false);
+        tounge.set(1);
+        // turn_pid(-25, -1, 1);
+        drive_turn(-30, -19 , 30, 50);
+        drive_straight_toward_goal(1000, 1);
+        scoring = 3;
+        wait(730, TIME_MSEC);
+        scoring = 1;
+        hood.set(0);
+        lift.set(0);
+        t1.interrupt();
+        arm.spin(DIR_REV, 100, VEL_PCT);
+        drive_straight(47, 75, 130);
+        tounge.set(0);
+        turn_pid(-45, -1, 1);
+        drive_straight_toward_goal(1000, 0);
+        hood.set(1);
+        arm.spin(DIR_FWD, 100, VEL_PCT);
+        drive_full.spin(DIR_REV, 50, VEL_PCT);
+
+        break;
+    }
+
 
 
     case RightSimple: {
@@ -111,7 +170,7 @@ void autonomous(void) {
         tounge.set(0);
         drive_straight(11, 50, 100);
         scoring = 2;
-        wait(600, TIME_MSEC);
+        wait(700, TIME_MSEC);
         scoring = 1;
         drive_straight(-49.5, 75, 100);
         tounge.set(1);
@@ -123,10 +182,10 @@ void autonomous(void) {
         wait(600, TIME_MSEC);
         // long goal
 
+        tounge.set(0);
         drive_straight_toward_goal(1100, 0);
         scoring = 4;
         drive_full.spinFor(DIR_REV, 700, TIME_MSEC, 50, VEL_PCT);
-        tounge.set(0);
         scoring = 1;
         drive_turn(-90, -13, 50, 75, false);
         t1.interrupt();
@@ -199,7 +258,7 @@ drive_straight(-29, 75, 50);
         drive_straight_toward_goal(1300, false); // try lowering
         drive_straight(5,30,75);
         tounge.set(0);
-        drive_turn(180, 13, 50, 75, false);
+        drive_turn(180, 12, 50, 75, false);
         drive_straight(77, 60, 100);
         turn_pid(90, -1, 1);
         drive_full.spin(DIR_REV, 5, VLT_VLT);
@@ -261,7 +320,7 @@ drive_straight(-29, 75, 50);
         drive_straight_toward_goal(1000, false); // try lowering
         drive_straight(5,30,75);
         tounge.set(0);
-        drive_turn(180, 13, 50, 75, false);
+        drive_turn(180, 12, 50, 75, false);
         drive_straight(77, 60, 100);
         turn_pid(90, -1, 1);
         drive_full.spin(DIR_REV, 5, VLT_VLT);
@@ -293,7 +352,7 @@ drive_straight(-29, 75, 50);
         drive_full.spinFor(DIR_REV, 2500, TIME_MSEC, 50, VEL_PCT);
         tounge.set(0);
         drive_straight(5, 30, 100);
-        scoring = 1;
+        scoring = 8;
         drive_straight(-5, 10, 50);
         drive_turn(80, 38, 50, 75, false);
         drive_full.spinFor(DIR_FWD, 1300, TIME_MSEC, 50, VEL_PCT);

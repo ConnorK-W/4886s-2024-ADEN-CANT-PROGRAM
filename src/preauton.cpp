@@ -5,7 +5,7 @@ void pre_auton(void) {
     imu.calibrate();
     tounge.set(0);
     int *sides;
-    const char *autons[6] = {"AWP", "Right Simple", "Right Complex", "Left Simple", "Left Complex", "Skills"};
+    const char *autons[7] = {"AWP", "AWP Push", "Right Simple", "Right Complex", "Left Simple", "Left Complex", "Skills"};
 
     // Create GUI - none of this is important, just for looks
     B_SCRN.clearScreen();

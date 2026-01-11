@@ -16,7 +16,7 @@ vex::motor drive_r2 = vex::motor(PORT12, DRIVE_INSERT, false);
 vex::motor drive_r3 = vex::motor(PORT13, DRIVE_INSERT, true);
 // vex::motor drive_r4 = vex::motor(PORT4, DRIVE_INSERT, true);
 
-vex::motor drive_l1 = vex::motor(PORT14, DRIVE_INSERT, false);
+vex::motor drive_l1 = vex::motor(PORT17, DRIVE_INSERT, false);
 vex::motor drive_l2 = vex::motor(PORT15, DRIVE_INSERT, true);
 vex::motor drive_l3 = vex::motor(PORT16, DRIVE_INSERT, true);
 // vex::motor drive_l4 = vex::motor(PORT8, DRIVE_INSERT, false);

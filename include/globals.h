@@ -5,11 +5,12 @@
 #define WHEEL_TO_WHEEL_DIST (10.5)
 
 #define AWP 0
-#define RightSimple 1
-#define RightComplex 2
-#define LeftSimple 3
-#define LeftComplex 4
-#define SKILLS 5
+#define AWPPush 1
+#define RightSimple 2
+#define RightComplex 3
+#define LeftSimple 4
+#define LeftComplex 5
+#define SKILLS 6
 
 
 // Operator control modes
