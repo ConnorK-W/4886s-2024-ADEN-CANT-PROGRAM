@@ -30,7 +30,6 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel) {
     float vel_rpm;
 
     while (ips >= 0 && std::abs(pos_drive_l() - pos_start_l) < std::abs(inches)) {
-        // Handles getting to speed
         if (std::abs(pos) + stop_dist(ips, ipss) >= std::abs(inches) && do_decel)
             ips -= ipss / TICKS_PER_SEC;
         else if (ips < target_ips)
@@ -38,14 +37,11 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel) {
         else
             ips = target_ips;
 
-        // Find expected position
-        pos += ips / TICKS_PER_SEC * dir_mod; // dir_mod adjusts for fwd/bwd
+        pos += ips / TICKS_PER_SEC * dir_mod;
 
-        // Update actual positions
         pos_l = pos_drive_l() - pos_start_l;
         pos_r = pos_drive_r() - pos_start_r;
 
-        // Maintain speed
         pid_adjustment_l = pid_drive_l.adjust(pos, pos_l);
         pid_adjustment_r = pid_drive_r.adjust(pos, pos_r);
         pid_adjustment_dir = pid_dir.adjust(target_heading, imu_rotation());
@@ -70,43 +66,40 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
     
     int CAMERA_CENTER_OFFSET;
     
-    // 1. SETUP CONFIGURATION BASED ON GOAL TYPE
     if (target_small_goal) {
-        lift.set(1); // Small Goal: Lift Up
+        lift.set(1);
         CAMERA_CENTER_OFFSET = -20;
     } else {
-        lift.set(0); // Big Goal: Lift Down
+        lift.set(0); 
         CAMERA_CENTER_OFFSET = -5;
     }
 
     int TARGET_CENTER = 160 + CAMERA_CENTER_OFFSET;
 
-    // Select PID Constants
     PID dir = target_small_goal ? 
         PID(DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KP, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KI, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KD) : 
         PID(DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KI, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KD);
 
-    // Select Drive Constants (Aggressive Config)
     float final_max_rpm = target_small_goal ? -200.0 : -600.0;
     float accel_base    = target_small_goal ? 10.0 : 14.0;
 
-    // Common Drive PIDs
     PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
 
-    // 2. INITIALIZE VARIABLES
+    PID pid_drive_l = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID pid_drive_r = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID pid_dir = PID(DRIVE_STRAIGHT_DIR_KP, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
+
     vex::timer t;
     t.clear();
 
     float current_vel = 0; 
     int last_known_x = 160;   
-    int lost_frames = 100; // Start assumed lost to force safe initialization
+    int lost_frames = 100;
     int goal_x = 160;
     int factor = 0;
 
-    // 3. MAIN LOOP
     while (t.time(vex::msec) < duration_msec) {
-        // Safety: Anti-tip check
         if (imu.roll() >= 6) {
             break; 
         }
@@ -114,70 +107,39 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
         aivis.takeSnapshot(yellow);
         bool has_target = aivis.largestObject.exists;
 
-        // Vision Filtering Logic
+        double dir_adj = 0;
+
         if (has_target) {
             goal_x = aivis.largestObject.centerX;
             last_known_x = goal_x; 
             lost_frames = 0;
             factor = 1;
+
+            current_vel = target_small_goal ? 200.0 : 400.0;
+
+            if (std::abs(TARGET_CENTER - goal_x) > 5) {
+                dir_adj = dir.adjust(TARGET_CENTER, goal_x);
+            }
+
         } else {
-            // Buffer: Keep turning briefly if frame is dropped
             if (lost_frames < 10) {
                 goal_x = last_known_x;
                 lost_frames++;
-                factor = 1; 
             } else {
                 goal_x = 160; 
                 factor = 0;
+                current_vel = -200.0;
+
+                dir_adj = dir.adjust(0, imu_rotation());
             }
         }
 
-        // Speed Calculation (Slow down if not centered)
-        float error = std::abs(TARGET_CENTER - goal_x);
-        if (factor == 0) {
-            error = 300.0; // Force high error -> low speed if target lost
-        }
-        
-        float speed_factor = 1.0 - (error / 300.0); 
-        
-        // Clamp speed factor
-        if (speed_factor < 0.6) speed_factor = 0.6;
-        if (speed_factor > 1.0) speed_factor = 1.0;
-
-        float active_speed_limit = 2 * final_max_rpm * speed_factor;
-
-        if (factor == 0) {
-            active_speed_limit = 0; 
-        }
-
-        // Acceleration Ramp
-        if (current_vel > active_speed_limit) { 
-            current_vel -= accel_base; 
-        } else if (current_vel < active_speed_limit) { 
-            current_vel += (accel_base * 2.0); 
-        }
-
-        // PID Calculation
-        double dir_adj = 0;
-        if (error > 5) {
-            dir_adj = dir.adjust(TARGET_CENTER, goal_x);
-        }
-
-        // Motor Application
         drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - factor*dir_adj, VEL_RPM);
         drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + factor*dir_adj, VEL_RPM);
-
-        // Get current actual RPM
-        double actual_L = drive_l.velocity(VEL_RPM);
-        double actual_R = drive_r.velocity(VEL_RPM);
-        
-        // Print to the debug terminal (L: <val> R: <val>)
-        printf("L: %.2f  R: %.2f\n", actual_L, actual_R);
         
         wait(20, vex::msec);
     }
 
-    // 4. STOP
     drive_r.stop(vex::brakeType::brake);
     drive_l.stop(vex::brakeType::brake);
 }
@@ -466,4 +428,3 @@ void drive_double_turn(float degrees1, float outer_radius1, float target_ips1, f
     drive_l.stop(vex::brakeType::brake);
     drive_r.stop(vex::brakeType::brake);
 }
-
