@@ -76,28 +76,25 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
 
     int TARGET_CENTER = 160 + CAMERA_CENTER_OFFSET;
 
-    PID dir = target_small_goal ? 
+    PID dir_pid = target_small_goal ? 
         PID(DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KP, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KI, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KD) : 
         PID(DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KI, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KD);
 
-    float final_max_rpm = target_small_goal ? -200.0 : -600.0;
-    float accel_base    = target_small_goal ? 10.0 : 14.0;
+    PID imu_pid = PID(5.0, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
 
     PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
 
-    PID pid_drive_l = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
-    PID pid_drive_r = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
-    PID pid_dir = PID(DRIVE_STRAIGHT_DIR_KP, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
-
     vex::timer t;
     t.clear();
 
-    float current_vel = 0; 
+    float current_vel = 0;
+    float target_vel = 0;
+    float slew_rate = 5.0; 
     int last_known_x = 160;   
     int lost_frames = 100;
     int goal_x = 160;
-    int factor = 0;
+    double dir_adj = 0;
 
     while (t.time(vex::msec) < duration_msec) {
         if (imu.roll() >= 6) {
@@ -107,35 +104,40 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
         aivis.takeSnapshot(yellow);
         bool has_target = aivis.largestObject.exists;
 
-        double dir_adj = 0;
-
         if (has_target) {
             goal_x = aivis.largestObject.centerX;
             last_known_x = goal_x; 
             lost_frames = 0;
-            factor = 1;
-
-            current_vel = target_small_goal ? 200.0 : 400.0;
-
-            if (std::abs(TARGET_CENTER - goal_x) > 5) {
-                dir_adj = dir.adjust(TARGET_CENTER, goal_x);
-            }
-
         } else {
             if (lost_frames < 10) {
                 goal_x = last_known_x;
                 lost_frames++;
-            } else {
-                goal_x = 160; 
-                factor = 0;
-                current_vel = -200.0;
-
-                dir_adj = dir.adjust(0, imu_rotation());
             }
         }
 
-        drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - factor*dir_adj, VEL_RPM);
-        drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + factor*dir_adj, VEL_RPM);
+        if (has_target || lost_frames < 10) {
+            current_vel = target_small_goal ? -200.0 : -400.0;
+            
+            if (std::abs(TARGET_CENTER - goal_x) > 5) {
+                dir_adj = dir_pid.adjust(TARGET_CENTER, goal_x);
+            } else {
+                dir_adj = 0;
+            }
+        } else {
+            current_vel = -200.0;
+            dir_adj = imu_pid.adjust(0, imu_rotation());
+        }
+
+        if (current_vel < target_vel) {
+            current_vel += slew_rate;
+            if (current_vel > target_vel) current_vel = target_vel;
+        } else if (current_vel > target_vel) {
+            current_vel -= slew_rate;
+            if (current_vel < target_vel) current_vel = target_vel;
+        }
+
+        drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
+        drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
         
         wait(20, vex::msec);
     }

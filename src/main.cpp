@@ -28,20 +28,13 @@ int main() {
     // imu.calibrate();
     // while (imu.isCalibrating()) {
     //     wait(20, vex::msec);
-    // }    
-    // intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-    // lift.set(0);
-    // tounge.set(1);
-    // drive_straight(38, 75, 130);
-    // drive_turn(-45, -25, 50, 75);
-    // drive_full.spin(DIR_FWD, 4, VLT_VLT);
-    // wait(600, TIME_MSEC);
-    // // long goal
-    // drive_straight_toward_goal(1000, 0);
-    // tounge.set(0);
-    // hood.set(1);
-    // arm.spin(DIR_FWD, 100, VEL_PCT);
-    // drive_full.spin(DIR_REV, 50, VEL_PCT);
+    // }
+    // TEST FXNs HERE
+    // wait(5000, vex::msec);
+
+    // drive_straight_toward_goal(50000000, 0);
+    // TEST FXNs HERE
+
 
     while (true) {
         wait(20, vex::msec);
