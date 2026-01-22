@@ -4,6 +4,10 @@ void pre_auton(void) {
     // Calibrate inertial
     imu.calibrate();
     tounge.set(0);
+
+    // Start vision processing thread
+    vex::thread vision_thread(vision_processing_task);
+
     int *sides;
     const char *autons[7] = {"AWP", "AWP Push", "Right Simple", "Right Complex", "Left Simple", "Left Complex", "Skills"};
 

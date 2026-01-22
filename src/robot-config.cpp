@@ -38,7 +38,7 @@ vex::inertial imu = vex::inertial(PORT3);
 vex::optical colorSort = vex::optical(PORT11);
 vex::timer totalTime = vex::timer();
 
-vex::aivision::colordesc yellow = vex::aivision::colordesc(1, 255, 175, 83, 20.00, 0.30);
+vex::aivision::colordesc yellow = vex::aivision::colordesc(1, 255, 175, 83, 40.00, 0.30); // Increased tolerance for better detection in varying lighting
 vex::aivision aivis = vex::aivision(PORT4, yellow);
 
 vex::motor_group drive_r = vex::motor_group(drive_r1, drive_r2, drive_r3);
@@ -46,3 +46,6 @@ vex::motor_group drive_l = vex::motor_group(drive_l1, drive_l2, drive_l3);
 vex::motor_group drive_full = vex::motor_group(drive_r1, drive_r2, drive_r3, drive_l1, drive_l2, drive_l3);
 vex::motor_group intakeFull = vex::motor_group(intakeLow, intakeHigh);
 
+
+// Potentiometer for lever
+vex::potV2 lever_pot = vex::potV2(Brain.ThreeWirePort.E);

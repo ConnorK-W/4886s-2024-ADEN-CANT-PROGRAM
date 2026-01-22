@@ -1,3 +1,6 @@
+#ifndef _GLOBALS_H_
+#define _GLOBALS_H_
+
 // Drive gear ratio
 #define DRIVE_GEARING (GEAR_36 / GEAR_48)
 // Connversion factor from motor revolutions to inches travelled
@@ -57,3 +60,16 @@ extern float drive_accel_kp, drive_accel_ki, drive_accel_kd;
 extern float drive_dir_kp, drive_dir_ki, drive_dir_kd;
 
 extern vex::color color;
+
+struct VisionData {
+    int centerX;
+    bool exists;
+    int width;
+    int height;
+    int objectCount;
+};
+
+extern VisionData latest_vision_data;
+extern vex::mutex vision_mutex;
+
+#endif // _GLOBALS_H_

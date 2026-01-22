@@ -14,6 +14,8 @@ void opcontrol(void) {
     // intakeLow.spin(DIR_REV, 100, VEL_PCT);
     arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
     arm.resetPosition();
+    arm.stop();
+    
     intakeLow.stop();
 
     bool shifted = false;
@@ -32,7 +34,7 @@ void opcontrol(void) {
     int liftHeight = 1;
     bool liftOT = 0;
     bool liftSA = 0;
-    finger.set(1);
+    finger.set(0);
     lift.set(0);
     tounge.set(0);
     bool sort = 1;
@@ -105,8 +107,8 @@ void opcontrol(void) {
     if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing()){
         hood.set(0);
     }
-    if (!BTN_L1.pressing() && !BTN_X.pressing()  && !BTN_B.pressing() && arm.position(ROT_DEG) > 40){
-        arm.spinToPosition(8 * 3, ROT_DEG, 100, VEL_PCT, false);
+    if (!BTN_L1.pressing() && !BTN_X.pressing()  && !BTN_B.pressing() && arm.position(ROT_DEG) > 20){
+        arm.spinToPosition(4 * 3, ROT_DEG, 100, VEL_PCT, false);
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
     }
     if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing()){

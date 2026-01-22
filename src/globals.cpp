@@ -1,7 +1,7 @@
 #include "../include/main.h"
 
 // Which auton will run
-int auton_mode = AWP;
+int auton_mode = RightComplex;
 // Heading robot should follow
 float target_heading = 0;
 
@@ -15,6 +15,9 @@ float turn_ki_r = 0;
 float turn_kd_r = 4.575;
 
 vex::color color = vex::color::red;
+
+VisionData latest_vision_data;
+vex::mutex vision_mutex;
 
 float move_kp = 0, move_ki = 0, move_kd = 0;
 float drive_accel_kp = DRIVE_STRAIGHT_DIR_KP, drive_accel_ki = DRIVE_STRAIGHT_DIR_KI, drive_accel_kd = DRIVE_STRAIGHT_DIR_KD;

@@ -31,3 +31,4 @@ extern vex::motor_group intakeFull;
 extern vex::aivision::colordesc yellow;
 extern vex::aivision aivis;
 
+extern vex::potV2 lever_pot;

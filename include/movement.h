@@ -3,7 +3,7 @@
  * @param target_ips goal for velocity - positive
  * @param ipss acceleration - positive
  */
-void drive_straight(float inches, float target_ips, float ipss, bool do_decel = true);
+void drive_straight(float inches, float target_ips, float ipss, bool do_decel = true, float start_ips = 0, float end_ips = 0);
 
 /**
  * Drives straight towards a goal using vision tracking for a set duration.
@@ -19,7 +19,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal);
  * @param ipss acceleration
  * @param reversed are we moving backwards?
  */
-void drive_turn(float degrees, float turn_radius, float target_ips, float ipss, bool reversed = false);
+void drive_turn(float degrees, float turn_radius, float target_ips, float ipss, bool reversed = false, float start_ips = 0, float end_ips = 0);
 
 /**
  * @param inches distance to travel linearly
@@ -67,4 +67,8 @@ void swing_turn(float x, float y);
  */
 void drive_double_turn(float degrees1, float outer_radius1, float target_ips1, float ipss1,
                        float degrees2, float outer_radius2, float target_ips2, float ipss2,
-                       bool reversed = false);
+                       bool reversed = false, float start_ips = 0, float end_ips = 0);
+
+void wiggle(int num_wiggles, float angle, int duration_msec);
+
+void vision_processing_task();

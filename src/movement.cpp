@@ -5,7 +5,7 @@
 // Oooh, this is a change!
 
 // Use to drive straight
-void drive_straight(float inches, float target_ips, float ipss, bool do_decel) {
+void drive_straight(float inches, float target_ips, float ipss, bool do_decel, float start_ips, float end_ips) {
     const int TICKS_PER_SEC = 50;
     const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
 
@@ -16,7 +16,7 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel) {
     PID pid_drive_r = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID pid_dir = PID(DRIVE_STRAIGHT_DIR_KP, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
 
-    float ips = 0, pos = 0;
+    float ips = start_ips, pos = 0;
     float pos_start_l = pos_drive_l(), pos_start_r = pos_drive_r();
     float pos_l, pos_r;
 
@@ -30,9 +30,12 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel) {
     float vel_rpm;
 
     while (ips >= 0 && std::abs(pos_drive_l() - pos_start_l) < std::abs(inches)) {
-        if (std::abs(pos) + stop_dist(ips, ipss) >= std::abs(inches) && do_decel)
-            ips -= ipss / TICKS_PER_SEC;
-        else if (ips < target_ips)
+        if (std::abs(pos) + stop_dist(ips, ipss, end_ips) >= std::abs(inches) && do_decel) {
+            if (ips > end_ips)
+                ips -= ipss / TICKS_PER_SEC;
+            else
+                ips = end_ips;
+        } else if (ips < target_ips)
             ips += ipss / TICKS_PER_SEC;
         else
             ips = target_ips;
@@ -46,6 +49,8 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel) {
         pid_adjustment_r = pid_drive_r.adjust(pos, pos_r);
         pid_adjustment_dir = pid_dir.adjust(target_heading, imu_rotation());
 
+        // Clamp integral windup if needed, or just rely on pid impl
+
         vel_rpm = ips / DRIVE_REV_TO_IN * 60;
 
         drive_l.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_l + pid_adjustment_dir, VEL_RPM);
@@ -53,12 +58,36 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel) {
 
         wait(MSEC_PER_TICK, vex::msec);
     }
-    if (do_decel) {
+    if (do_decel && end_ips == 0) {
         drive_r.stop(vex::brakeType::brake);
         drive_l.stop(vex::brakeType::brake);
     } else {
         drive_r.stop(vex::brakeType::coast);
         drive_l.stop(vex::brakeType::coast);
+    }
+}
+
+void vision_processing_task() {
+    while (true) {
+        aivis.takeSnapshot(yellow);
+        
+        vision_mutex.lock();
+        latest_vision_data.centerX = aivis.largestObject.centerX;
+        latest_vision_data.exists = aivis.largestObject.exists;
+        latest_vision_data.width = aivis.largestObject.width;
+        latest_vision_data.height = aivis.largestObject.height;
+        latest_vision_data.objectCount = aivis.objectCount;
+
+        if (latest_vision_data.exists) {
+            // printf("Vision: Found! X:%d W:%d Cnt:%d\n", 
+            //     latest_vision_data.centerX, latest_vision_data.width, latest_vision_data.objectCount);
+        } else {
+            // printf("Vision: No object found\n");
+        }
+
+        vision_mutex.unlock();
+        
+        wait(20, vex::msec);
     }
 }
 
@@ -68,10 +97,10 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
     
     if (target_small_goal) {
         lift.set(1);
-        CAMERA_CENTER_OFFSET = -20;
+        CAMERA_CENTER_OFFSET = 0; // was -20
     } else {
         lift.set(0); 
-        CAMERA_CENTER_OFFSET = -5;
+        CAMERA_CENTER_OFFSET = 0; // was -5
     }
 
     int TARGET_CENTER = 160 + CAMERA_CENTER_OFFSET;
@@ -101,11 +130,14 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
             break; 
         }
 
-        aivis.takeSnapshot(yellow);
-        bool has_target = aivis.largestObject.exists;
+        // Use threaded vision data
+        vision_mutex.lock();
+        bool has_target = latest_vision_data.exists;
+        int current_center_x = latest_vision_data.centerX;
+        vision_mutex.unlock();
 
         if (has_target) {
-            goal_x = aivis.largestObject.centerX;
+            goal_x = current_center_x;
             last_known_x = goal_x; 
             lost_frames = 0;
         } else {
@@ -123,8 +155,9 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
             } else {
                 dir_adj = 0;
             }
+            printf("Error: %d, Correction: %.2f\n", TARGET_CENTER - goal_x, dir_adj);
         } else {
-            current_vel = -200.0;
+            current_vel = -200.0 * 0.5;
             dir_adj = imu_pid.adjust(0, imu_rotation());
         }
 
@@ -154,7 +187,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
  */
 
 // Use for arc
-void drive_turn(float degrees, float outer_radius, float target_ips, float ipss, bool reversed) {
+void drive_turn(float degrees, float outer_radius, float target_ips, float ipss, bool reversed, float start_ips, float end_ips) {
     const int TICKS_PER_SEC = 50;
     const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
 
@@ -166,7 +199,7 @@ void drive_turn(float degrees, float outer_radius, float target_ips, float ipss,
     float pid_adjustment_l;
     float pid_adjustment_r;
 
-    float ips = 0;
+    float ips = start_ips;
     float outer_vel_rpm, inner_vel_rpm;
     float outer_pos = 0, inner_pos;                             // expected distance that outer side has travelled
     float pos_start_l = pos_drive_l(), pos_start_r = pos_drive_r(); // start positions
@@ -191,8 +224,11 @@ void drive_turn(float degrees, float outer_radius, float target_ips, float ipss,
         degrees_remaining = target_heading - imu_rotation();
 
         // Handle acceleration
-        if (std::abs(degrees_remaining / RAD_TO_DEG * outer_radius) - stop_dist(ips, ipss) <= 0) {
-            ips -= ipss / TICKS_PER_SEC;
+        if (std::abs(degrees_remaining / RAD_TO_DEG * outer_radius) - stop_dist(ips, ipss, end_ips) <= 0) {
+            if (ips > end_ips)
+                ips -= ipss / TICKS_PER_SEC;
+            else
+                ips = end_ips;
         } else if (ips < target_ips)
             ips += ipss / TICKS_PER_SEC;
         else
@@ -206,8 +242,8 @@ void drive_turn(float degrees, float outer_radius, float target_ips, float ipss,
         outer_pos += ips / TICKS_PER_SEC;
         inner_pos = outer_pos * radius_ratio;
 
-        printf("rad ratio: %.2f\n", radius_ratio);
-        printf("inner :%.2f\nouter: %.2f\n", inner_vel_rpm, outer_vel_rpm);
+        // printf("rad ratio: %.2f\n", radius_ratio);
+        // printf("inner :%.2f\nouter: %.2f\n", inner_vel_rpm, outer_vel_rpm);
 
 
         // Get PID adjustments
@@ -237,8 +273,14 @@ void drive_turn(float degrees, float outer_radius, float target_ips, float ipss,
 
         wait(MSEC_PER_TICK, vex::msec);
     }
-    drive_l.stop(vex::brakeType::brake);
-    drive_r.stop(vex::brakeType::brake);
+    
+    if (end_ips == 0) {
+        drive_l.stop(vex::brakeType::brake);
+        drive_r.stop(vex::brakeType::brake);
+    } else {
+        drive_l.stop(vex::brakeType::coast);
+        drive_r.stop(vex::brakeType::coast);
+    }
 }
 
 // degrees, -1, 1
@@ -295,14 +337,14 @@ void turn_pid(float degrees, float ratio, int direction, int waitTime) {
 // Double Arc Implementation
 void drive_double_turn(float degrees1, float outer_radius1, float target_ips1, float ipss1,
                        float degrees2, float outer_radius2, float target_ips2, float ipss2,
-                       bool reversed) {
+                       bool reversed, float start_ips, float end_ips) {
     const int TICKS_PER_SEC = 50;
     const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
 
     // --- TURN 1 ---
     target_heading += degrees1; 
 
-    float ips = 0;
+    float ips = start_ips;
     float outer_vel_rpm, inner_vel_rpm;
     float outer_pos = 0, inner_pos;
     float pos_start_l = pos_drive_l(), pos_start_r = pos_drive_r();
@@ -386,8 +428,11 @@ void drive_double_turn(float degrees1, float outer_radius1, float target_ips1, f
 
         // Handle Deceleration for end of Turn 2
         // Calculate arc length remaining: degrees_remaining / 57.3 * radius
-        if (std::abs(degrees_remaining / RAD_TO_DEG * outer_radius2) - stop_dist(ips, ipss2) <= 0) {
-            ips -= ipss2 / TICKS_PER_SEC;
+        if (std::abs(degrees_remaining / RAD_TO_DEG * outer_radius2) - stop_dist(ips, ipss2, end_ips) <= 0) {
+             if (ips > end_ips)
+                ips -= ipss2 / TICKS_PER_SEC;
+            else
+                ips = end_ips;
         } else if (ips < target_ips2) {
              // If second turn is faster, accelerate to it
              if(ips < target_ips2) ips += ipss2 / TICKS_PER_SEC;
@@ -427,6 +472,21 @@ void drive_double_turn(float degrees1, float outer_radius1, float target_ips1, f
         wait(MSEC_PER_TICK, vex::msec);
     }
 
-    drive_l.stop(vex::brakeType::brake);
-    drive_r.stop(vex::brakeType::brake);
+    if (end_ips == 0) {
+        drive_l.stop(vex::brakeType::brake);
+        drive_r.stop(vex::brakeType::brake);
+    } else {
+        drive_l.stop(vex::brakeType::coast);
+        drive_r.stop(vex::brakeType::coast);
+    }
+}
+
+void wiggle(int num_wiggles, float angle, int duration_msec) {
+    for (int i = 0; i < num_wiggles; i++) {
+        target_heading += angle;
+        wait(duration_msec, vex::msec);
+        target_heading -= 2 * angle;
+        wait(duration_msec, vex::msec);
+        target_heading += angle;
+    }
 }
