@@ -13,7 +13,7 @@ void opcontrol(void) {
     Brain.Screen.setFont(vex::fontType::mono30);
 
     // intakeLow.spin(DIR_REV, 100, VEL_PCT);
-    arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
+    arm.rotate_pid(9);
     arm.resetPosition();    
     intakeLow.stop();
 
@@ -62,7 +62,7 @@ void opcontrol(void) {
         lift.set(!lift.value());
         }
         if (BTN_RIGHT.PRESSED) {
-            arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
+            arm.pid_step(9);
             arm.resetPosition();
         }
 
@@ -110,12 +110,12 @@ void opcontrol(void) {
     if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing()){
         hood.set(0);
     }
-    if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing() && lever_pot.value(ROT_DEG) < 300){
-        arm.spin(DIR_REV, 100, VEL_PCT);
+    if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing() && get_pot_value() > 12){
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
+        arm.pid_step(9);
 
     }
-    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing() && lever_pot.value(ROT_DEG) > 300){
+    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing() && get_pot_value() < 12){
         intakeLow.spin(DIR_FWD, 10, VEL_PCT);
         arm.stop();
     }
@@ -160,6 +160,3 @@ void imuTurn(int turnGoal){
     drive_full.stop();
 }
 */
-
-
-

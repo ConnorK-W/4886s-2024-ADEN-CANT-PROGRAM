@@ -24,7 +24,7 @@ vex::motor drive_l3 = vex::motor(PORT16, DRIVE_INSERT, true);
 // Subsystem 3
 vex::motor intakeLow = vex::motor(PORT2, INTAKE_INSERT, true);
 vex::motor intakeHigh = vex::motor(PORT7, INTAKE_INSERT, true);
-vex::motor arm = vex::motor(PORT1, vex::gearSetting::ratio18_1, true);
+Arm arm = Arm(PORT1, vex::gearSetting::ratio18_1, true);
 
 // 3 Wire Ports
 vex::digital_out finger = vex::digital_out(PORTD);

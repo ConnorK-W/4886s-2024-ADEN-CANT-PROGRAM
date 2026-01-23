@@ -110,7 +110,13 @@ void graph_pid() {
     }
 }
 
-    
+
+double get_pot_value() {
+    double val = lever_pot.angle(vex::percentUnits::pct);
+    double val_norm = (100 - (((val - 44)/(86-44))*100));
+
+    return val_norm;
+}
 
 
 // Shorthand functions

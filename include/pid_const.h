@@ -35,3 +35,9 @@
 #define TURN_PID_KP 0.325
 #define TURN_PID_KI 0.00
 #define TURN_PID_KD 1.225
+
+// Arm PID consts
+#define ARM_KP 1.5
+#define ARM_KI 0.0
+#define ARM_KD 0.0
+

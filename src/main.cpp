@@ -14,6 +14,7 @@ void test_vision();
 void test_potentiometer();
 
 int main() {
+    // NORMAL
     vex::competition Competition;
      
     // AUTON
@@ -21,9 +22,8 @@ int main() {
     Competition.drivercontrol(opcontrol);
     
     pre_auton();
+    // NORMAL
 
-    // master.ButtonLeft.pressed(tune_goal_pid);
-    // master.ButtonRight.pressed(autonomous);
 
     // CALIBRATE FOR TESTING FXNs
     // imu.calibrate();
@@ -31,35 +31,21 @@ int main() {
     //     wait(20, vex::msec);
     // }
     // TEST FXNs HERE
-    // wait(5000, vex::msec);
 
-
-    
-    // drive_straight_toward_goal(2000, 0);
     // TEST FXNs HERE
+
 
     // test_potentiometer();
 
-    while (true) {
-        wait(20, vex::msec);
-    }
-}
+    // master.ButtonLeft.pressed([]() { arm.rotate_pid(50.0); });
 
-void test_potentiometer() {
-    while (1) {
-        B_SCRN.clearScreen();
-        double val = lever_pot.angle(vex::percentUnits::pct);
-        B_SCRN.printAt(20, 20, "Pot Value: %.2f", val);
-        
-        if (val > 3600 || val < -3600) {
-             B_SCRN.printAt(20, 40, "Error: Check Port/Device");
-             B_SCRN.printAt(20, 60, "Is it a V2 Pot?");
-        }
-        
-        wait(20, vex::msec);
-    }
+    // while (true) {
+    //     B_SCRN.clearScreen();
+    //     B_SCRN.setCursor(1, 1);
+    //     B_SCRN.print("Pot Value: %.2f", get_pot_value());
+    //     wait(20, vex::msec);
+    // }
 }
-
 
 void test_aivision() {
     // Init

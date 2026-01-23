@@ -353,3 +353,63 @@ void tune_fast_pid() {
         wait(20, vex::msec);
     }
 }
+
+// Tunes arm PID with buttons
+void tune_arm_pid() {
+    master.rumble(".");
+    const float TUNER = 0.05; 
+
+    B_SCRN.clearScreen();
+
+    while (true) {
+        // Toggle PID movement on Y press
+        if (BTN_Y.PRESSED) {
+            // Wait for button release
+            while (BTN_Y.PRESSED) { wait(20, vex::msec); }
+
+            // Run PID loop until Y pressed again
+            while (!BTN_Y.PRESSED) {
+                 arm.rotate_pid(9);
+                
+                 break; 
+            }
+            // Wait for release
+            while (BTN_Y.PRESSED) { wait(20, vex::msec); }
+        }
+
+        // Tune Constants
+        // Up/Down -> kP
+        // X/B     -> kI
+        // Right/Left -> kD
+        if (btn_up() || btn_down()) {
+            arm_kp += (btn_up() - btn_down()) * TUNER;
+            if(arm_kp < 0) arm_kp = 0;
+        }
+        if (btn_x() || btn_b()) {
+            arm_ki += (btn_x() - btn_b()) * TUNER;
+             if(arm_ki < 0) arm_ki = 0;
+        }
+        if (btn_right() || btn_left()) {
+            arm_kd += (btn_right() - btn_left()) * TUNER;
+             if(arm_kd < 0) arm_kd = 0;
+        }
+
+        // Display
+        B_SCRN.clearScreen();
+        B_SCRN.setCursor(1, 1);
+        B_SCRN.print("Arm PID Tuning");
+        B_SCRN.setCursor(2, 1);
+        B_SCRN.print("P: %.3f", arm_kp);
+        B_SCRN.setCursor(3, 1);
+        B_SCRN.print("I: %.3f", arm_ki);
+        B_SCRN.setCursor(4, 1);
+        B_SCRN.print("D: %.3f", arm_kd);
+        B_SCRN.setCursor(5, 1);
+        B_SCRN.print("Pot: %.2f", get_pot_value());
+        
+        // Also print to terminal
+        printf("P: %.3f I: %.3f D: %.3f Pot: %.2f\n", arm_kp, arm_ki, arm_kd, get_pot_value());
+
+        wait(100, vex::msec); // Slower loop for tuning UI
+    }
+}

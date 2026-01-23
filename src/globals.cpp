@@ -24,3 +24,5 @@ float drive_accel_kp = DRIVE_STRAIGHT_DIR_KP, drive_accel_ki = DRIVE_STRAIGHT_DI
 float drive_dir_kp = 0, drive_dir_ki = 0, drive_dir_kd = 0;
 float drive_biggoal_kp = DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP, drive_biggoal_ki = DRIVE_STRAIGHT_TOWARD_BIGGOAL_KI, drive_biggoal_kd = DRIVE_STRAIGHT_TOWARD_BIGGOAL_KD;
 float drive_smallgoal_kp = DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KP, drive_smallgoal_ki = DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KI, drive_smallgoal_kd = DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KD;
+
+float arm_kp = ARM_KP, arm_ki = ARM_KI, arm_kd = ARM_KD;

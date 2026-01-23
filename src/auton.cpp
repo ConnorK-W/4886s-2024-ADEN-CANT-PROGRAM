@@ -413,24 +413,6 @@ drive_straight(-29, 75, 50);
     }
 }
 
-
-
-double get_intake_pot() {
-    double pot_angle = lever_pot.angle(vex::rotationUnits::deg);
-    double arm_pos = arm.position(vex::rotationUnits::deg);
-
-    if (arm_pos > 40) {
-        if (pot_angle < 10) {
-            pot_angle += 330;
-        }
-    } else {
-        if (pot_angle > 320) {
-            pot_angle -= 330;
-        }
-    }
-    return pot_angle;
-}
-
 void intake() {
     arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
     arm.resetPosition();
@@ -444,8 +426,8 @@ void intake() {
             intakeLow.stop();
             hood.set(0);
             printf("%f\n", arm.position(ROT_DEG));
-            if ((arm.position(ROT_DEG) - 24.8) > 15) {
-                arm.spin(DIR_REV, 12, VLT_VLT);
+            if ((get_pot_value() > 12)) {
+                arm.pid_step(9);
                 intakeLow.spin(DIR_REV, 100, VEL_PCT);
             }
 
@@ -455,8 +437,8 @@ void intake() {
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
             hood.set(0);
             printf("%f\n", arm.position(ROT_DEG));
-            if ((arm.position(ROT_DEG) - 24.8) > 15) {
-                arm.spin(DIR_REV, 12, VLT_VLT);
+            if ((get_pot_value() > 12)) {
+                arm.pid_step(9);
                 intakeLow.spin(DIR_REV, 100, VEL_PCT);
             }
             break;

@@ -490,3 +490,63 @@ void wiggle(int num_wiggles, float angle, int duration_msec) {
         target_heading += angle;
     }
 }
+
+
+void Arm::pid_step(double target_val) {
+    // Update PID constants from globals
+    // This allows dynamic tuning to work immediately
+    pid.set_kP(arm_kp);
+    pid.set_kI(arm_ki);
+    pid.set_kD(arm_kd);
+
+    double current_val = get_pot_value();
+    double pid_val = pid.adjust(target_val, current_val);
+
+    this->spin(vex::directionType::fwd, pid_val, vex::velocityUnits::pct);
+}
+
+void Arm::rotate_pid(double target_val) {
+    // Re-initialize or reset PID if needed, but since we have a member PID, 
+    // we can just rely on the step function updating constants.
+    // However, for a *blocking* move, we might want to reset integral windup?
+    // The current PID implementation doesn't expose reset(), but creating a new PID object does.
+    // For now, let's just use the member PID to persist state which is generally better.
+    
+    double current_val = 0;
+    double prev_val = 0;
+    int stall_timer = 0;
+
+    // Run loop to actively hold position
+    while (true) {
+        current_val = get_pot_value();
+        
+        // Check if controller button B is pressed to exit the loop
+        if (master.ButtonB.pressing()) {
+            break;
+        }
+
+        // Exit conditions
+        if (current_val < target_val) {
+             break;
+        }
+
+        // Stall detection
+        if (std::abs(current_val - prev_val) < 0.05) {
+            stall_timer += 20;
+        } else {
+            stall_timer = 0;
+        }
+
+        if (stall_timer > 250) {
+            break;
+        }
+
+        prev_val = current_val;
+
+        // Perform one step
+        this->pid_step(target_val);
+
+        vex::task::sleep(20);
+    }
+    this->stop();
+}

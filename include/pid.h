@@ -1,3 +1,4 @@
+#pragma once
 #include "globals.h"
 
 /**
@@ -22,6 +23,10 @@ class PID {
         void tune_kP(float value, float mod);
         void tune_kI(float value, float mod);
         void tune_kD(float value, float mod);
+
+        void set_kP(double val) { kP = val; }
+        void set_kI(double val) { kI = val; }
+        void set_kD(double val) { kD = val; }
 
         float get_const(char constant);
 };

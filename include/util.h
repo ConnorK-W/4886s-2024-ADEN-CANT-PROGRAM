@@ -69,6 +69,12 @@ void graph_pid();
 void lift_limit_torque(void);
 
 
+
+/**
+ * @brief Gets normalized potentiometer value 0-100
+ */
+double get_pot_value(void);
+
 // Shorthand functions
 
 /**

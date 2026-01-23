@@ -1,6 +1,8 @@
 extern vex::brain Brain;
 extern vex::controller master;
 
+#include "subsystems.h"
+
 extern vex::motor drive_r1;
 extern vex::motor drive_r2;
 extern vex::motor drive_r3;
@@ -12,7 +14,7 @@ extern vex::motor drive_l4;
 
 extern vex::motor intakeLow;
 extern vex::motor intakeHigh;
-extern vex::motor arm;
+extern Arm arm;
 
 extern vex::digital_out finger;
 extern vex::digital_out tounge;
