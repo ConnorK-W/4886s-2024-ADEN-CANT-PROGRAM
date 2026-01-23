@@ -9,7 +9,8 @@ void opcontrol(void) {
     drive_r.stop(vex::brakeType::coast);
     colorSort.setLightPower(100, PCT_PCT);
     colorSort.setLight(vex::ledState::on);
-    arm.stop(vex::brakeType::coast);
+    arm.stop(vex::brakeType::brake);
+    Brain.Screen.setFont(vex::fontType::mono30);
 
     // intakeLow.spin(DIR_REV, 100, VEL_PCT);
     arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
@@ -64,6 +65,10 @@ void opcontrol(void) {
             arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
             arm.resetPosition();
         }
+
+        B_SCRN.printAt(100, 200, "Arm position: %f", lever_pot.value(ROT_DEG));
+        B_SCRN.printAt(100, 220, "Arm current: %f", arm.current(PCT_PCT));
+
         
         // Toggles chase neutral post
         //if (BTN_RIGHT.PRESSED)
@@ -76,12 +81,15 @@ void opcontrol(void) {
         wait(20, vex::msec);
 
     // Intake
-
+    
     if (BTN_R1.pressing()){
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        B_SCRN.printAt(100, 150, "Intaking %i", intakeLow.direction());
     }
     if (BTN_R2.pressing()){
         intakeLow.spin(DIR_REV, 50, VEL_PCT);
+        B_SCRN.printAt(100, 150, "Outtaking %i", intakeLow.direction());
+
     }
     if (BTN_L1.pressing()){
         arm.spinToPosition(140 * 3, ROT_DEG, 100, VEL_PCT, false);
@@ -102,12 +110,14 @@ void opcontrol(void) {
     if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing()){
         hood.set(0);
     }
-    if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing() && arm.position(ROT_DEG) > 10){
+    if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing() && lever_pot.value(ROT_DEG) < 300){
         arm.spin(DIR_REV, 100, VEL_PCT);
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
+
     }
-    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing()){
+    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing() && lever_pot.value(ROT_DEG) > 300){
         intakeLow.spin(DIR_FWD, 10, VEL_PCT);
+        arm.stop();
     }
 
 
