@@ -46,6 +46,9 @@ vex::motor_group drive_l = vex::motor_group(drive_l1, drive_l2, drive_l3);
 vex::motor_group drive_full = vex::motor_group(drive_r1, drive_r2, drive_r3, drive_l1, drive_l2, drive_l3);
 vex::motor_group intakeFull = vex::motor_group(intakeLow, intakeHigh);
 
-
 // Potentiometer for lever
 vex::potV2 lever_pot = vex::potV2(Brain.ThreeWirePort.E);
+
+// Distance sensors
+vex::distance distance_left = vex::distance(PORT6);
+vex::distance distance_front = vex::distance(PORT7);

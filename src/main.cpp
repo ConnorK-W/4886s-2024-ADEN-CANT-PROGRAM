@@ -11,17 +11,18 @@
 
 void test_aivision();
 void test_vision();
+void test_distance();
 void test_potentiometer();
 
 int main() {
-    // NORMAL
-    vex::competition Competition;
+    // // NORMAL
+    // vex::competition Competition;
      
-    // AUTON
-    Competition.autonomous(autonomous);
-    Competition.drivercontrol(opcontrol);
+    // // AUTON
+    // Competition.autonomous(autonomous);
+    // Competition.drivercontrol(opcontrol);
     
-    pre_auton();
+    // pre_auton();
     // NORMAL
 
 
@@ -45,6 +46,19 @@ int main() {
     //     B_SCRN.print("Pot Value: %.2f", get_pot_value());
     //     wait(20, vex::msec);
     // }
+
+    test_distance();
+}
+
+void test_distance() {
+    intakeLow.spin(DIR_FWD, 100, VLT_VLT);
+    while (1) {
+        double distancefront = distance_front.objectDistance(vex::distanceUnits::in);
+        double distanceleft = distance_left.objectDistance(vex::distanceUnits::in);
+        B_SCRN.printAt(100, 240, "Front dist: %.2f", distancefront);
+        B_SCRN.printAt(100, 220, "Left dist: %.2f", distanceleft);
+        wait(20, vex::msec);
+    }
 }
 
 void test_aivision() {

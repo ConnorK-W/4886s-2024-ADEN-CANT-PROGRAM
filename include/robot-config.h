@@ -34,3 +34,6 @@ extern vex::aivision::colordesc yellow;
 extern vex::aivision aivis;
 
 extern vex::potV2 lever_pot;
+
+extern vex::distance distance_left;
+extern vex::distance distance_front;
