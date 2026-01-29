@@ -15,14 +15,14 @@ void test_distance();
 void test_potentiometer();
 
 int main() {
-    // // NORMAL
-    // vex::competition Competition;
+    // NORMAL
+    vex::competition Competition;
      
-    // // AUTON
-    // Competition.autonomous(autonomous);
-    // Competition.drivercontrol(opcontrol);
+    // AUTON
+    Competition.autonomous(autonomous);
+    Competition.drivercontrol(opcontrol);
     
-    // pre_auton();
+    pre_auton();
     // NORMAL
 
 
@@ -47,7 +47,7 @@ int main() {
     //     wait(20, vex::msec);
     // }
 
-    test_distance();
+    // test_distance();
 }
 
 void test_distance() {

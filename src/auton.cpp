@@ -184,27 +184,36 @@ void autonomous(void) {
 
 
     case RightSimple: {
-        vex::thread t1(intake);
-        lift.set(1);
-        drive_straight(41.5, 70, 100);
+                vex::thread t1(intake);
+        drive_straight(20, 50, 70);
+        drive_turn(50, 9.5, 30, 75, false, 0, 0);
         tounge.set(1);
-        turn_pid(90, -1, 1);
-        drive_straight(10, 75, 50);
-        drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(500, TIME_MSEC);
-        // long goal
-        drive_straight(-28, 75, 100);
+        drive_turn(-95, -11, 30, 75, false, 0, 0);
         tounge.set(0);
-        scoring = 4;
-        drive_full.spin(DIR_REV, 50, VEL_PCT);
-        wait(500, TIME_MSEC);
-        tounge.set(0);
+        drive_straight(12, 50, 100, true, 0, 20);
+        scoring = 2;
+        wait(900, TIME_MSEC);
         scoring = 1;
-        drive_straight(2, 75, 100);
-        drive_turn(-90, -12.5, 50, 75, false);
+        drive_straight(-49, 75, 100, true, 0, 0);
+        tounge.set(1);
+
+        // long goal
+        turn_pid(-135, -1, 1);
+        drive_straight(7, 35, 40, true, 0, 15);
+        drive_full.spin(DIR_FWD, 5, VLT_VLT);
+        wait(650, TIME_MSEC);
+        // long goal
+
+        tounge.set(0);
+        drive_straight_toward_goal(1100, 0);
+        scoring = 4;
+        drive_full.spinFor(DIR_REV, 700, TIME_MSEC, 50, VEL_PCT);
+        scoring = 1;
+        drive_turn(-90, -13, 50, 75, false, 0, 0);
         t1.interrupt();
         turn_pid(90, -1, 1);
-        drive_straight(-27, 75, 50);
+        drive_straight(-27, 75, 50, true, 0, 0);
+        turn_pid(30, -1, 1);
 
         break;
     }
@@ -217,11 +226,11 @@ void autonomous(void) {
         tounge.set(1);
         drive_turn(-95, -11, 30, 75, false, 0, 0);
         tounge.set(0);
-        drive_straight(11, 50, 100, true, 0, 0);
+        drive_straight(12, 50, 100, true, 0, 20);
         scoring = 2;
         wait(900, TIME_MSEC);
         scoring = 1;
-        drive_straight(-49.5, 75, 100, true, 0, 0);
+        drive_straight(-49, 75, 100, true, 0, 0);
         tounge.set(1);
 
         // long goal
@@ -422,9 +431,6 @@ drive_straight(-29, 75, 50);
 }
 
 void intake() {
-    arm.spinFor(DIR_REV, 500, TIME_MSEC, 100, VEL_PCT);
-    arm.resetPosition();
-    arm.stop();
     intakeLow.spin(DIR_FWD, 100, VEL_PCT);
     int antiJamTime = 0;
 
