@@ -221,7 +221,7 @@ void autonomous(void) {
 
     case RightComplex: {
         vex::thread t1(intake);
-        drive_straight(20, 50, 70);
+        drive_straight(14, 50, 70);
         drive_turn(50, 9.5, 30, 75, false, 0, 0);
         tounge.set(1);
         drive_turn(-95, -11, 30, 75, false, 0, 0);
