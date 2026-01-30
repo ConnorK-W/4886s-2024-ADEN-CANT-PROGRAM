@@ -10,7 +10,7 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel = 
  * @param duration_msec The duration to drive in milliseconds.
  * @param target_small_goal If true: targets Small Goal (Lift UP, Slower). If false: targets Big Goal (Lift DOWN, Faster).
  */
-void drive_straight_toward_goal(int duration_msec, bool target_small_goal);
+void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool correct = true);
 
 /**
  * @param degrees changes target heading

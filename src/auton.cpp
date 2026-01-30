@@ -296,8 +296,8 @@ drive_straight(-29, 75, 50);
         vex::thread t1(intake);
         finger.set(1); // get finger out of way 
         tounge.set(1); // open tounge
-        drive_straight((41.5-17+9.5-0.5-1), 70, 100); // straight
-        drive_turn(-90, -13, 40, 75, false); // arc toward goal
+        drive_straight((41.5-17+9.5-0.5+1), 70, 100); // straight
+        drive_turn(-92, -12, 40, 75, false); // arc toward goal
 
 
         scoring = 1;
@@ -313,7 +313,7 @@ drive_straight(-29, 75, 50);
         wait(500, TIME_MSEC);
 
         // long goal
-        drive_straight_toward_goal(1300, false); // try lowering
+        drive_straight_toward_goal(1300, false, false); // try lowering
         drive_straight(5,30,75, true, 0, 10);
         tounge.set(0);
         drive_turn(180, 12, 30, 75, false, 10, 0);
@@ -326,7 +326,7 @@ drive_straight(-29, 75, 50);
         drive_straight(9, 30, 50, true, 0, 0);
         turn_pid(-90, -1, 1); 
         tounge.set(1);
-        drive_straight_toward_goal(700, false);
+        drive_straight_toward_goal(700, false, false);
         scoring = 5;
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
@@ -343,7 +343,7 @@ drive_straight(-29, 75, 50);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(500, TIME_MSEC);
         // score second goal
-        drive_straight_toward_goal(750, false); // try lowering 
+        drive_straight_toward_goal(750, false, false); // try lowering 
         scoring = 6; 
         drive_full.spinFor(DIR_REV, 2500, TIME_MSEC, 50, VEL_PCT);
         scoring = 1;
@@ -379,7 +379,7 @@ drive_straight(-29, 75, 50);
         wait(500, TIME_MSEC);
 
         // long goal
-        drive_straight_toward_goal(1000, false); // try lowering
+        drive_straight_toward_goal(1000, false, false); // try lowering
         drive_straight(5,30,75, false);
         tounge.set(0);
         drive_turn(180, 12, 30, 75, false);
@@ -392,7 +392,7 @@ drive_straight(-29, 75, 50);
         drive_straight(9, 30, 100, false);
         turn_pid(-90, -1, 1); 
         tounge.set(1);
-        drive_straight_toward_goal(700, false);
+        drive_straight_toward_goal(700, false, false);
         scoring = 5;
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
@@ -409,7 +409,7 @@ drive_straight(-29, 75, 50);
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(500, TIME_MSEC);
         // score second goal
-        drive_straight_toward_goal(750, false); // try lowering 
+        drive_straight_toward_goal(750, false, false); // try lowering 
         scoring = 6; 
         drive_full.spinFor(DIR_REV, 2500, TIME_MSEC, 50, VEL_PCT);
         scoring = 1;

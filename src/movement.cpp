@@ -91,7 +91,7 @@ void vision_processing_task() {
     }
 }
 
-void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
+void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool correct) {
     
     int CAMERA_CENTER_OFFSET;
     
@@ -109,7 +109,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
         PID(DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KP, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KI, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KD) : 
         PID(DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KI, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KD);
 
-    PID imu_pid = PID(5.0, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
+    PID imu_pid = PID(correct ? 5.0 : DRIVE_STRAIGHT_DIR_KP, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
 
     PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
@@ -131,23 +131,32 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal) {
         }
 
         // Use threaded vision data
-        vision_mutex.lock();
-        bool has_target = latest_vision_data.exists;
-        int current_center_x = latest_vision_data.centerX;
-        vision_mutex.unlock();
+        // Use threaded vision data
+        bool has_target = false;
+        int current_center_x = 160;
 
-        if (has_target) {
-            goal_x = current_center_x;
-            last_known_x = goal_x; 
-            lost_frames = 0;
-        } else {
-            if (lost_frames < 10) {
-                goal_x = last_known_x;
-                lost_frames++;
+        if (correct) {
+            vision_mutex.lock();
+            has_target = latest_vision_data.exists;
+            current_center_x = latest_vision_data.centerX;
+            vision_mutex.unlock();
+
+            if (has_target) {
+                goal_x = current_center_x;
+                last_known_x = goal_x; 
+                lost_frames = 0;
+            } else {
+                if (lost_frames < 10) {
+                    goal_x = last_known_x;
+                    lost_frames++;
+                }
             }
         }
 
-        if (has_target || lost_frames < 10) {
+        if (!correct) {
+            current_vel = target_small_goal ? -230.0 : -400.0;
+            dir_adj = imu_pid.adjust(target_heading, imu_rotation());
+        } else if (has_target || lost_frames < 10) {
             current_vel = target_small_goal ? -230.0 : -400.0;
             
             if (std::abs(TARGET_CENTER - goal_x) > 5) {
