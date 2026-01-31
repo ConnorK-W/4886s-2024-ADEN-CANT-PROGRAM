@@ -59,6 +59,9 @@ extern float move_kp, move_ki, move_kd;
 extern float drive_accel_kp, drive_accel_ki, drive_accel_kd;
 extern float drive_dir_kp, drive_dir_ki, drive_dir_kd;
 
+extern float drive_biggoal_kp, drive_biggoal_ki, drive_biggoal_kd;
+extern float drive_smallgoal_kp, drive_smallgoal_ki, drive_smallgoal_kd;
+
 extern float arm_kp, arm_ki, arm_kd;
 
 extern vex::color color;

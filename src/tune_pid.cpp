@@ -413,3 +413,51 @@ void tune_arm_pid() {
         wait(100, vex::msec); // Slower loop for tuning UI
     }
 }
+
+// Tunes drive_straight_toward_goal big goal kP
+// Runs the function for 2000ms each time Y is pressed
+void tune_drive_toward_goal() {
+    master.rumble("--"); // Double dash for drive toward goal tuning
+    const float TUNER = 0.025;
+
+    B_SCRN.clearScreen();
+
+    while (true) {
+        // Toggle movement on Y press - runs for 2000ms
+        if (BTN_Y.PRESSED) {
+            // Wait for button release
+            while (BTN_Y.PRESSED) { wait(20, vex::msec); }
+
+            // Run drive_straight_toward_goal for 2000ms (big goal mode)
+            drive_straight_toward_goal(2000, false, true);
+            
+            // Stop motors explicitly after run
+            drive_r.stop(vex::brakeType::brake);
+            drive_l.stop(vex::brakeType::brake);
+            
+            wait(200, vex::msec);
+        }
+
+        // Tune big goal kP only
+        // Up/Down -> kP
+        if (btn_up() || btn_down()) {
+            drive_biggoal_kp += (btn_up() - btn_down()) * TUNER;
+            if (drive_biggoal_kp < 0) drive_biggoal_kp = 0;
+        }
+
+        // Display
+        B_SCRN.clearScreen();
+        B_SCRN.setCursor(1, 1);
+        B_SCRN.print("Big Goal kP Tuning");
+        B_SCRN.setCursor(2, 1);
+        B_SCRN.print("kP: %.3f", drive_biggoal_kp);
+        B_SCRN.setCursor(3, 1);
+        B_SCRN.print("Press Y to run 2000ms");
+        
+        // Print to terminal
+        printf("BIG GOAL kP: %.3f\n", drive_biggoal_kp);
+
+        wait(100, vex::msec); // Slower loop for tuning UI
+    }
+}
+

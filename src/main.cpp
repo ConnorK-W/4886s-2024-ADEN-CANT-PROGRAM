@@ -26,13 +26,21 @@ int main() {
     // NORMAL
 
 
-    // CALIBRATE FOR TESTING FXNs
+    // // CALIBRATE FOR TESTING FXNs
     // imu.calibrate();
     // while (imu.isCalibrating()) {
     //     wait(20, vex::msec);
     // }
+    
+    // Start vision processing task for goal detection
+    
+    
     // TEST FXNs HERE
-
+    // Tune drive_straight_toward_goal k values
+    // aivis.startAwb();
+    // wait(500, vex::msec); // Let AWB initialize
+    // vex::thread vision_thread(vision_processing_task);
+    // tune_drive_toward_goal();
     // TEST FXNs HERE
 
 
@@ -48,6 +56,7 @@ int main() {
     // }
 
     // test_distance();
+
 }
 
 void test_distance() {

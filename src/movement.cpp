@@ -106,8 +106,8 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
     int TARGET_CENTER = 160 + CAMERA_CENTER_OFFSET;
 
     PID dir_pid = target_small_goal ? 
-        PID(DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KP, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KI, DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KD) : 
-        PID(DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KI, DRIVE_STRAIGHT_TOWARD_BIGGOAL_KD);
+        PID(drive_smallgoal_kp, drive_smallgoal_ki, drive_smallgoal_kd) : 
+        PID(drive_biggoal_kp, drive_biggoal_ki, drive_biggoal_kd);
 
     PID imu_pid = PID(correct ? 5.0 : DRIVE_STRAIGHT_DIR_KP, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
 
