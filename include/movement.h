@@ -73,5 +73,4 @@ void wiggle(int num_wiggles, float angle, int duration_msec);
 
 void vision_processing_task();
 
-
-
+void drive_straight_with_dist(float inches, float target_ips, float ipss, bool do_decel = true, float start_ips = 0, float end_ips = 0);

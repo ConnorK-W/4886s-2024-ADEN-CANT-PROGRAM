@@ -306,7 +306,7 @@ drive_straight(-29, 75, 50);
         vex::thread t1(intake);
         finger.set(1); // get finger out of way 
         tounge.set(1); // open tounge
-        drive_straight(34, 70, 70); // straight
+        drive_straight(35, 70, 70); // straight
         drive_turn(-90, -12, 40, 75, false); // arc toward goal
 
 
@@ -438,7 +438,7 @@ drive_straight(-29, 75, 50);
         scoring = 0;
         drive_straight(-7, 10, 50, false);
         drive_turn(80, 38, 50, 75, false);
-        drive_full.spinFor(DIR_FWD, 1300, TIME_MSEC, 50, VEL_PCT);
+        drive_full.spinFor(DIR_FWD, 1100, TIME_MSEC, 50, VEL_PCT);
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
         drive_full.spinFor(DIR_REV, 200, TIME_MSEC, 50, VEL_PCT);
 

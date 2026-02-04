@@ -41,6 +41,7 @@
 // Global variable declarations
 extern int auton_mode;
 extern float target_heading;
+extern float offsettheta;
 
 // Selection
 extern const char *control_types[6];

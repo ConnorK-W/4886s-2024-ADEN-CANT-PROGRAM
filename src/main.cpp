@@ -12,51 +12,36 @@
 void test_aivision();
 void test_vision();
 void test_distance();
+void test_drive_straight_with_dist();
 void test_potentiometer();
 
 int main() {
-    // NORMAL
-    vex::competition Competition;
+    // // NORMAL
+    // vex::competition Competition;
      
-    // AUTON
-    Competition.autonomous(autonomous);
-    Competition.drivercontrol(opcontrol);
+    // // AUTON
+    // Competition.autonomous(autonomous);
+    // Competition.drivercontrol(opcontrol);
     
-    pre_auton();
-    // NORMAL
+    // pre_auton();
+    // // NORMAL
 
 
     // // CALIBRATE FOR TESTING FXNs
-    // imu.calibrate();
-    // while (imu.isCalibrating()) {
-    //     wait(20, vex::msec);
-    // }
-    
-    // Start vision processing task for goal detection
-    
-    
-    // TEST FXNs HERE
-    // Tune drive_straight_toward_goal k values
-    // aivis.startAwb();
-    // wait(500, vex::msec); // Let AWB initialize
-    // vex::thread vision_thread(vision_processing_task);
-    // tune_drive_toward_goal();
-    // TEST FXNs HERE
+    imu.calibrate();
+    while (imu.isCalibrating()) {
+        wait(20, vex::msec);
+    }
 
+    test_drive_straight_with_dist();
 
-    // test_potentiometer();
+}
 
-    // master.ButtonLeft.pressed([]() { arm.rotate_pid(50.0); });
-
-    // while (true) {
-    //     B_SCRN.clearScreen();
-    //     B_SCRN.setCursor(1, 1);
-    //     B_SCRN.print("Pot Value: %.2f", get_pot_value());
-    //     wait(20, vex::msec);
-    // }
-
-    // test_distance();
-
+void test_drive_straight_with_dist() {
+    finger.set(1);
+    drive_straight_with_dist(80, 60, 70, true, 0, 0);
+    turn_pid(90 + offsettheta, -1, 1);
+    offsettheta = 0;
 }
 
 void test_distance() {

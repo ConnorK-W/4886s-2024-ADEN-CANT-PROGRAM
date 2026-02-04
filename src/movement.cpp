@@ -2,7 +2,82 @@
 #include "stddefs.h"
 #include <cmath>
 
-// Oooh, this is a change!
+
+void drive_straight_with_dist(float inches, float target_ips, float ipss, bool do_decel, float start_ips, float end_ips) {
+
+    const int TICKS_PER_SEC = 50;
+    const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
+
+    drive_r.stop(vex::brakeType::coast);
+    drive_l.stop(vex::brakeType::coast);
+
+    PID pid_drive_l = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID pid_drive_r = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID pid_dir = PID(DRIVE_STRAIGHT_DIR_KP, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
+
+    float ips = start_ips, pos = 0;
+    float pos_start_l = pos_drive_l(), pos_start_r = pos_drive_r();
+    float pos_l, pos_r;
+
+    // adjusts velocity for positive/negative distances
+    float dir_mod = (inches > 0) ? 1 : -1;
+
+    float pid_adjustment_l;
+    float pid_adjustment_r;
+    float pid_adjustment_dir;
+
+    float vel_rpm;
+
+    double df_i = distance_front.objectDistance(vex::distanceUnits::in);
+    double dl_i = distance_left.objectDistance(vex::distanceUnits::in);
+
+    while (ips >= 0 && std::abs(pos_drive_l() - pos_start_l) < std::abs(inches)) {
+        if (std::abs(pos) + stop_dist(ips, ipss, end_ips) >= std::abs(inches) && do_decel) {
+            if (ips > end_ips)
+                ips -= ipss / TICKS_PER_SEC;
+            else
+                ips = end_ips;
+        } else if (ips < target_ips)
+            ips += ipss / TICKS_PER_SEC;
+        else
+            ips = target_ips;
+
+        pos += ips / TICKS_PER_SEC * dir_mod;
+
+        pos_l = pos_drive_l() - pos_start_l;
+        pos_r = pos_drive_r() - pos_start_r;
+
+        pid_adjustment_l = pid_drive_l.adjust(pos, pos_l);
+        pid_adjustment_r = pid_drive_r.adjust(pos, pos_r);
+        pid_adjustment_dir = pid_dir.adjust(target_heading, imu_rotation());
+
+        // Clamp integral windup if needed, or just rely on pid impl
+
+        vel_rpm = ips / DRIVE_REV_TO_IN * 60;
+
+        drive_l.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_l + pid_adjustment_dir, VEL_RPM);
+        drive_r.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_r - pid_adjustment_dir, VEL_RPM);
+
+        wait(MSEC_PER_TICK, vex::msec);
+    }
+    if (do_decel && end_ips == 0) {
+        drive_r.stop(vex::brakeType::brake);
+        drive_l.stop(vex::brakeType::brake);
+    } else {
+        drive_r.stop(vex::brakeType::coast);
+        drive_l.stop(vex::brakeType::coast);
+    }
+
+    double df_f = distance_front.objectDistance(vex::distanceUnits::in);
+    double dl_f = distance_left.objectDistance(vex::distanceUnits::in);
+
+    double change_l = dl_f - dl_i;
+    double change_r = df_f - df_i;
+
+    double theta = std::atan(change_l / change_r) * (180.0 / 3.14159265358979323846);
+
+    offsettheta = theta;
+}
 
 // Use to drive straight
 void drive_straight(float inches, float target_ips, float ipss, bool do_decel, float start_ips, float end_ips) {
