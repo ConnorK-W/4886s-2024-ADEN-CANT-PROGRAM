@@ -149,170 +149,80 @@ void drive_straight_to_dist_value(float target_dist_in, float target_ips, float 
     drive_l.stop(vex::brakeType::coast);
 }
 
-// Drives straight while maintaining target distance from wall using left distance sensor
+// Pattern: 10% straight, 70% correction, 20% straight
 void drive_straight_wall_follow(float inches, float target_ips, float ipss, float target_wall_dist, bool do_decel, float start_ips, float end_ips) {
-    const int TICKS_PER_SEC = 50;
-    const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
-    
-    drive_r.stop(vex::brakeType::coast);
-    drive_l.stop(vex::brakeType::coast);
-    
-    PID pid_drive_l = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
-    PID pid_drive_r = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
-    PID pid_wall = PID(WALL_FOLLOW_KP, WALL_FOLLOW_KI, WALL_FOLLOW_KD);
-    
-    float ips = start_ips, pos = 0;
-    float pos_start_l = pos_drive_l(), pos_start_r = pos_drive_r();
-    float pos_l, pos_r;
-    
-    float dir_mod = (inches > 0) ? 1 : -1;
-    
-    float pid_adjustment_l;
-    float pid_adjustment_r;
-    float pid_adjustment_wall;
-    
-    float vel_rpm;
-    
-    while (ips >= 0 && std::abs(pos_drive_l() - pos_start_l) < std::abs(inches)) {
-        if (std::abs(pos) + stop_dist(ips, ipss, end_ips) >= std::abs(inches) && do_decel) {
-            if (ips > end_ips)
-                ips -= ipss / TICKS_PER_SEC;
-            else
-                ips = end_ips;
-        } else if (ips < target_ips)
-            ips += ipss / TICKS_PER_SEC;
-        else
-            ips = target_ips;
-        
-        pos += ips / TICKS_PER_SEC * dir_mod;
-        
-        pos_l = pos_drive_l() - pos_start_l;
-        pos_r = pos_drive_r() - pos_start_r;
-        
-        pid_adjustment_l = pid_drive_l.adjust(pos, pos_l);
-        pid_adjustment_r = pid_drive_r.adjust(pos, pos_r);
-        
-        // Get current heading error for trig correction
-        float heading_error = imu_rotation() - target_heading;
-        
-        // Wall following: adjust heading based on left distance sensor
-        // Compensate for sensor angle using trig: actual_dist = measured_dist / cos(angle)
-        float measured_wall_dist = distance_left.objectDistance(vex::distanceUnits::in);
-        float angle_rad = heading_error * (3.14159265359 / 180.0); // Convert to radians
-        float cos_angle = std::cos(angle_rad);
-        // Avoid division by zero
-        if (std::abs(cos_angle) < 0.1) cos_angle = 0.1;
-        float actual_wall_dist = measured_wall_dist / cos_angle;
-        
-        pid_adjustment_wall = pid_wall.adjust(target_wall_dist, actual_wall_dist);
-        
-        vel_rpm = ips / DRIVE_REV_TO_IN * 60;
-        
-        // Combine drive straight with wall following steering (wall PID replaces dir PID)
-        drive_l.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_l + pid_adjustment_wall, VEL_RPM);
-        drive_r.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_r - pid_adjustment_wall, VEL_RPM);
+    float total = std::abs(inches);
+    float dir = (inches > 0) ? 1 : -1;
 
-        wait(MSEC_PER_TICK, vex::msec);
+    // Safety timeout: exit if robot hasn't moved after 500ms
+    vex::timer timeout_timer;
+    timeout_timer.clear();
+
+    // PHASE 1: Drive straight for first 10%
+    float first_straight = total * 0.1;
+    printf("Phase 1: Drive straight %.1f (10%%)\n", first_straight);
+    drive_straight(dir * first_straight, target_ips, ipss, false, start_ips, target_ips);
+
+    // Check timeout after first movement
+    if (timeout_timer.time(vex::msec) > 500) {
+        float current_vel = std::abs(drive_l.velocity(vex::velocityUnits::pct)) * 6.0 / 100.0;  // Convert to approx ips
+        if (current_vel < 2.0) {
+            printf("Wall follow timeout: robot not moving (%.1f ips)\n", current_vel);
+            drive_l.stop(vex::brakeType::brake);
+            drive_r.stop(vex::brakeType::brake);
+            return;
+        }
     }
 
-    // Only stop motors if we're decelerating to zero
-    // Otherwise leave them spinning at end_ips for velocity carryover
+    // Measure distance to wall after initial straight
+    float current_dist = distance_left.objectDistance(vex::distanceUnits::in);
+
+    // PHASE 2: Calculate triangle for middle 70% correction
+    float leg1 = current_dist - target_wall_dist;  // Perpendicular
+    float leg2 = total * 0.7;                      // Forward distance for correction
+
+    float angle_rad = std::atan2(leg1, leg2);
+    float angle_deg = angle_rad * 180.0 / 3.14159265359;
+    float hypotenuse = std::sqrt(leg1 * leg1 + leg2 * leg2);
+
+    printf("Phase 2: Triangle CurrentDist=%.1f Target=%.1f Leg1=%.1f Leg2=%.1f\n",
+           current_dist, target_wall_dist, leg1, leg2);
+    printf("Angle=%.1f° Hypotenuse=%.1f\n", angle_deg, hypotenuse);
+
+    // Turn to angle
+    turn_pid(-angle_deg, -1, 1, 500);
+    wait(100, vex::msec);
+
+    // Drive hypotenuse
+    drive_straight(dir * hypotenuse, target_ips, ipss, false, target_ips, target_ips);
+    printf("After correction: %.1f from wall\n", distance_left.objectDistance(vex::distanceUnits::in));
+
+    // Turn back to 0°
+    float heading_error = imu_rotation() - target_heading;
+    turn_pid(-heading_error, -1, 1, 500);
+    wait(100, vex::msec);
+
+    // PHASE 3: Drive remaining 20% straight
+    float last_straight = total * 0.2;
+    printf("Phase 3: Drive straight %.1f (20%%)\n", last_straight);
+    drive_straight(dir * last_straight, target_ips, ipss, do_decel, target_ips, end_ips);
+
+    printf("Final: %.1f from wall (target=%.1f)\n\n",
+           distance_left.objectDistance(vex::distanceUnits::in), target_wall_dist);
+
     if (do_decel && end_ips == 0) {
-        drive_r.stop(vex::brakeType::brake);
         drive_l.stop(vex::brakeType::brake);
-    } else if (!do_decel || end_ips == 0) {
-        drive_r.stop(vex::brakeType::coast);
-        drive_l.stop(vex::brakeType::coast);
+        drive_r.stop(vex::brakeType::brake);
     }
-    // If end_ips > 0, motors keep spinning for velocity carryover
 }
 
-// Backup function with hardcoded jitter parameters for tube alignment
-// Maintains 21.5" from left wall while driving
+// Backs up to tube position while maintaining distance from left wall
 void backup_to_tube_leftdist() {
-    const float JITTER_MAG = 5.0;         // RPM (decreased from 10 to reduce overcorrection)
-    const int JITTER_PERIOD = 20;         // ms
-    const float BASE_SPEED = 200.0;       // RPM
-    const float TARGET_DIST = 21.5;       // inches
-    const int DURATION = 2500;            // ms
-
-    drive_to_distance_timed(DURATION, TARGET_DIST, BASE_SPEED, JITTER_MAG, JITTER_PERIOD);
+    // Back up 15 inches at 200 rpm (approx 83 ips) while maintaining 21.5" from left wall
+    // Negative distance = reverse
+    drive_straight_wall_follow(-15, 83, 100, 21.5, true, 0, 0);
 }
 
-// Drives forward for a set time while jittering to reach target distance on left sensor
-void drive_to_distance_timed(int duration_msec, float target_dist, float base_speed, float jitter_mag, int jitter_period_msec) {
-    const int TICKS_PER_SEC = 50;
-    const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
-
-    vex::timer run_timer;
-    run_timer.clear();
-
-    int jitter_timer = 0;
-    bool jitter_direction = true; // true = right (toward wall), false = left (away from wall)
-    int debug_counter = 0;
-
-    // Run for specified duration
-    while (run_timer.time(vex::msec) < duration_msec) {
-        // Get current heading error for trig correction
-        float heading_error = imu_rotation() - target_heading;
-
-        // Read left distance sensor with cosine correction
-        // When angled, sensor reads shorter distance - need to compensate
-        float measured_dist = distance_left.objectDistance(vex::distanceUnits::in);
-        float angle_rad = heading_error * (3.14159265359 / 180.0); // Convert to radians
-        float cos_angle = std::cos(angle_rad);
-        // Avoid division by zero
-        if (std::abs(cos_angle) < 0.1) cos_angle = 0.1;
-        float current_dist = measured_dist / cos_angle;
-
-        float error = current_dist - target_dist;
-
-        // Determine which direction to bias jitter
-        // If too far (current < target, error negative): bias toward wall (right/positive)
-        // If too close (current > target, error positive): bias away from wall (left/negative)
-        float jitter_adjustment;
-
-        if (std::abs(error) > 0.5) { // Only jitter if not at target
-            // Switch jitter direction based on period
-            jitter_timer += MSEC_PER_TICK;
-            if (jitter_timer >= jitter_period_msec) {
-                jitter_direction = !jitter_direction;
-                jitter_timer = 0;
-            }
-
-            // Apply jitter with bias toward target
-            if (error < 0) { // Too far, need to turn right (toward wall)
-                jitter_adjustment = jitter_direction ? jitter_mag : jitter_mag * 0.3;
-            } else { // Too close, need to turn left (away from wall)
-                jitter_adjustment = jitter_direction ? -jitter_mag * 0.3 : -jitter_mag;
-            }
-        } else {
-            // At target, drive straight
-            jitter_adjustment = 0;
-        }
-
-        // Debug output every 5 ticks
-        if (debug_counter % 5 == 0) {
-            printf("Meas:%.1f Act:%.1f Tgt:%.1f Err:%.1f Ang:%.1f Jit:%.0f L:%d R:%d Dir:%s\n",
-                   measured_dist, current_dist, target_dist, error, heading_error, jitter_adjustment,
-                   (int)(base_speed + jitter_adjustment), (int)(base_speed - jitter_adjustment),
-                   jitter_direction ? "R" : "L");
-        }
-        debug_counter++;
-
-        // Apply motors with jitter
-        // Positive adjustment = turn right (toward wall): speed left, slow right
-        // Negative adjustment = turn left (away from wall): slow left, speed right
-        drive_l.spin(DIR_FWD, base_speed + jitter_adjustment, VEL_RPM);
-        drive_r.spin(DIR_FWD, base_speed - jitter_adjustment, VEL_RPM);
-
-        wait(MSEC_PER_TICK, vex::msec);
-    }
-
-    // Stop motors
-    drive_l.stop(vex::brakeType::brake);
-    drive_r.stop(vex::brakeType::brake);
-}
 
 // Use to drive straight
 void drive_straight(float inches, float target_ips, float ipss, bool do_decel, float start_ips, float end_ips) {

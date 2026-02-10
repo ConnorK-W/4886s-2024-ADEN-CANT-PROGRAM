@@ -98,17 +98,7 @@ void drive_straight_to_dist_value(float target_dist_in, float target_ips, float 
 void drive_straight_wall_follow(float inches, float target_ips, float ipss, float target_wall_dist, bool do_decel = true, float start_ips = 0, float end_ips = 0);
 
 /**
- * @brief Drives forward for a set time while jittering to reach target distance on left sensor
- * @param duration_msec How long to drive (milliseconds)
- * @param target_dist Target distance from left sensor (inches)
- * @param base_speed Base forward speed (RPM)
- * @param jitter_mag Magnitude of jitter adjustment (RPM)
- * @param jitter_period_msec Period of jitter oscillation (milliseconds)
- */
-void drive_to_distance_timed(int duration_msec, float target_dist, float base_speed, float jitter_mag, int jitter_period_msec);
-
-/**
- * @brief Hardcoded backup function: drives 2.5s at 200 RPM maintaining 21.5" from left wall
- * Uses jitter control (10 RPM magnitude, 20ms period) for wall following
+ * @brief Backs up to tube position while maintaining 21.5" from left wall
  */
 void backup_to_tube_leftdist();
+

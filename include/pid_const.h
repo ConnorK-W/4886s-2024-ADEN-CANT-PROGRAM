@@ -42,12 +42,15 @@
 #define ARM_KD 0.0
 
 // drive_straight_to_dist_value() consts
-#define DRIVE_TO_DIST_KP 2.7
+#define DRIVE_TO_DIST_KP 2.5
+
 #define DRIVE_TO_DIST_KI 0.0
 #define DRIVE_TO_DIST_KD 1.0
 
-// Wall following PID consts
-#define WALL_FOLLOW_KP 2.0
-#define WALL_FOLLOW_KI 0.0
-#define WALL_FOLLOW_KD 0.5
+// Wall following - Smooth proportional corrections
+// How it works: Check distance, turn proportionally, drive (distance based on error), repeat
+#define WALL_BASE_CHECK_INTERVAL 1.5  // Minimum distance between checks in inches (try 1.0-3.0)
+#define WALL_CORRECTION_GAIN 3.0      // Degrees per inch of error (try 2.0-6.0)
+#define WALL_MAX_CORRECTION_ANGLE 12.0 // Maximum turn angle in degrees (try 8-15)
+#define WALL_ERROR_THRESHOLD 0.3      // Ignore errors smaller than this in inches (try 0.2-0.8)
 

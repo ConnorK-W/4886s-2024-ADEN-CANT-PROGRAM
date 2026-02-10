@@ -148,25 +148,29 @@ void tune_smallgoal_pid() {
     }
 }
 
-// Tunes wall following PID
+// Tunes smooth proportional wall following
 void tune_wall_follow_pid() {
     master.rumble("...");
-    const float TUNER = 0.025;
+    const float INTERVAL_TUNER = 0.25;  // Adjust base interval by 0.25 inches
+    const float GAIN_TUNER = 0.5;       // Adjust correction gain by 0.5 deg/inch
+    const float MAX_ANGLE_TUNER = 1.0;  // Adjust max angle by 1 degree
+    const float THRESHOLD_TUNER = 0.1;  // Adjust threshold by 0.1 inches
 
-    // Wall follow PID tuning values
-    float wall_kp = WALL_FOLLOW_KP;
-    float wall_ki = WALL_FOLLOW_KI;
-    float wall_kd = WALL_FOLLOW_KD;
+    // Proportional controller tuning values
+    float base_interval = WALL_BASE_CHECK_INTERVAL;   // Base distance between checks
+    float correction_gain = WALL_CORRECTION_GAIN;     // Degrees per inch of error
+    float max_angle = WALL_MAX_CORRECTION_ANGLE;      // Maximum correction angle
+    float error_threshold = WALL_ERROR_THRESHOLD;     // Ignore errors below this
 
     // Test parameters
-    float drive_dist = 24.0;      // Drive 24 inches
-    float target_wall_dist = 24.0; // Target 12 inches from wall
-    float target_speed = 50;
-    float accel = 20;
+    float test_distance = 24.0;       // Test drive distance (positive = forward)
+    float target_wall_dist = 21.0;    // Target distance from wall
+    float target_speed = 20;           // Test speed in IPS (slow for testing)
+    float accel = 15;                  // Acceleration (lower for smoother)
 
     B_SCRN.clearScreen();
 
-    // Tune mode: 0=wall_kp, 1=wall_ki, 2=wall_kd, 3=drive_dist, 4=target_wall_dist
+    // Tune mode: 0=base_interval, 1=correction_gain, 2=max_angle, 3=error_threshold, 4=test_distance
     static int tune_mode = 0;
     const int NUM_MODES = 5;
 
@@ -175,102 +179,43 @@ void tune_wall_follow_pid() {
         if (BTN_Y.PRESSED) {
             while (BTN_Y.PRESSED) { wait(20, vex::msec); }
 
+            // Put down the tongue
+            tounge.set(1);
+            wait(200, vex::msec);
+
             imu.calibrate();
             while (imu.isCalibrating()) { wait(20, vex::msec); }
             reset_imu_rotation();
             target_heading = imu_rotation();
 
-            // Temporarily override PID constants
-            #undef WALL_FOLLOW_KP
-            #undef WALL_FOLLOW_KI
-            #undef WALL_FOLLOW_KD
-            #define WALL_FOLLOW_KP wall_kp
-            #define WALL_FOLLOW_KI wall_ki
-            #define WALL_FOLLOW_KD wall_kd
+            // Temporarily override constants for testing
+            #undef WALL_BASE_CHECK_INTERVAL
+            #undef WALL_CORRECTION_GAIN
+            #undef WALL_MAX_CORRECTION_ANGLE
+            #undef WALL_ERROR_THRESHOLD
+            #define WALL_BASE_CHECK_INTERVAL base_interval
+            #define WALL_CORRECTION_GAIN correction_gain
+            #define WALL_MAX_CORRECTION_ANGLE max_angle
+            #define WALL_ERROR_THRESHOLD error_threshold
 
-            // Run test for 6 seconds max to prevent motor burnout
-            // Use a large distance but limit by time
-            vex::timer test_timer;
-            test_timer.clear();
+            printf("\n=== Smooth Wall Follow Test ===\n");
+            printf("BaseInt:%.1f  Gain:%.1f  MaxAng:%.1f  Thr:%.1f  Target:%.1f\n\n",
+                   base_interval, correction_gain, max_angle, error_threshold, target_wall_dist);
 
-            // Run wall follow with very large distance (will be limited by time)
-            const int TICKS_PER_SEC = 50;
-            const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
+            // Run the smooth proportional wall follow function
+            drive_straight_wall_follow(test_distance, target_speed, accel, target_wall_dist, true, 0, 0);
 
-            PID pid_drive_l = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
-            PID pid_drive_r = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
-            PID pid_wall = PID(wall_kp, wall_ki, wall_kd);
+            printf("\n=== Test Complete ===\n\n");
 
-            float ips = 0, pos = 0;
-            float pos_start_l = pos_drive_l(), pos_start_r = pos_drive_r();
-            float pos_l, pos_r;
-            float dir_mod = 1;
-            float vel_rpm;
-
-            // Run for 6 seconds
-            while (test_timer.time(vex::msec) < 6000) {
-                // Accelerate
-                if (ips < target_speed)
-                    ips += accel / TICKS_PER_SEC;
-                else
-                    ips = target_speed;
-
-                pos += ips / TICKS_PER_SEC * dir_mod;
-
-                pos_l = pos_drive_l() - pos_start_l;
-                pos_r = pos_drive_r() - pos_start_r;
-
-                float pid_adjustment_l = pid_drive_l.adjust(pos, pos_l);
-                float pid_adjustment_r = pid_drive_r.adjust(pos, pos_r);
-
-                // Get current heading error for trig correction
-                float heading_error = imu_rotation() - target_heading;
-
-                // Wall following: adjust heading based on left distance sensor
-                float measured_wall_dist = distance_left.objectDistance(vex::distanceUnits::in);
-
-                // If sensor doesn't detect wall, use a large default value
-                if (measured_wall_dist > 200 || measured_wall_dist < 1) {
-                    measured_wall_dist = target_wall_dist; // No correction if no wall detected
-                }
-
-                float angle_rad = heading_error * (3.14159265359 / 180.0);
-                float cos_angle = std::cos(angle_rad);
-                if (std::abs(cos_angle) < 0.1) cos_angle = 0.1;
-                float actual_wall_dist = measured_wall_dist / cos_angle;
-
-                float pid_adjustment_wall_raw = pid_wall.adjust(target_wall_dist, actual_wall_dist);
-                float pid_adjustment_wall = pid_adjustment_wall_raw;
-
-                // Clamp wall correction to prevent spinning (max ±50 RPM correction)
-                if (pid_adjustment_wall > 50) pid_adjustment_wall = 50;
-                if (pid_adjustment_wall < -50) pid_adjustment_wall = -50;
-
-                // INVERT signs - if robot keeps going wrong way, this might help
-                pid_adjustment_wall = -pid_adjustment_wall;
-
-                vel_rpm = ips / DRIVE_REV_TO_IN * 60;
-
-                // Debug output every 5 ticks
-                static int debug_counter = 0;
-                if (debug_counter % 5 == 0) {
-                    printf("Meas:%.1f Act:%.1f Tgt:%.1f Err:%.1f Raw:%.1f Out:%.1f L:%d R:%d\n",
-                           measured_wall_dist, actual_wall_dist, target_wall_dist,
-                           target_wall_dist - actual_wall_dist, pid_adjustment_wall_raw, pid_adjustment_wall,
-                           (int)(dir_mod * vel_rpm + pid_adjustment_l + pid_adjustment_wall),
-                           (int)(dir_mod * vel_rpm + pid_adjustment_r - pid_adjustment_wall));
-                }
-                debug_counter++;
-
-                drive_l.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_l + pid_adjustment_wall, VEL_RPM);
-                drive_r.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_r - pid_adjustment_wall, VEL_RPM);
-
-                wait(MSEC_PER_TICK, vex::msec);
-            }
-
-            // Stop motors after 6 seconds
-            drive_l.stop(vex::brakeType::brake);
-            drive_r.stop(vex::brakeType::brake);
+            // Restore original constants
+            #undef WALL_BASE_CHECK_INTERVAL
+            #undef WALL_CORRECTION_GAIN
+            #undef WALL_MAX_CORRECTION_ANGLE
+            #undef WALL_ERROR_THRESHOLD
+            #define WALL_BASE_CHECK_INTERVAL 1.5
+            #define WALL_CORRECTION_GAIN 3.0
+            #define WALL_MAX_CORRECTION_ANGLE 12.0
+            #define WALL_ERROR_THRESHOLD 0.3
 
             wait(200, vex::msec);
         }
@@ -284,53 +229,57 @@ void tune_wall_follow_pid() {
         // Adjust selected value
         int adjust = btn_up() - btn_down();
         switch(tune_mode) {
-            case 0: // Wall follow kP
-                wall_kp += adjust * TUNER;
-                if (wall_kp < 0) wall_kp = 0;
+            case 0: // Base interval (minimum check distance)
+                base_interval += adjust * INTERVAL_TUNER;
+                if (base_interval < 0.5) base_interval = 0.5;
+                if (base_interval > 5) base_interval = 5;
                 break;
-            case 1: // Wall follow kI
-                wall_ki += adjust * TUNER;
-                if (wall_ki < 0) wall_ki = 0;
+            case 1: // Correction gain (degrees per inch)
+                correction_gain += adjust * GAIN_TUNER;
+                if (correction_gain < 0.5) correction_gain = 0.5;
+                if (correction_gain > 10) correction_gain = 10;
                 break;
-            case 2: // Wall follow kD
-                wall_kd += adjust * TUNER;
-                if (wall_kd < 0) wall_kd = 0;
+            case 2: // Max correction angle (degrees)
+                max_angle += adjust * MAX_ANGLE_TUNER;
+                if (max_angle < 5) max_angle = 5;
+                if (max_angle > 25) max_angle = 25;
                 break;
-            case 3: // Drive distance
-                drive_dist += adjust * 5;
-                if (drive_dist < 10) drive_dist = 10;
+            case 3: // Error threshold (inches)
+                error_threshold += adjust * THRESHOLD_TUNER;
+                if (error_threshold < 0) error_threshold = 0;
+                if (error_threshold > 2) error_threshold = 2;
                 break;
-            case 4: // Target wall distance
-                target_wall_dist += adjust * 1;
-                if (target_wall_dist < 3) target_wall_dist = 3;
+            case 4: // Test distance
+                test_distance += adjust * 6;
+                if (test_distance < 6) test_distance = 6;
+                if (test_distance > 60) test_distance = 60;
                 break;
         }
 
         // Display current values
         B_SCRN.clearScreen();
         B_SCRN.setCursor(1, 1);
-        B_SCRN.print("Wall Follow PID Tuning");
+        B_SCRN.print("Wall Smooth Tuning");
 
-        // Show wall PID values with selection indicator
         B_SCRN.setCursor(2, 1);
-        B_SCRN.print("%sWALL kP: %.3f", (tune_mode == 0) ? "> " : "  ", wall_kp);
+        B_SCRN.print("%sBaseInt: %.2f in", (tune_mode == 0) ? "> " : "  ", base_interval);
         B_SCRN.setCursor(3, 1);
-        B_SCRN.print("%sWALL kI: %.3f", (tune_mode == 1) ? "> " : "  ", wall_ki);
+        B_SCRN.print("%sGain: %.1f d/in", (tune_mode == 1) ? "> " : "  ", correction_gain);
         B_SCRN.setCursor(4, 1);
-        B_SCRN.print("%sWALL kD: %.3f", (tune_mode == 2) ? "> " : "  ", wall_kd);
+        B_SCRN.print("%sMaxAng: %.0f deg", (tune_mode == 2) ? "> " : "  ", max_angle);
 
         B_SCRN.setCursor(5, 1);
-        B_SCRN.print("%sDrive: %.1f in", (tune_mode == 3) ? "> " : "  ", drive_dist);
+        B_SCRN.print("%sThresh: %.1f in", (tune_mode == 3) ? "> " : "  ", error_threshold);
         B_SCRN.setCursor(6, 1);
-        B_SCRN.print("%sWallDist: %.1f in", (tune_mode == 4) ? "> " : "  ", target_wall_dist);
+        B_SCRN.print("%sTestDist: %.0f in", (tune_mode == 4) ? "> " : "  ", test_distance);
 
         B_SCRN.setCursor(7, 1);
-        B_SCRN.print("Y: Run  A: Next Param");
+        B_SCRN.print("WallTgt:%.1f  Speed:%.0f", target_wall_dist, target_speed);
         B_SCRN.setCursor(8, 1);
-        B_SCRN.print("Left: %.2f in", distance_left.objectDistance(vex::distanceUnits::in));
+        B_SCRN.print("Y:Run A:Next  L:%.1f", distance_left.objectDistance(vex::distanceUnits::in));
 
-        printf("WALL(kP:%.3f kI:%.3f kD:%.3f) Drive:%.1f WallDist:%.1f\n",
-               wall_kp, wall_ki, wall_kd, drive_dist, target_wall_dist);
+        printf("WALL(Base:%.2f Gain:%.1f Max:%.0f Thr:%.1f) Test:%.0f\n",
+               base_interval, correction_gain, max_angle, error_threshold, test_distance);
 
         wait(100, vex::msec);
     }
@@ -747,98 +696,4 @@ void tune_dist_sensor_pid() {
     }
 }
 
-// Tunes distance-following with jitter approach (no PID)
-void tune_distance_turn_pid() {
-    master.rumble("----");
-
-    // Jitter tuning parameters
-    float jitter_mag = 30.0;        // RPM adjustment for jitter
-    int jitter_period = 100;        // milliseconds per jitter cycle
-    float base_speed = 100.0;       // Forward speed (RPM)
-    int test_duration = 3000;       // Test duration (ms)
-    float target_distance = 21.5;   // Target distance (inches)
-
-    B_SCRN.clearScreen();
-
-    // Tune mode: 0=jitter_mag, 1=jitter_period, 2=base_speed, 3=test_duration, 4=target_distance
-    static int tune_mode = 0;
-    const int NUM_MODES = 5;
-
-    while (true) {
-        // Run test on Y press
-        if (BTN_Y.PRESSED) {
-            while (BTN_Y.PRESSED) { wait(20, vex::msec); }
-
-            printf("\n=== STARTING TEST ===\n");
-            printf("Target: %.1f in, Speed: %.0f RPM, Jitter: %.0f RPM @ %d ms\n",
-                   target_distance, base_speed, jitter_mag, jitter_period);
-
-            // Set target heading for cosine correction
-            target_heading = imu_rotation();
-
-            // Run the jitter test
-            drive_to_distance_timed(test_duration, target_distance, base_speed, jitter_mag, jitter_period);
-
-            printf("=== TEST COMPLETE ===\n\n");
-            wait(200, vex::msec);
-        }
-
-        // Change tuning parameter with A button
-        if (BTN_A.PRESSED) {
-            while (BTN_A.PRESSED) { wait(20, vex::msec); }
-            tune_mode = (tune_mode + 1) % NUM_MODES;
-        }
-
-        // Adjust selected value
-        int adjust = btn_up() - btn_down();
-        switch(tune_mode) {
-            case 0: // Jitter magnitude
-                jitter_mag += adjust * 5;
-                if (jitter_mag < 0) jitter_mag = 0;
-                break;
-            case 1: // Jitter period
-                jitter_period += adjust * 20;
-                if (jitter_period < 20) jitter_period = 20;
-                break;
-            case 2: // Base speed
-                base_speed += adjust * 10;
-                if (base_speed < 10) base_speed = 10;
-                break;
-            case 3: // Test duration
-                test_duration += adjust * 500;
-                if (test_duration < 1000) test_duration = 1000;
-                break;
-            case 4: // Target distance
-                target_distance += adjust * 1;
-                if (target_distance < 3) target_distance = 3;
-                break;
-        }
-
-        // Display current values
-        B_SCRN.clearScreen();
-        B_SCRN.setCursor(1, 1);
-        B_SCRN.print("Jitter Distance Tuning");
-
-        B_SCRN.setCursor(2, 1);
-        B_SCRN.print("%sJitter Mag: %.0f RPM", (tune_mode == 0) ? "> " : "  ", jitter_mag);
-        B_SCRN.setCursor(3, 1);
-        B_SCRN.print("%sJitter Per: %d ms", (tune_mode == 1) ? "> " : "  ", jitter_period);
-        B_SCRN.setCursor(4, 1);
-        B_SCRN.print("%sBase Speed: %.0f RPM", (tune_mode == 2) ? "> " : "  ", base_speed);
-        B_SCRN.setCursor(5, 1);
-        B_SCRN.print("%sDuration: %d ms", (tune_mode == 3) ? "> " : "  ", test_duration);
-        B_SCRN.setCursor(6, 1);
-        B_SCRN.print("%sTarget Dist: %.1f in", (tune_mode == 4) ? "> " : "  ", target_distance);
-
-        B_SCRN.setCursor(7, 1);
-        B_SCRN.print("Y: Run Test  A: Cycle");
-        B_SCRN.setCursor(8, 1);
-        B_SCRN.print("Left Sensor: %.1f in", distance_left.objectDistance(vex::distanceUnits::in));
-
-        printf("Jitter(Mag:%.0f Per:%dms) Speed:%.0f Dur:%d Tgt:%.1f\n",
-               jitter_mag, jitter_period, base_speed, test_duration, target_distance);
-
-        wait(100, vex::msec);
-    }
-}
 

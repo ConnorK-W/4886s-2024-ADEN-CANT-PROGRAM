@@ -357,7 +357,7 @@ drive_straight(-29, 75, 50);
         scoring = 5;
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
-        backup_to_tube_leftdist();
+        drive_straight_wall_follow(-15, 83, 100, 21.5, true, 0, 0);
         scoring = 1;
         drive_full.spin(DIR_FWD, 3, VLT_VLT);
         wait(2000, TIME_MSEC);

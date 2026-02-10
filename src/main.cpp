@@ -16,26 +16,19 @@ void test_drive_straight_with_dist();
 void test_potentiometer();
 void test_drive_to_dist_value();
 void test_wall_follow();
+void test_distance_display();
 
 int main() {
-    // NORMAL - COMMENTED OUT FOR TUNING
+    // NORMAL COMPETITION MODE
     vex::competition Competition;
-    
-    // AUTON
     Competition.autonomous(autonomous);
     Competition.drivercontrol(opcontrol);
-    
     pre_auton();
-    // NORMAL
 
-    // TUNING MODE: Distance jitter tuning for 21.5" left sensor
-    // tune_distance_turn_pid();
-
-    // // test_distance();
-    // test_drive_straight_with_dist();
-    // test_drive_to_dist_value();
-    // tune_dist_sensor_pid();
-    // tune_wall_follow_pid();
+    // Tuning/test functions (commented out):
+    // tune_wall_follow_pid();   // Wall follow parameter tuning
+    // test_distance_display();  // Display distance sensor readings
+    // test_wall_follow();       // Simple one-shot test
 
 }
 
@@ -58,8 +51,51 @@ void test_wall_follow() {
     reset_imu_rotation();
     target_heading = imu_rotation();
 
-    // Drive 48 inches while maintaining 12 inches from left wall
-    drive_straight_wall_follow(48, 50, 20, 12.0);
+    // Drive 24 inches while maintaining 21.5 inches from left wall
+    // Parameters: distance(in), speed(ips), accel(ipss), target_wall_dist(in)
+    drive_straight_wall_follow(24, 60, 30, 21.5);
+}
+
+void test_distance_display() {
+    imu.calibrate();
+    while (imu.isCalibrating()) {
+        wait(20, vex::msec);
+    }
+    reset_imu_rotation();
+    target_heading = imu_rotation();
+
+    B_SCRN.clearScreen();
+
+    // Display distance readings continuously
+    while (true) {
+        float current_heading = imu_rotation();
+        float measured_dist = distance_left.objectDistance(vex::distanceUnits::in);
+
+        // Trig correction
+        float heading_error = current_heading - target_heading;
+        float angle_rad = heading_error * (3.14159265359 / 180.0);
+        float cos_angle = std::cos(angle_rad);
+        if (std::abs(cos_angle) < 0.1) cos_angle = 0.1;
+        float corrected_dist = measured_dist / cos_angle;
+
+        // Display on brain
+        B_SCRN.setCursor(1, 1);
+        B_SCRN.print("Distance Test");
+        B_SCRN.setCursor(3, 1);
+        B_SCRN.print("Heading: %.1f deg  ", heading_error);
+        B_SCRN.setCursor(4, 1);
+        B_SCRN.print("Raw: %.2f in       ", measured_dist);
+        B_SCRN.setCursor(5, 1);
+        B_SCRN.print("Corrected: %.2f in ", corrected_dist);
+        B_SCRN.setCursor(7, 1);
+        B_SCRN.print("Rotate robot to test");
+
+        // Print to terminal
+        printf("Hdg:%.1f  Raw:%.2f  Corrected:%.2f\n",
+               heading_error, measured_dist, corrected_dist);
+
+        wait(100, vex::msec);
+    }
 }
 
 void test_drive_straight_with_dist() {
