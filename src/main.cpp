@@ -14,27 +14,52 @@ void test_vision();
 void test_distance();
 void test_drive_straight_with_dist();
 void test_potentiometer();
+void test_drive_to_dist_value();
+void test_wall_follow();
 
 int main() {
-    // // NORMAL
-    // vex::competition Competition;
-     
-    // // AUTON
-    // Competition.autonomous(autonomous);
-    // Competition.drivercontrol(opcontrol);
+    // NORMAL - COMMENTED OUT FOR TUNING
+    vex::competition Competition;
     
-    // pre_auton();
-    // // NORMAL
+    // AUTON
+    Competition.autonomous(autonomous);
+    Competition.drivercontrol(opcontrol);
+    
+    pre_auton();
+    // NORMAL
 
+    // TUNING MODE: Distance jitter tuning for 21.5" left sensor
+    // tune_distance_turn_pid();
 
-    // // CALIBRATE FOR TESTING FXNs
+    // // test_distance();
+    // test_drive_straight_with_dist();
+    // test_drive_to_dist_value();
+    // tune_dist_sensor_pid();
+    // tune_wall_follow_pid();
+
+}
+
+void test_drive_to_dist_value() {
     imu.calibrate();
     while (imu.isCalibrating()) {
         wait(20, vex::msec);
     }
+    reset_imu_rotation();
+    
+    // Drive to where front distance sensor reads 18.2 inches
+    drive_straight_to_dist_value(18.2, 50, 20, distance_front);
+}
 
-    test_drive_straight_with_dist();
+void test_wall_follow() {
+    imu.calibrate();
+    while (imu.isCalibrating()) {
+        wait(20, vex::msec);
+    }
+    reset_imu_rotation();
+    target_heading = imu_rotation();
 
+    // Drive 48 inches while maintaining 12 inches from left wall
+    drive_straight_wall_follow(48, 50, 20, 12.0);
 }
 
 void test_drive_straight_with_dist() {
@@ -45,7 +70,7 @@ void test_drive_straight_with_dist() {
 }
 
 void test_distance() {
-    intakeLow.spin(DIR_FWD, 100, VLT_VLT);
+    // intakeLow.spin(DIR_FWD, 100, VLT_VLT);
     while (1) {
         double distancefront = distance_front.objectDistance(vex::distanceUnits::in);
         double distanceleft = distance_left.objectDistance(vex::distanceUnits::in);

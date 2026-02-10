@@ -41,3 +41,13 @@
 #define ARM_KI 0.0
 #define ARM_KD 0.0
 
+// drive_straight_to_dist_value() consts
+#define DRIVE_TO_DIST_KP 2.7
+#define DRIVE_TO_DIST_KI 0.0
+#define DRIVE_TO_DIST_KD 1.0
+
+// Wall following PID consts
+#define WALL_FOLLOW_KP 2.0
+#define WALL_FOLLOW_KI 0.0
+#define WALL_FOLLOW_KD 0.5
+

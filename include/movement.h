@@ -74,3 +74,41 @@ void wiggle(int num_wiggles, float angle, int duration_msec);
 void vision_processing_task();
 
 void drive_straight_with_dist(float inches, float target_ips, float ipss, bool do_decel = true, float start_ips = 0, float end_ips = 0);
+
+/**
+ * @brief Drives straight using PID on distance sensor reading
+ * @param target_dist_in Target distance from sensor (inches)
+ * @param target_ips Goal velocity (positive)
+ * @param ipss Acceleration (positive)
+ * @param dist_sensor Reference to distance sensor to use
+ * @param do_decel Whether to decelerate at end
+ */
+void drive_straight_to_dist_value(float target_dist_in, float target_ips, float ipss, vex::distance& dist_sensor, bool do_decel = true);
+
+/**
+ * @brief Drives straight while maintaining a target distance from side wall using left distance sensor
+ * @param inches Distance to travel
+ * @param target_ips Goal velocity
+ * @param ipss Acceleration
+ * @param target_wall_dist Target distance from wall (inches)
+ * @param do_decel Whether to decelerate
+ * @param start_ips Starting velocity
+ * @param end_ips Final velocity
+ */
+void drive_straight_wall_follow(float inches, float target_ips, float ipss, float target_wall_dist, bool do_decel = true, float start_ips = 0, float end_ips = 0);
+
+/**
+ * @brief Drives forward for a set time while jittering to reach target distance on left sensor
+ * @param duration_msec How long to drive (milliseconds)
+ * @param target_dist Target distance from left sensor (inches)
+ * @param base_speed Base forward speed (RPM)
+ * @param jitter_mag Magnitude of jitter adjustment (RPM)
+ * @param jitter_period_msec Period of jitter oscillation (milliseconds)
+ */
+void drive_to_distance_timed(int duration_msec, float target_dist, float base_speed, float jitter_mag, int jitter_period_msec);
+
+/**
+ * @brief Hardcoded backup function: drives 2.5s at 200 RPM maintaining 21.5" from left wall
+ * Uses jitter control (10 RPM magnitude, 20ms period) for wall following
+ */
+void backup_to_tube_leftdist();

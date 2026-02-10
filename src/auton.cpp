@@ -6,6 +6,16 @@ int scoring = 1;
 
 void intake(void);
 
+void stream_front_distance(void) {
+    while (true) {
+        double dist = distance_front.objectDistance(vex::distanceUnits::in);
+        B_SCRN.clearLine(1);
+        B_SCRN.setCursor(1, 1);
+        B_SCRN.print("Front: %.2f in", dist);
+        wait(100, TIME_MSEC);
+    }
+}
+
 void autonomous(void) {
     while (imu.isCalibrating()) {
         wait(20, vex::msec);
@@ -25,20 +35,24 @@ void autonomous(void) {
         drive_turn(90, 14, 40, 75, false, 20, 0);
 
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
-        wait(625, TIME_MSEC);
-        // long goal
-        tounge.set(0);
-        drive_straight_toward_goal(800, 0);
-        scoring = 4;
-        drive_full.spin(DIR_REV, 50, VEL_PCT);
         wait(700, TIME_MSEC);
+        hood.set(1);
+        // long goal
+        vex::thread t4([](){
+            wait(400, TIME_MSEC);
+            scoring = 4;
+        });
+        drive_straight_toward_goal(1000, 0);
+        drive_full.spin(DIR_REV, 50, VEL_PCT);
+        t4.interrupt();
+        wait(500, TIME_MSEC);
 
         // middle goal
         scoring = 1;
         drive_turn(91, 5, 25, 70, false);
         target_heading = 180;   
         drive_straight(52,45,45, true, 0, 20);
-        drive_straight(11, 12, 50, true, 20, 6);
+        drive_straight(12, 12, 50, true, 20, 6);
         tounge.set(1);
         turn_pid(-45, -1, 1);
         vex::thread t2([](){
@@ -60,6 +74,7 @@ void autonomous(void) {
         drive_straight(7, 35, 40, true, 0, 15);
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
         wait(625, TIME_MSEC);
+        hood.set(1);
         // long goal
         vex::thread t3([](){
             wait(400, TIME_MSEC);
@@ -68,9 +83,7 @@ void autonomous(void) {
         drive_straight_toward_goal(1000, 0);
         
         tounge.set(0);
-        hood.set(1);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
-
         break;
     }
 
@@ -304,11 +317,13 @@ drive_straight(-29, 75, 50);
 
     case SKILLS: {
         vex::thread t1(intake);
+        vex::thread dist_thread(stream_front_distance);
         finger.set(1); // get finger out of way 
         tounge.set(1); // open tounge
-        drive_straight(35, 70, 70); // straight
-        drive_turn(-90, -12, 40, 75, false); // arc toward goal
-
+        drive_straight_to_dist_value(18.5, 75, 125, distance_front);
+        tounge.set(1);
+        turn_pid(-90, -1, 1);
+        drive_straight(8, 20, 70, false);
 
         scoring = 1;
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
@@ -324,26 +339,25 @@ drive_straight(-29, 75, 50);
 
         // long goal
         // drive_straight(-35, 50, 70); // straight
-        drive_straight_toward_goal(1300, false, true); // try lowering
+        drive_straight_toward_goal(1700, false, true); // try lowering
         drive_straight(5,30,75, true, 0, 10);
         tounge.set(0);
-        drive_turn(180, 12, 30, 75, false, 10, 0);
-        drive_straight(80, 60, 70, true, 0, 5);
-        turn_pid(90, -1, 1);
-        drive_full.spin(DIR_REV, 4, VLT_VLT);
-        wait(1000, TIME_MSEC);
-        drive_full.stop();
-
+        drive_turn(180, 12, 30, 75, false, 10, 2);
+        drive_straight_with_dist(80, 60, 70, true, 0, 2);
+        
+        // driving from wall to first goal align
+        turn_pid(-90 + offsettheta, -1, 1);
+        offsettheta = 0;
+        drive_straight_to_dist_value(16, 45, 100, distance_front);
         // first goal
-        drive_straight(9, 30, 50);
-        turn_pid(-90, -1, 1); 
+        turn_pid(90, -1, 1); 
         tounge.set(1);
         // drive_straight(-15, 50, 70); // straight
         drive_straight_toward_goal(700, false, true);
         scoring = 5;
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
-        drive_straight(10, 30, 100, false);
+        backup_to_tube_leftdist();
         scoring = 1;
         drive_full.spin(DIR_FWD, 3, VLT_VLT);
         wait(2000, TIME_MSEC);
@@ -360,24 +374,18 @@ drive_straight(-29, 75, 50);
         drive_straight_toward_goal(750, false, true); // try lowering 
         scoring = 6; 
         drive_full.spinFor(DIR_REV, 2500, TIME_MSEC, 50, VEL_PCT);
-        scoring = 1;
         wait(400, TIME_MSEC);
-        scoring = 6; 
-        drive_full.spinFor(DIR_REV, 2000, TIME_MSEC, 50, VEL_PCT);
         tounge.set(0);
-        drive_straight(5, 10, 50, false);
+        drive_straight(5, 10, 50, false, 0, 2);
         scoring = 0;
-        drive_straight(-7, 10, 50, false);
+        drive_straight(-7, 10, 50, false, 0, 2);
 
 
         // second half legacy going over
-        drive_turn(89, 15, 50, 75, false);
-        drive_straight(88, 75, 125, false);
-        drive_full.spin(DIR_FWD, 6, VLT_VLT);
-        wait(1000, TIME_MSEC);
-        drive_straight(-11, 30, 70, false);
+        drive_turn(89, 15, 50, 75, false, 0, 2);
+        drive_straight(90, 75, 125, true, 0, 2);
+        drive_straight_to_dist_value(18.5, 75, 125, distance_front);
         tounge.set(1);
-        scoring = 1;
         turn_pid(-90, -1, 1);
         drive_straight(8, 20, 70, false);
         scoring = 1;
@@ -394,25 +402,26 @@ drive_straight(-29, 75, 50);
 
         // long goal
         // drive_straight(-35, 50, 70); // straight
-        drive_straight_toward_goal(1000, false, true); // try lowering
+        drive_straight_toward_goal(1700, false, true); // try lowering
         drive_straight(5,30,75, false);
         tounge.set(0);
         drive_turn(180, 12, 30, 75, false);
-        drive_straight(77, 50, 75, false);
-        turn_pid(90, -1, 1);
-        drive_full.spin(DIR_REV, 5, VLT_VLT);
-        wait(1000, TIME_MSEC);
-
-        // first goal
-        drive_straight(9, 30, 100);
-        turn_pid(-90, -1, 1); 
+        
+        // drive down
+        drive_straight_with_dist(80, 60, 70, true, 0, 0);
+        turn_pid(-90 + offsettheta, -1, 1);
+        offsettheta = 0;
+        drive_straight_to_dist_value(16, 45, 100, distance_front);
+        
+        // align to second goal
+        turn_pid(90, -1, 1); 
         tounge.set(1);
         // drive_straight(-15, 50, 70); // straight
         drive_straight_toward_goal(700, false, true);
         scoring = 5;
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
-        drive_straight(8, 20, 75, false);
+        backup_to_tube_leftdist();
         scoring = 1;
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(1500, TIME_MSEC);
@@ -429,16 +438,13 @@ drive_straight(-29, 75, 50);
         drive_straight_toward_goal(750, false, true); // try lowering 
         scoring = 6; 
         drive_full.spinFor(DIR_REV, 2500, TIME_MSEC, 50, VEL_PCT);
-        scoring = 1;
         wait(400, TIME_MSEC);
-        scoring = 6; 
-        drive_full.spinFor(DIR_REV, 2000, TIME_MSEC, 50, VEL_PCT);
         tounge.set(0);
         drive_straight(5, 10, 50, false);
         scoring = 0;
         drive_straight(-7, 10, 50, false);
         drive_turn(80, 38, 50, 75, false);
-        drive_full.spinFor(DIR_FWD, 1100, TIME_MSEC, 50, VEL_PCT);
+        drive_full.spinFor(DIR_FWD, 1300, TIME_MSEC, 50, VEL_PCT);
         intakeLow.spin(DIR_REV, 100, VEL_PCT);
         drive_full.spinFor(DIR_REV, 200, TIME_MSEC, 50, VEL_PCT);
 
@@ -504,7 +510,7 @@ void intake() {
             lift.set(0);
             hood.set(1);
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-            arm.spin(DIR_FWD, 25, VEL_PCT);
+            arm.spin(DIR_FWD, 32.5, VEL_PCT);
             break;
         }
         case 7: {

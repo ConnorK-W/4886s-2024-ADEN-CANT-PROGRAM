@@ -71,7 +71,7 @@ void tune_smallgoal_pid() {
             while (!BTN_Y.PRESSED) {
                 if (imu.roll() < 6) {
                     aivis.takeSnapshot(yellow);
-                                    
+
                     bool has_target = aivis.largestObject.exists;
 
                     if (has_target) {
@@ -145,6 +145,194 @@ void tune_smallgoal_pid() {
         dir.tune_kD(btn_right() - btn_left(), TUNER);
 
         wait(20, vex::msec);
+    }
+}
+
+// Tunes wall following PID
+void tune_wall_follow_pid() {
+    master.rumble("...");
+    const float TUNER = 0.025;
+
+    // Wall follow PID tuning values
+    float wall_kp = WALL_FOLLOW_KP;
+    float wall_ki = WALL_FOLLOW_KI;
+    float wall_kd = WALL_FOLLOW_KD;
+
+    // Test parameters
+    float drive_dist = 24.0;      // Drive 24 inches
+    float target_wall_dist = 24.0; // Target 12 inches from wall
+    float target_speed = 50;
+    float accel = 20;
+
+    B_SCRN.clearScreen();
+
+    // Tune mode: 0=wall_kp, 1=wall_ki, 2=wall_kd, 3=drive_dist, 4=target_wall_dist
+    static int tune_mode = 0;
+    const int NUM_MODES = 5;
+
+    while (true) {
+        // Run test on Y press
+        if (BTN_Y.PRESSED) {
+            while (BTN_Y.PRESSED) { wait(20, vex::msec); }
+
+            imu.calibrate();
+            while (imu.isCalibrating()) { wait(20, vex::msec); }
+            reset_imu_rotation();
+            target_heading = imu_rotation();
+
+            // Temporarily override PID constants
+            #undef WALL_FOLLOW_KP
+            #undef WALL_FOLLOW_KI
+            #undef WALL_FOLLOW_KD
+            #define WALL_FOLLOW_KP wall_kp
+            #define WALL_FOLLOW_KI wall_ki
+            #define WALL_FOLLOW_KD wall_kd
+
+            // Run test for 6 seconds max to prevent motor burnout
+            // Use a large distance but limit by time
+            vex::timer test_timer;
+            test_timer.clear();
+
+            // Run wall follow with very large distance (will be limited by time)
+            const int TICKS_PER_SEC = 50;
+            const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
+
+            PID pid_drive_l = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+            PID pid_drive_r = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+            PID pid_wall = PID(wall_kp, wall_ki, wall_kd);
+
+            float ips = 0, pos = 0;
+            float pos_start_l = pos_drive_l(), pos_start_r = pos_drive_r();
+            float pos_l, pos_r;
+            float dir_mod = 1;
+            float vel_rpm;
+
+            // Run for 6 seconds
+            while (test_timer.time(vex::msec) < 6000) {
+                // Accelerate
+                if (ips < target_speed)
+                    ips += accel / TICKS_PER_SEC;
+                else
+                    ips = target_speed;
+
+                pos += ips / TICKS_PER_SEC * dir_mod;
+
+                pos_l = pos_drive_l() - pos_start_l;
+                pos_r = pos_drive_r() - pos_start_r;
+
+                float pid_adjustment_l = pid_drive_l.adjust(pos, pos_l);
+                float pid_adjustment_r = pid_drive_r.adjust(pos, pos_r);
+
+                // Get current heading error for trig correction
+                float heading_error = imu_rotation() - target_heading;
+
+                // Wall following: adjust heading based on left distance sensor
+                float measured_wall_dist = distance_left.objectDistance(vex::distanceUnits::in);
+
+                // If sensor doesn't detect wall, use a large default value
+                if (measured_wall_dist > 200 || measured_wall_dist < 1) {
+                    measured_wall_dist = target_wall_dist; // No correction if no wall detected
+                }
+
+                float angle_rad = heading_error * (3.14159265359 / 180.0);
+                float cos_angle = std::cos(angle_rad);
+                if (std::abs(cos_angle) < 0.1) cos_angle = 0.1;
+                float actual_wall_dist = measured_wall_dist / cos_angle;
+
+                float pid_adjustment_wall_raw = pid_wall.adjust(target_wall_dist, actual_wall_dist);
+                float pid_adjustment_wall = pid_adjustment_wall_raw;
+
+                // Clamp wall correction to prevent spinning (max ±50 RPM correction)
+                if (pid_adjustment_wall > 50) pid_adjustment_wall = 50;
+                if (pid_adjustment_wall < -50) pid_adjustment_wall = -50;
+
+                // INVERT signs - if robot keeps going wrong way, this might help
+                pid_adjustment_wall = -pid_adjustment_wall;
+
+                vel_rpm = ips / DRIVE_REV_TO_IN * 60;
+
+                // Debug output every 5 ticks
+                static int debug_counter = 0;
+                if (debug_counter % 5 == 0) {
+                    printf("Meas:%.1f Act:%.1f Tgt:%.1f Err:%.1f Raw:%.1f Out:%.1f L:%d R:%d\n",
+                           measured_wall_dist, actual_wall_dist, target_wall_dist,
+                           target_wall_dist - actual_wall_dist, pid_adjustment_wall_raw, pid_adjustment_wall,
+                           (int)(dir_mod * vel_rpm + pid_adjustment_l + pid_adjustment_wall),
+                           (int)(dir_mod * vel_rpm + pid_adjustment_r - pid_adjustment_wall));
+                }
+                debug_counter++;
+
+                drive_l.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_l + pid_adjustment_wall, VEL_RPM);
+                drive_r.spin(DIR_FWD, dir_mod * vel_rpm + pid_adjustment_r - pid_adjustment_wall, VEL_RPM);
+
+                wait(MSEC_PER_TICK, vex::msec);
+            }
+
+            // Stop motors after 6 seconds
+            drive_l.stop(vex::brakeType::brake);
+            drive_r.stop(vex::brakeType::brake);
+
+            wait(200, vex::msec);
+        }
+
+        // Change tuning parameter with A button
+        if (BTN_A.PRESSED) {
+            while (BTN_A.PRESSED) { wait(20, vex::msec); }
+            tune_mode = (tune_mode + 1) % NUM_MODES;
+        }
+
+        // Adjust selected value
+        int adjust = btn_up() - btn_down();
+        switch(tune_mode) {
+            case 0: // Wall follow kP
+                wall_kp += adjust * TUNER;
+                if (wall_kp < 0) wall_kp = 0;
+                break;
+            case 1: // Wall follow kI
+                wall_ki += adjust * TUNER;
+                if (wall_ki < 0) wall_ki = 0;
+                break;
+            case 2: // Wall follow kD
+                wall_kd += adjust * TUNER;
+                if (wall_kd < 0) wall_kd = 0;
+                break;
+            case 3: // Drive distance
+                drive_dist += adjust * 5;
+                if (drive_dist < 10) drive_dist = 10;
+                break;
+            case 4: // Target wall distance
+                target_wall_dist += adjust * 1;
+                if (target_wall_dist < 3) target_wall_dist = 3;
+                break;
+        }
+
+        // Display current values
+        B_SCRN.clearScreen();
+        B_SCRN.setCursor(1, 1);
+        B_SCRN.print("Wall Follow PID Tuning");
+
+        // Show wall PID values with selection indicator
+        B_SCRN.setCursor(2, 1);
+        B_SCRN.print("%sWALL kP: %.3f", (tune_mode == 0) ? "> " : "  ", wall_kp);
+        B_SCRN.setCursor(3, 1);
+        B_SCRN.print("%sWALL kI: %.3f", (tune_mode == 1) ? "> " : "  ", wall_ki);
+        B_SCRN.setCursor(4, 1);
+        B_SCRN.print("%sWALL kD: %.3f", (tune_mode == 2) ? "> " : "  ", wall_kd);
+
+        B_SCRN.setCursor(5, 1);
+        B_SCRN.print("%sDrive: %.1f in", (tune_mode == 3) ? "> " : "  ", drive_dist);
+        B_SCRN.setCursor(6, 1);
+        B_SCRN.print("%sWallDist: %.1f in", (tune_mode == 4) ? "> " : "  ", target_wall_dist);
+
+        B_SCRN.setCursor(7, 1);
+        B_SCRN.print("Y: Run  A: Next Param");
+        B_SCRN.setCursor(8, 1);
+        B_SCRN.print("Left: %.2f in", distance_left.objectDistance(vex::distanceUnits::in));
+
+        printf("WALL(kP:%.3f kI:%.3f kD:%.3f) Drive:%.1f WallDist:%.1f\n",
+               wall_kp, wall_ki, wall_kd, drive_dist, target_wall_dist);
+
+        wait(100, vex::msec);
     }
 }
 
@@ -458,6 +646,199 @@ void tune_drive_toward_goal() {
         printf("BIG GOAL kP: %.3f\n", drive_biggoal_kp);
 
         wait(100, vex::msec); // Slower loop for tuning UI
+    }
+}
+
+void tune_dist_sensor_pid() {
+    master.rumble("...");
+    const float TUNER = 0.1;
+
+    // Distance PID tuning values
+    float dist_kp = DRIVE_TO_DIST_KP;
+    float dist_ki = DRIVE_TO_DIST_KI;
+    float dist_kd = DRIVE_TO_DIST_KD;
+
+    // Test parameters
+    float target_dist = 18.2;
+    float max_speed = 50;
+    float accel = 100;
+
+    B_SCRN.clearScreen();
+
+    // Tune mode: 0=dist_kp, 1=dist_ki, 2=dist_kd, 3=max_speed, 4=accel
+    static int tune_mode = 0;
+    const int NUM_MODES = 5;
+
+    while (true) {
+        // Run test on Y press
+        if (BTN_Y.PRESSED) {
+            while (BTN_Y.PRESSED) { wait(20, vex::msec); }
+
+            imu.calibrate();
+            while (imu.isCalibrating()) { wait(20, vex::msec); }
+            reset_imu_rotation();
+            target_heading = imu_rotation();
+
+            drive_straight_to_dist_value(target_dist, max_speed, accel, distance_front);
+
+            wait(200, vex::msec);
+        }
+
+        // Change tuning parameter with A button
+        if (BTN_A.PRESSED) {
+            while (BTN_A.PRESSED) { wait(20, vex::msec); }
+            tune_mode = (tune_mode + 1) % NUM_MODES;
+        }
+
+        // Adjust selected value
+        int adjust = btn_up() - btn_down();
+        switch(tune_mode) {
+            case 0: // Distance kP
+                dist_kp += adjust * TUNER;
+                if (dist_kp < 0) dist_kp = 0;
+                break;
+            case 1: // Distance kI
+                dist_ki += adjust * TUNER;
+                if (dist_ki < 0) dist_ki = 0;
+                break;
+            case 2: // Distance kD
+                dist_kd += adjust * TUNER;
+                if (dist_kd < 0) dist_kd = 0;
+                break;
+            case 3: // Max speed
+                max_speed += adjust * 5;
+                if (max_speed < 10) max_speed = 10;
+                break;
+            case 4: // Acceleration
+                accel += adjust * 5;
+                if (accel < 5) accel = 5;
+                break;
+        }
+
+        // Display current values
+        B_SCRN.clearScreen();
+        B_SCRN.setCursor(1, 1);
+        B_SCRN.print("Dist Sensor PID Tuning");
+
+        // Show distance PID values with selection indicator
+        B_SCRN.setCursor(2, 1);
+        B_SCRN.print("%sDIST kP: %.3f", (tune_mode == 0) ? "> " : "  ", dist_kp);
+        B_SCRN.setCursor(3, 1);
+        B_SCRN.print("%sDIST kI: %.3f", (tune_mode == 1) ? "> " : "  ", dist_ki);
+        B_SCRN.setCursor(4, 1);
+        B_SCRN.print("%sDIST kD: %.3f", (tune_mode == 2) ? "> " : "  ", dist_kd);
+
+        B_SCRN.setCursor(5, 1);
+        B_SCRN.print("%sMax Speed: %.1f", (tune_mode == 3) ? "> " : "  ", max_speed);
+        B_SCRN.setCursor(6, 1);
+        B_SCRN.print("%sAccel: %.1f", (tune_mode == 4) ? "> " : "  ", accel);
+
+        B_SCRN.setCursor(7, 1);
+        B_SCRN.print("Y: Run to %.1f in", target_dist);
+        B_SCRN.setCursor(8, 1);
+        B_SCRN.print("A: Next Param");
+        B_SCRN.setCursor(9, 1);
+        B_SCRN.print("Front: %.2f in", distance_front.objectDistance(vex::distanceUnits::in));
+
+        printf("DIST(kP:%.3f kI:%.3f kD:%.3f) Speed:%.1f Accel:%.1f\n",
+               dist_kp, dist_ki, dist_kd, max_speed, accel);
+
+        wait(100, vex::msec);
+    }
+}
+
+// Tunes distance-following with jitter approach (no PID)
+void tune_distance_turn_pid() {
+    master.rumble("----");
+
+    // Jitter tuning parameters
+    float jitter_mag = 30.0;        // RPM adjustment for jitter
+    int jitter_period = 100;        // milliseconds per jitter cycle
+    float base_speed = 100.0;       // Forward speed (RPM)
+    int test_duration = 3000;       // Test duration (ms)
+    float target_distance = 21.5;   // Target distance (inches)
+
+    B_SCRN.clearScreen();
+
+    // Tune mode: 0=jitter_mag, 1=jitter_period, 2=base_speed, 3=test_duration, 4=target_distance
+    static int tune_mode = 0;
+    const int NUM_MODES = 5;
+
+    while (true) {
+        // Run test on Y press
+        if (BTN_Y.PRESSED) {
+            while (BTN_Y.PRESSED) { wait(20, vex::msec); }
+
+            printf("\n=== STARTING TEST ===\n");
+            printf("Target: %.1f in, Speed: %.0f RPM, Jitter: %.0f RPM @ %d ms\n",
+                   target_distance, base_speed, jitter_mag, jitter_period);
+
+            // Set target heading for cosine correction
+            target_heading = imu_rotation();
+
+            // Run the jitter test
+            drive_to_distance_timed(test_duration, target_distance, base_speed, jitter_mag, jitter_period);
+
+            printf("=== TEST COMPLETE ===\n\n");
+            wait(200, vex::msec);
+        }
+
+        // Change tuning parameter with A button
+        if (BTN_A.PRESSED) {
+            while (BTN_A.PRESSED) { wait(20, vex::msec); }
+            tune_mode = (tune_mode + 1) % NUM_MODES;
+        }
+
+        // Adjust selected value
+        int adjust = btn_up() - btn_down();
+        switch(tune_mode) {
+            case 0: // Jitter magnitude
+                jitter_mag += adjust * 5;
+                if (jitter_mag < 0) jitter_mag = 0;
+                break;
+            case 1: // Jitter period
+                jitter_period += adjust * 20;
+                if (jitter_period < 20) jitter_period = 20;
+                break;
+            case 2: // Base speed
+                base_speed += adjust * 10;
+                if (base_speed < 10) base_speed = 10;
+                break;
+            case 3: // Test duration
+                test_duration += adjust * 500;
+                if (test_duration < 1000) test_duration = 1000;
+                break;
+            case 4: // Target distance
+                target_distance += adjust * 1;
+                if (target_distance < 3) target_distance = 3;
+                break;
+        }
+
+        // Display current values
+        B_SCRN.clearScreen();
+        B_SCRN.setCursor(1, 1);
+        B_SCRN.print("Jitter Distance Tuning");
+
+        B_SCRN.setCursor(2, 1);
+        B_SCRN.print("%sJitter Mag: %.0f RPM", (tune_mode == 0) ? "> " : "  ", jitter_mag);
+        B_SCRN.setCursor(3, 1);
+        B_SCRN.print("%sJitter Per: %d ms", (tune_mode == 1) ? "> " : "  ", jitter_period);
+        B_SCRN.setCursor(4, 1);
+        B_SCRN.print("%sBase Speed: %.0f RPM", (tune_mode == 2) ? "> " : "  ", base_speed);
+        B_SCRN.setCursor(5, 1);
+        B_SCRN.print("%sDuration: %d ms", (tune_mode == 3) ? "> " : "  ", test_duration);
+        B_SCRN.setCursor(6, 1);
+        B_SCRN.print("%sTarget Dist: %.1f in", (tune_mode == 4) ? "> " : "  ", target_distance);
+
+        B_SCRN.setCursor(7, 1);
+        B_SCRN.print("Y: Run Test  A: Cycle");
+        B_SCRN.setCursor(8, 1);
+        B_SCRN.print("Left Sensor: %.1f in", distance_left.objectDistance(vex::distanceUnits::in));
+
+        printf("Jitter(Mag:%.0f Per:%dms) Speed:%.0f Dur:%d Tgt:%.1f\n",
+               jitter_mag, jitter_period, base_speed, test_duration, target_distance);
+
+        wait(100, vex::msec);
     }
 }
 
