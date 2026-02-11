@@ -24,10 +24,13 @@ void autonomous(void) {
     reset_imu_rotation();
     drive_full.setStopping(vex::hold);
 
+    // Start ONE intake thread for all autonomous routines
+    vex::thread intake_thread(intake);
+
     switch (auton_mode) {
-    
+
     case AWP: {
-        vex::thread t1(intake);
+        // Intake thread already running globally
         lift.set(0);
         tounge.set(1);
         drive_straight((41.5-17+9.5-3+1+1), 70, 100, true, 0, 20);
@@ -65,7 +68,7 @@ void autonomous(void) {
         scoring = 1;
         hood.set(0);
         lift.set(0);
-        t1.interrupt();
+        // Intake thread continues running (controlled by 'scoring' variable)
         arm.spin(DIR_REV, 100, VEL_PCT);
         drive_straight(46, 75, 100, true, 0, 0);
         // tounge.set(1);
@@ -89,7 +92,7 @@ void autonomous(void) {
 
 
     case AWPPush: {
-        vex::thread t1(intake);
+        // Intake thread already running globally
         drive_straight(-5, 40, 100);
         lift.set(0);
         tounge.set(1);
@@ -121,7 +124,7 @@ void autonomous(void) {
         scoring = 1;
         hood.set(0);
         lift.set(0);
-        t1.interrupt();
+        // Intake thread continues running (controlled by 'scoring' variable)
         arm.spin(DIR_REV, 100, VEL_PCT);
         drive_straight(51, 75, 130, true, 0, 0);
         tounge.set(1);
@@ -197,7 +200,7 @@ void autonomous(void) {
 
 
     case RightSimple: {
-                vex::thread t1(intake);
+                // Intake thread already running globally
         drive_straight(20, 50, 70);
         drive_turn(50, 9.5, 30, 75, false, 0, 0);
         tounge.set(1);
@@ -223,7 +226,7 @@ void autonomous(void) {
         drive_full.spinFor(DIR_REV, 700, TIME_MSEC, 50, VEL_PCT);
         scoring = 1;
         drive_turn(-90, -13, 50, 75, false, 0, 0);
-        t1.interrupt();
+        // Intake thread continues running (controlled by 'scoring' variable)
         turn_pid(90, -1, 1);
         drive_straight(-27, 75, 50, true, 0, 0);
         turn_pid(30, -1, 1);
@@ -233,7 +236,7 @@ void autonomous(void) {
 
 
     case RightComplex: {
-        vex::thread t1(intake);
+        // Intake thread already running globally
         drive_straight(14, 50, 70);
         drive_turn(50, 9.5, 30, 75, false, 0, 0);
         tounge.set(1);
@@ -259,7 +262,7 @@ void autonomous(void) {
         drive_full.spinFor(DIR_REV, 700, TIME_MSEC, 50, VEL_PCT);
         scoring = 1;
         drive_turn(-90, -13, 50, 75, false, 0, 0);
-        t1.interrupt();
+        // Intake thread continues running (controlled by 'scoring' variable)
         turn_pid(90, -1, 1);
         drive_straight(-27, 75, 50, true, 0, 0);
         turn_pid(30, -1, 1);
@@ -269,7 +272,7 @@ void autonomous(void) {
 
 
     case LeftComplex: {
-        vex::thread t1(intake);
+        // Intake thread already running globally
         lift.set(1);
         drive_straight(17, 75, 100, true, 0, 30);
         vex::thread t4([](){
@@ -300,7 +303,7 @@ void autonomous(void) {
 
         drive_turn(-90, -15, 30, 50, false, 0, 0);
         scoring = 1;
-        t1.interrupt();
+        // Intake thread continues running (controlled by 'scoring' variable)
         turn_pid(90, -1, 1);
         drive_straight(-30, 75, 100, true, 0, 0);
         drive_l.stop(vex::brakeType::hold);
@@ -316,7 +319,7 @@ drive_straight(-29, 75, 50);
     }
 
     case SKILLS: {
-        vex::thread t1(intake);
+        // Intake thread already running globally
         vex::thread dist_thread(stream_front_distance);
         finger.set(1); // get finger out of way 
         tounge.set(1); // open tounge
@@ -343,7 +346,7 @@ drive_straight(-29, 75, 50);
         drive_straight(5,30,75, true, 0, 10);
         tounge.set(0);
         drive_turn(180, 12, 30, 75, false, 10, 2);
-        drive_straight_with_dist(80, 60, 70, true, 0, 2);
+        drive_straight_with_dist(82, 60, 70, true, 0, 2);
         
         // driving from wall to first goal align
         turn_pid(-90 + offsettheta, -1, 1);
@@ -408,7 +411,7 @@ drive_straight(-29, 75, 50);
         drive_turn(180, 12, 30, 75, false);
         
         // drive down
-        drive_straight_with_dist(80, 60, 70, true, 0, 0);
+        drive_straight_with_dist(82, 60, 70, true, 0, 0);
         turn_pid(-90 + offsettheta, -1, 1);
         offsettheta = 0;
         drive_straight_to_dist_value(16, 45, 100, distance_front);

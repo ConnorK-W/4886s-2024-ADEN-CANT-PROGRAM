@@ -85,6 +85,7 @@ void drive_straight_to_dist_value(float target_dist_in, float target_ips, float 
     const float STOP_VELOCITY_THRESHOLD = 2.0; // Auto-stop when decelerated to 2 ips
     const float KILLSWITCH_VELOCITY = 2.0; // Kill switch if moving less than 2 ips
     const int KILLSWITCH_TIME_MS = 500; // for 0.5 seconds
+    const float MAX_VALID_DISTANCE = 100.0; // Max reasonable distance reading in inches
 
     drive_r.stop(vex::brakeType::coast);
     drive_l.stop(vex::brakeType::coast);
@@ -98,8 +99,40 @@ void drive_straight_to_dist_value(float target_dist_in, float target_ips, float 
     float pid_adjustment_dir;
     float vel_rpm;
 
+    // Outlier filtering
+    float prev_valid_dist = target_dist_in; // Initialize to target
+    const float OUTLIER_THRESHOLD = 20.0; // Ignore readings that jump more than 20 inches
+    bool has_valid_reading = false;
+
     while (true) {
-        float current_dist = dist_sensor.objectDistance(vex::distanceUnits::in);
+        float raw_dist = dist_sensor.objectDistance(vex::distanceUnits::in);
+
+        // Filter out outliers and invalid readings
+        float current_dist;
+        bool reading_is_valid = false;
+
+        if (raw_dist >= MAX_VALID_DISTANCE) {
+            // No valid reading - if we've never had one, keep driving forward
+            if (!has_valid_reading) {
+                current_dist = target_dist_in + 10.0; // Pretend we're 10" too far, so we keep driving forward
+                reading_is_valid = false;
+            } else {
+                // Lost the reading after having it - use previous valid distance
+                current_dist = prev_valid_dist;
+                reading_is_valid = true;
+            }
+        } else if (has_valid_reading && std::abs(raw_dist - prev_valid_dist) > OUTLIER_THRESHOLD) {
+            // Outlier spike - use previous valid reading instead
+            current_dist = prev_valid_dist;
+            reading_is_valid = true;
+        } else {
+            // Valid reading - use it and update previous
+            current_dist = raw_dist;
+            prev_valid_dist = raw_dist;
+            reading_is_valid = true;
+            has_valid_reading = true;
+        }
+
         float dist_error = current_dist - target_dist_in;
         
         // Check if we've reached target and are slow enough to stop
