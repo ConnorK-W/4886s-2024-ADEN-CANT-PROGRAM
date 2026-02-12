@@ -66,9 +66,6 @@ void opcontrol(void) {
             arm.resetPosition();
         }
 
-        B_SCRN.printAt(100, 200, "Arm position: %f", lever_pot.value(ROT_DEG));
-        B_SCRN.printAt(100, 220, "Arm current: %f", arm.current(PCT_PCT));
-
         
         // Toggles chase neutral post
         //if (BTN_RIGHT.PRESSED)
@@ -84,11 +81,9 @@ void opcontrol(void) {
     
     if (BTN_R1.pressing()){
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        B_SCRN.printAt(100, 150, "Intaking %i", intakeLow.direction());
     }
     if (BTN_R2.pressing()){
         intakeLow.spin(DIR_REV, 50, VEL_PCT);
-        B_SCRN.printAt(100, 150, "Outtaking %i", intakeLow.direction());
 
     }
     if (BTN_L1.pressing()){
