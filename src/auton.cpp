@@ -20,16 +20,17 @@ void autonomous(void) {
         vex::thread t1(intake);
         lift.set(0);
         tounge.set(1);
-        drive_straight(32, 70, 100, true, 0, 20);
+        drive_straight(33, 70, 100, true, 0, 20);
         finger.set(1);
         drive_turn(90, 14, 40, 75, false, 20, 0);
 
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
-        wait(700, TIME_MSEC);
+        wait(750, TIME_MSEC);
         hood.set(1);
+        tounge.set(0);
         // long goal
         vex::thread t4([](){
-            wait(400, TIME_MSEC);
+            wait(600, TIME_MSEC);
             scoring = 4;
         });
         drive_straight_toward_goal(1000, 0);
@@ -39,14 +40,13 @@ void autonomous(void) {
 
         // middle goal
         scoring = 1;
-        drive_turn(91, 5, 25, 70, false);
+        drive_turn(90, 5, 25, 70, false);
         target_heading = 180;   
-        drive_straight(52,45,45, true, 0, 20);
-        drive_straight(12, 12, 50, true, 20, 6);
-        tounge.set(1);
+        drive_straight(52,30,30, true, 0, 10);
+        drive_straight(12, 10, 50, true, 10, 5);
         turn_pid(-45, -1, 1);
         vex::thread t2([](){
-            wait(750, TIME_MSEC);
+            wait(500, TIME_MSEC);
             scoring = 3;
         });
         drive_straight_toward_goal(1500, 1);
@@ -57,21 +57,21 @@ void autonomous(void) {
         lift.set(0);
         t1.interrupt();
         arm.spin(DIR_REV, 100, VEL_PCT);
-        drive_straight(46, 75, 100, true, 0, 0);
+        drive_straight(30, 75, 100, true, 0, 30);
+        tounge.set(1);
         // tounge.set(1);
 
-        turn_pid(-44, -1, 1);
-        drive_straight(7, 35, 40, true, 0, 15);
+        drive_turn(-45, -30, 40, 75, false, 30, 0);
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
-        wait(625, TIME_MSEC);
-        hood.set(1);
+        wait(800, TIME_MSEC);
         // long goal
+        tounge.set(0);
+        hood.set(1);
         vex::thread t3([](){
-            wait(400, TIME_MSEC);
+            wait(500, TIME_MSEC);
             arm.spin(DIR_FWD, 100, VEL_PCT);
         });
-        drive_straight_toward_goal(1000, 0);
-        
+        drive_straight_toward_goal(1500, 0);
         tounge.set(0);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         break;
@@ -224,35 +224,41 @@ void autonomous(void) {
 
     case RightComplex: {
         vex::thread t1(intake);
-        drive_straight(14, 50, 70);
-        drive_turn(50, 9.5, 30, 75, false, 0, 0);
+        drive_straight(10, 70, 120, true, 0, 15);
+        drive_turn(50, 11, 20, 75, false, 30, 5);
         tounge.set(1);
-        drive_turn(-95, -11, 30, 75, false, 0, 0);
+        drive_turn(-95, -11, 30, 75, false, 5, 5);
         tounge.set(0);
-        drive_straight(12, 50, 100, true, 0, 20);
+        drive_straight(12, 50, 100, true, 5, 20);
         scoring = 2;
         wait(900, TIME_MSEC);
         scoring = 1;
-        drive_straight(-49, 75, 100, true, 0, 0);
+        drive_straight(-51, 75, 100, true, 0, 5);
         tounge.set(1);
 
         // long goal
         turn_pid(-135, -1, 1);
-        drive_straight(7, 35, 40, true, 0, 15);
+        drive_straight(12, 20, 120, true, 0, 15);
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
-        wait(650, TIME_MSEC);
+        wait(600, TIME_MSEC);
         // long goal
 
         tounge.set(0);
-        drive_straight_toward_goal(1100, 0);
-        scoring = 4;
-        drive_full.spinFor(DIR_REV, 700, TIME_MSEC, 50, VEL_PCT);
+                tounge.set(0);
+        vex::thread t3([](){
+            wait(600, TIME_MSEC);
+            scoring = 4;
+        });
+        drive_straight_toward_goal(1500, 0);
+        drive_turn(-110, -10, 50, 100, false, 0, 50);
         scoring = 1;
-        drive_turn(-90, -13, 50, 75, false, 0, 0);
         t1.interrupt();
-        turn_pid(90, -1, 1);
-        drive_straight(-27, 75, 50, true, 0, 0);
-        turn_pid(30, -1, 1);
+        turn_pid(100, -1, 1);
+        drive_straight(-27, 75, 100, true, 0, 0);
+        drive_l.stop(vex::brakeType::hold);
+        drive_r.stop(vex::brakeType::hold);
+        drive_turn(30, 5, 10, 75, true, 0, 0);
+
 
         break;
     }
