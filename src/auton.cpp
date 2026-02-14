@@ -39,9 +39,12 @@ void autonomous(void) {
         wait(500, TIME_MSEC);
 
         // middle goal
-        scoring = 1;
-        drive_turn(90, 5, 25, 70, false);
-        target_heading = 180;   
+        vex::thread t5([](){
+            wait(500, TIME_MSEC);
+            scoring = 1;
+        });
+        drive_turn(90, 5, 30, 70, false);
+        target_heading = 181;   
         drive_straight(52,30,30, true, 0, 10);
         drive_straight(12, 10, 50, true, 10, 5);
         turn_pid(-45, -1, 1);
@@ -57,7 +60,7 @@ void autonomous(void) {
         lift.set(0);
         t1.interrupt();
         arm.spin(DIR_REV, 100, VEL_PCT);
-        drive_straight(30, 75, 100, true, 0, 30);
+        drive_straight(31.5, 75, 100, true, 0, 30);
         tounge.set(1);
         // tounge.set(1);
 
@@ -522,6 +525,7 @@ void intake() {
             hood.set(1);
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
             arm.spin(DIR_FWD, 32.5, VEL_PCT);
+
             break;
         }
         case 7: {
