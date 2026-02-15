@@ -33,7 +33,7 @@ void autonomous(void) {
             wait(600, TIME_MSEC);
             scoring = 4;
         });
-        drive_straight_toward_goal(1000, 0);
+        drive_straight_toward_goal(1000, 0, false);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         t4.interrupt();
         wait(500, TIME_MSEC);
@@ -46,13 +46,13 @@ void autonomous(void) {
         drive_turn(90, 5, 30, 70, false);
         target_heading = 181;   
         drive_straight(52,30,30, true, 0, 10);
-        drive_straight(12, 10, 50, true, 10, 5);
+        drive_straight(10, 10, 50, true, 10, 5);
         turn_pid(-45, -1, 1);
         vex::thread t2([](){
             wait(500, TIME_MSEC);
             scoring = 3;
         });
-        drive_straight_toward_goal(1500, 1);
+        drive_straight_toward_goal(1500, 1, false);
         wait(500, TIME_MSEC);
         t2.interrupt();
         scoring = 1;
@@ -74,7 +74,7 @@ void autonomous(void) {
             wait(500, TIME_MSEC);
             arm.spin(DIR_FWD, 100, VEL_PCT);
         });
-        drive_straight_toward_goal(1500, 0);
+        drive_straight_toward_goal(1500, 0, false);
         tounge.set(0);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         break;
@@ -250,11 +250,9 @@ void autonomous(void) {
 
         tounge.set(0);
                 tounge.set(0);
-        vex::thread t3([](){
-            wait(600, TIME_MSEC);
-            scoring = 4;
-        });
-        drive_straight_toward_goal(1500, 0);
+        drive_straight_toward_goal(3000, 0);
+        scoring = 4;
+        wait(1000, TIME_MSEC);
         drive_turn(-90, -13, 50, 75, false, 0, 0);
         t1.interrupt();
         turn_pid(90, -1, 1);
@@ -284,9 +282,9 @@ void autonomous(void) {
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(600, TIME_MSEC);
         lift.set(1);
-        drive_turn(45, -13, 70, 75, true, 0, 15);
-        drive_straight(-40, 75, 100, true, 15, 30);
-        drive_straight_toward_goal(2000, 1);
+        drive_turn(42.5, -17, 70, 75, true, 0, 15);
+        drive_straight(-35, 75, 100, true, 15, 30);
+        drive_straight_toward_goal(2000, 1, false);
         scoring = 3;
         wait(1000, TIME_MSEC);
         t1.interrupt();
@@ -297,7 +295,7 @@ void autonomous(void) {
     case LeftComplex: {
         vex::thread t1(intake);
         lift.set(1);
-        drive_straight(17, 75, 100, true, 0, 30);
+        drive_straight(9, 75, 100, true, 0, 30);
         vex::thread t4([](){
             wait(500, TIME_MSEC);
             tounge.set(1);
@@ -310,19 +308,19 @@ void autonomous(void) {
         wait(700, TIME_MSEC);
         scoring = 1;
         lift.set(0);
-        drive_straight(30, 75, 100, true, 0, 30);
+        drive_straight(36, 75, 100, true, 0, 30);
         // tounge.set(1);
 
-        drive_turn(-45, -30, 40, 75, false, 30, 0);
+        drive_turn(-45, -25, 40, 75, false, 30, 0);
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
-        wait(800, TIME_MSEC);
+        wait(700, TIME_MSEC);
         // long goal
         tounge.set(0);
         vex::thread t3([](){
             wait(500, TIME_MSEC);
             scoring = 4;
         });
-        drive_straight_toward_goal(1500, 0);
+        drive_straight_toward_goal(1500, 0, false);
 
         drive_turn(-90, -15, 30, 50, false, 0, 0);
         scoring = 1;
