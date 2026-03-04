@@ -361,7 +361,7 @@ drive_straight(-29, 75, 50);
         drive_straight(5,30,75, true, 0, 10);
         tounge.set(0);
         drive_turn(180, 12, 30, 75, false, 10, 0);
-        drive_straight(85, 60, 70, true, 0, 5);
+        drive_straight(80, 40, 70, true, 0, 5);
         turn_pid(90, -1, 1);
         drive_full.spin(DIR_REV, 4, VLT_VLT);
         wait(1000, TIME_MSEC);
@@ -373,7 +373,7 @@ drive_straight(-29, 75, 50);
         tounge.set(1);
         // drive_straight(-15, 50, 70); // straight
         drive_straight_toward_goal(700, false, true);
-        scoring = 5;
+        scoring = 4;
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
         drive_straight(10, 30, 100, false);
@@ -423,7 +423,7 @@ drive_straight(-29, 75, 50);
         drive_straight(5,30,75, false);
         tounge.set(0);
         drive_turn(180, 12, 30, 75, false);
-        drive_straight(81, 50, 75, false);
+        drive_straight(80, 40, 70, false);
         turn_pid(90, -1, 1);
         drive_full.spin(DIR_REV, 5, VLT_VLT);
         wait(1000, TIME_MSEC);
@@ -434,7 +434,7 @@ drive_straight(-29, 75, 50);
         tounge.set(1);
         // drive_straight(-15, 50, 70); // straight
         drive_straight_toward_goal(700, false, true);
-        scoring = 5;
+        scoring = 4;
         drive_full.spinFor(DIR_REV, 1500, TIME_MSEC, 50, VEL_PCT);
         // second match load
         drive_straight(9, 20, 75, false);
@@ -454,10 +454,11 @@ drive_straight(-29, 75, 50);
         tounge.set(0);
         scoring = 8;
         drive_turn(80, 38, 50, 75, false);
-        drive_full.spinFor(DIR_FWD, 1100, TIME_MSEC, 50, VEL_PCT);
+        drive_full.spinFor(DIR_FWD, 1150, TIME_MSEC, 50, VEL_PCT);
 
         break;
     }
+
     }
 }
 
