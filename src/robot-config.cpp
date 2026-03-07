@@ -24,17 +24,17 @@ vex::motor drive_r3 = vex::motor(PORT10, DRIVE_INSERT, false);
 // Subsystem 3
 vex::motor intakeLow = vex::motor(PORT20, INTAKE_INSERT, false);
 vex::motor intakeHigh = vex::motor(PORT11, INTAKE_INSERT, false);
-Arm arm = Arm(PORT1, vex::gearSetting::ratio18_1, true);
+Arm arm = Arm(PORT15, vex::gearSetting::ratio18_1, true);
 
 // 3 Wire Ports
-vex::digital_out finger = vex::digital_out(PORTD);
+vex::digital_out finger = vex::digital_out(PORTE);
 vex::digital_out tounge = vex::digital_out(PORTC);
 vex::digital_out lift = vex::digital_out(PORTA);
 vex::digital_out hood = vex::digital_out(PORTB);
 
 
 // Sensors
-vex::inertial imu = vex::inertial(PORT3);
+vex::inertial imu = vex::inertial(PORT13);
 vex::optical colorSort = vex::optical(PORT11);
 vex::timer totalTime = vex::timer();
 
