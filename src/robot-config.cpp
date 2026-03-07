@@ -11,26 +11,26 @@
 vex::brain Brain;
 vex::controller master;
 
-vex::motor drive_r1 = vex::motor(PORT11, DRIVE_INSERT, false);
-vex::motor drive_r2 = vex::motor(PORT12, DRIVE_INSERT, false);
-vex::motor drive_r3 = vex::motor(PORT13, DRIVE_INSERT, true);
+vex::motor drive_l1 = vex::motor(PORT1, DRIVE_INSERT, true);
+vex::motor drive_l2 = vex::motor(PORT2, DRIVE_INSERT, true);
+vex::motor drive_l3 = vex::motor(PORT3, DRIVE_INSERT, false);
 // vex::motor drive_r4 = vex::motor(PORT4, DRIVE_INSERT, true);
 
-vex::motor drive_l1 = vex::motor(PORT17, DRIVE_INSERT, false);
-vex::motor drive_l2 = vex::motor(PORT15, DRIVE_INSERT, true);
-vex::motor drive_l3 = vex::motor(PORT16, DRIVE_INSERT, true);
+vex::motor drive_r1 = vex::motor(PORT8, DRIVE_INSERT, false);
+vex::motor drive_r2 = vex::motor(PORT9, DRIVE_INSERT, true);
+vex::motor drive_r3 = vex::motor(PORT10, DRIVE_INSERT, false);
 // vex::motor drive_l4 = vex::motor(PORT8, DRIVE_INSERT, false);
 
 // Subsystem 3
-vex::motor intakeLow = vex::motor(PORT2, INTAKE_INSERT, true);
-vex::motor intakeHigh = vex::motor(PORT7, INTAKE_INSERT, true);
+vex::motor intakeLow = vex::motor(PORT20, INTAKE_INSERT, false);
+vex::motor intakeHigh = vex::motor(PORT11, INTAKE_INSERT, false);
 Arm arm = Arm(PORT1, vex::gearSetting::ratio18_1, true);
 
 // 3 Wire Ports
 vex::digital_out finger = vex::digital_out(PORTD);
 vex::digital_out tounge = vex::digital_out(PORTC);
-vex::digital_out lift = vex::digital_out(PORTB);
-vex::digital_out hood = vex::digital_out(PORTA);
+vex::digital_out lift = vex::digital_out(PORTA);
+vex::digital_out hood = vex::digital_out(PORTB);
 
 
 // Sensors

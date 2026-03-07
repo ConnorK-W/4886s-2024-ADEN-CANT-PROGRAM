@@ -9,13 +9,7 @@ void opcontrol(void) {
     drive_r.stop(vex::brakeType::coast);
     colorSort.setLightPower(100, PCT_PCT);
     colorSort.setLight(vex::ledState::on);
-    arm.stop(vex::brakeType::brake);
     Brain.Screen.setFont(vex::fontType::mono30);
-
-    // intakeLow.spin(DIR_REV, 100, VEL_PCT);
-    arm.rotate_pid(9);
-    arm.resetPosition();    
-    intakeLow.stop();
 
     bool shifted = false;
     bool intaking = 1;
@@ -38,11 +32,6 @@ void opcontrol(void) {
     tounge.set(0);
     bool sort = 1;
 
-    arm.resetPosition();
-    intakeLow.spin(DIR_FWD, 5, VEL_PCT);
-    arm.stop();
-
-
     while (1) {
         // master.rumble(".");
         // Drive control
@@ -55,16 +44,12 @@ void opcontrol(void) {
         if (BTN_Y.PRESSED) {
             tounge.set(!tounge.value());
         }
-        if (BTN_L2.PRESSED) {
-            finger.set(!finger.value());
-        }
-        if (BTN_A.PRESSED) {
-        lift.set(!lift.value());
-        }
-        if (BTN_RIGHT.PRESSED) {
-            arm.pid_step(9);
-            arm.resetPosition();
-        }
+        if (BTN_L2.pressing()){
+        hood.set(0 );
+    }
+
+        B_SCRN.printAt(100, 200, "Arm position: %f", lever_pot.value(ROT_DEG));
+        B_SCRN.printAt(100, 220, "Arm current: %f", arm.current(PCT_PCT));
 
         
         // Toggles chase neutral post
@@ -78,41 +63,39 @@ void opcontrol(void) {
         wait(20, vex::msec);
 
     // Intake
-    
     if (BTN_R1.pressing()){
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        intakeHigh.spin(DIR_FWD, 3, VLT_VLT);
     }
     if (BTN_R2.pressing()){
-        intakeLow.spin(DIR_REV, 50, VEL_PCT);
-
+        intakeFull.spin(DIR_REV, 100, VEL_PCT);
     }
     if (BTN_L1.pressing()){
-        arm.spinToPosition(140 * 3, ROT_DEG, 100, VEL_PCT, false);
-        // arm.spinToPosition(140 * 3, ROT_DEG, 35, VEL_PCT, false);
-        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        hood.set(1);
-    }
-    if (BTN_X.pressing()){
-        arm.spinToPosition(140 * 3, ROT_DEG, 35, VEL_PCT, false);
-        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        hood.set(1);
-    }
-    if (BTN_B.pressing()){
-        arm.spinToPosition(140 * 3, ROT_DEG, 15, VEL_PCT, false);
-        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        hood.set(1);
-    }
-    if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing()){
+        intakeFull.spin(DIR_FWD, 100, VEL_PCT);       
         hood.set(0);
     }
-    if (!BTN_L1.pressing() && !BTN_X.pressing() && !BTN_B.pressing() && get_pot_value() > 12){
-        intakeLow.spin(DIR_REV, 100, VEL_PCT);
-        arm.pid_step(9);
-
+    if (BTN_X.pressing()){
+        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        intakeHigh.spin(DIR_FWD, 50, VEL_PCT);
     }
-    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing() && get_pot_value() < 12){
-        intakeLow.spin(DIR_FWD, 10, VEL_PCT);
-        arm.stop();
+    if (BTN_A.pressing()){
+        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
+        lift.set(1);
+    }
+    else if (BTN_B.pressing()){
+        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        intakeHigh.spin(DIR_FWD, 15, VEL_PCT);
+        lift.set(1);
+    }
+    else{
+        lift.set(0);
+    }
+    if (!BTN_L1.pressing() && !BTN_L2.pressing() && !BTN_X.pressing() && !BTN_B.pressing() && !BTN_A.pressing()){
+        hood.set(1);
+    }
+    if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing() && !BTN_A.pressing()){
+        intakeFull.stop();
     }
 
 

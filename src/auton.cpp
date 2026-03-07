@@ -33,49 +33,37 @@ void autonomous(void) {
             wait(600, TIME_MSEC);
             scoring = 4;
         });
-        drive_straight_toward_goal(1000, 0, false);
+        drive_straight(-30, 70, 100, true, 0, 70);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         t4.interrupt();
         wait(500, TIME_MSEC);
-
-        // middle goal
-        vex::thread t5([](){
-            wait(500, TIME_MSEC);
-            scoring = 1;
-        });
         drive_turn(90, 5, 30, 70, false);
-        target_heading = 181;   
-        drive_straight(52,30,30, true, 0, 10);
-        drive_straight(10, 10, 50, true, 10, 5);
-        turn_pid(-45, -1, 1);
-        vex::thread t2([](){
-            wait(500, TIME_MSEC);
-            scoring = 3;
-        });
-        drive_straight_toward_goal(1500, 1, false);
-        wait(500, TIME_MSEC);
-        t2.interrupt();
         scoring = 1;
-        hood.set(0);
+        target_heading = 181;   
+        drive_straight(62,50,30, true, 0, 10);
+        turn_pid(-45, -1, 1);
+        drive_straight(-15, 50, 100);
+        scoring = 3;
+        wait(500, TIME_MSEC);
+        scoring = 1;
         lift.set(0);
         t1.interrupt();
-        arm.spin(DIR_REV, 100, VEL_PCT);
         drive_straight(31.5, 75, 100, true, 0, 30);
         tounge.set(1);
         // tounge.set(1);
 
         drive_turn(-45, -30, 40, 75, false, 30, 0);
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
-        wait(800, TIME_MSEC);
+        wait(900, TIME_MSEC);
         // long goal
         tounge.set(0);
-        hood.set(1);
+        hood.set(0);
         vex::thread t3([](){
             wait(500, TIME_MSEC);
-            arm.spin(DIR_FWD, 100, VEL_PCT);
+            hood.set(0);
+            intakeFull.spin(DIR_FWD, 100, VEL_PCT);
         });
-        drive_straight_toward_goal(1500, 0, false);
-        tounge.set(0);
+        drive_straight(-30, 70, 100, true, 0, 70);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         break;
     }
@@ -469,28 +457,19 @@ void intake() {
     while (true) {
         switch (scoring) {
         case 0: {
-            intakeLow.stop();
-            hood.set(0);
-            printf("%f\n", arm.position(ROT_DEG));
-            if ((get_pot_value() > 12)) {
-                arm.pid_step(9);
-                intakeLow.spin(DIR_REV, 100, VEL_PCT);
-            }
-
+            intakeFull.stop();
+            hood.set(1);
             break;
         }
         case 1: {
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-            hood.set(0);
-            printf("%f\n", arm.position(ROT_DEG));
-            if ((get_pot_value() > 12)) {
-                arm.pid_step(9);
-                intakeLow.spin(DIR_REV, 100, VEL_PCT);
-            }
+            intakeHigh.spin(DIR_FWD, 3, VLT_VLT);
+            hood.set(1);
             break;
         }
         case 2: {
             intakeLow.spin(DIR_REV, 30, VEL_PCT);
+            intakeHigh.spin(DIR_REV, 100, VEL_PCT);
             hood.set(1);
             break;
         }
@@ -498,55 +477,32 @@ void intake() {
             lift.set(1);
             hood.set(1);
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-            arm.spin(DIR_FWD, 35, VEL_PCT);
+            intakeLow.spin(DIR_FWD, 100, VEL_PCT);
             break;
         }
         case 4: {
             lift.set(0);
-            hood.set(1);
-            intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-            arm.spin(DIR_FWD, 100, VEL_PCT);
+            hood.set(0);
+            intakeFull.spin(DIR_FWD, 100, VEL_PCT);
             break;
         }
         case 5: {
             lift.set(0);
             hood.set(1);
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-            arm.spin(DIR_FWD, 50, VEL_PCT);
+            intakeHigh.spin(DIR_FWD, 80, VEL_PCT);
             break;
         }
         case 6: {
-            lift.set(0);
-            hood.set(1);
-            intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-            arm.spin(DIR_FWD, 32.5, VEL_PCT);
 
             break;
         }
         case 7: {
-            hood.set(0);
-            arm.spin(DIR_REV, 12, VLT_VLT);
-            intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-            drive_full.spin(DIR_FWD, 4, VLT_VLT);
-            wait(700, TIME_MSEC);
-            drive_full.spin(DIR_REV, 5, VLT_VLT);
-            wait(100, TIME_MSEC);
-            drive_full.spin(DIR_FWD, 4, VLT_VLT);
-            wait(300, TIME_MSEC);
-            drive_full.spin(DIR_REV, 5, VLT_VLT);
-            wait(100, TIME_MSEC);
-            drive_full.spin(DIR_FWD, 4, VLT_VLT);
-            wait(500, TIME_MSEC);
-            drive_full.spin(DIR_REV, 5, VLT_VLT);
-            wait(100, TIME_MSEC);
-            drive_full.spin(DIR_FWD, 6, VLT_VLT);
-            wait(800, TIME_MSEC);
+            
             break;
         }
         case 8: {
-            lift.set(0);
-            hood.set(0);
-            intakeLow.spin(DIR_REV, 100, VEL_PCT);
+            
             break;
         }
         }

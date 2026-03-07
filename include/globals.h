@@ -36,7 +36,7 @@
 #define CHAR_WI 24
 
 // Multiplier for turn sensitivty
-#define SENSITIVITY 0.60
+#define SENSITIVITY 0.50
 
 // Global variable declarations
 extern int auton_mode;
