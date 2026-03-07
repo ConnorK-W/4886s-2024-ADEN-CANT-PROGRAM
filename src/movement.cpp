@@ -379,7 +379,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
     double dir_adj = 0;
 
     while (t.time(vex::msec) < duration_msec) {
-        if (imu.roll() >= 6) {
+        if (imu.roll() <= -4) {
             break; 
         }
 
@@ -431,8 +431,8 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
             if (current_vel < target_vel) current_vel = target_vel;
         }
 
-        drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
-        drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
+        drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
+        drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
         
         wait(20, vex::msec);
     }

@@ -35,11 +35,11 @@ vex::digital_out hood = vex::digital_out(PORTB);
 
 // Sensors
 vex::inertial imu = vex::inertial(PORT13);
-vex::optical colorSort = vex::optical(PORT11);
+vex::optical colorSort = vex::optical(PORT15);
 vex::timer totalTime = vex::timer();
 
 vex::aivision::colordesc yellow = vex::aivision::colordesc(1, 255, 175, 83, 40.00, 0.30); // Increased tolerance for better detection in varying lighting
-vex::aivision aivis = vex::aivision(PORT4, yellow);
+vex::aivision aivis = vex::aivision(PORT19, yellow);
 
 vex::motor_group drive_r = vex::motor_group(drive_r1, drive_r2, drive_r3);
 vex::motor_group drive_l = vex::motor_group(drive_l1, drive_l2, drive_l3);
