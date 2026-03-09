@@ -12,7 +12,7 @@ void opcontrol(void) {
     Brain.Screen.setFont(vex::fontType::mono30);
 
     bool shifted = false;
-    bool intaking = 1;
+    bool scoring = 0;
     void red_sort(void);
     void blue_sort(void);
 
@@ -24,9 +24,6 @@ void opcontrol(void) {
     const int LIFT_BUFFER = 110;
     
     tounge.set(0);
-    int liftHeight = 1;
-    bool liftOT = 0;
-    bool liftSA = 0;
     finger.set(0);
     lift.set(0);
     tounge.set(0);
@@ -59,37 +56,48 @@ void opcontrol(void) {
         if (do_neutral_line_up) {
             // neutral_line_up();
         }
-        liftSA = 0;
         wait(20, vex::msec);
 
     // Intake
     if (BTN_R1.pressing()){
         intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        intakeHigh.spin(DIR_FWD, 3, VLT_VLT);
+        intakeHigh.spin(DIR_FWD, 1, VLT_VLT);
     }
-    if (BTN_R2.pressing()){
+    else if (BTN_R2.pressing()){
         intakeFull.spin(DIR_REV, 100, VEL_PCT);
     }
-    if (BTN_L1.pressing()){
+    else if (BTN_L1.pressing()){
         intakeFull.spin(DIR_FWD, 100, VEL_PCT);       
         hood.set(0);
     }
-    if (BTN_X.pressing()){
-        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        intakeHigh.spin(DIR_FWD, 50, VEL_PCT);
-    }
-    if (BTN_A.pressing()){
-        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        intakeHigh.spin(DIR_FWD, 100, VEL_PCT);
-        lift.set(1);
-    }
     else if (BTN_B.pressing()){
-        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-        intakeHigh.spin(DIR_FWD, 15, VEL_PCT);
+        intake1.spin(DIR_REV, 10, VEL_PCT);
+        intake2.spin(DIR_REV, 100, VEL_PCT);
+        intakeHigh.spin(DIR_REV, 30, VEL_PCT);
         lift.set(1);
     }
-    else{
+    else if (BTN_A.pressing()){
+        if (scoring == 0){
+            intakeFull.spinFor(DIR_REV, 150, TIME_MSEC, 100, VEL_PCT);
+            scoring = 1;
+        }
+        intake1.spin(DIR_FWD, 100, VEL_PCT);
+        intake2.spin(DIR_FWD, 50, VEL_PCT);
+        intakeHigh.spin(DIR_REV, 100, VEL_PCT);
+    }
+    else if (BTN_X.pressing()){
+        if (scoring == 0){
+            tounge.set(1);
+            intakeFull.spinFor(DIR_REV, 150, TIME_MSEC, 100, VEL_PCT);
+            scoring = 1;
+        }
+        intake1.spin(DIR_FWD, 100, VEL_PCT);
+        intake2.spin(DIR_FWD, 20, VEL_PCT);
+        intakeHigh.spin(DIR_REV, 30, VEL_PCT);
+    }
+    else {
         lift.set(0);
+        scoring = 0;
     }
     if (!BTN_L1.pressing() && !BTN_L2.pressing() && !BTN_X.pressing() && !BTN_B.pressing() && !BTN_A.pressing()){
         hood.set(1);

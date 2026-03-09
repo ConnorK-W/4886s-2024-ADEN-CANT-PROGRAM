@@ -22,8 +22,9 @@ vex::motor drive_r3 = vex::motor(PORT10, DRIVE_INSERT, false);
 // vex::motor drive_l4 = vex::motor(PORT8, DRIVE_INSERT, false);
 
 // Subsystem 3
-vex::motor intakeLow = vex::motor(PORT20, INTAKE_INSERT, false);
-vex::motor intakeHigh = vex::motor(PORT11, INTAKE_INSERT, false);
+vex::motor intake1 = vex::motor(PORT20, INTAKE_INSERT, false);
+vex::motor intake2 = vex::motor(PORT11, INTAKE_INSERT, false);
+vex::motor intakeHigh = vex::motor(PORT14, INTAKE_INSERT, false);
 Arm arm = Arm(PORT15, vex::gearSetting::ratio18_1, true);
 
 // 3 Wire Ports
@@ -44,7 +45,8 @@ vex::aivision aivis = vex::aivision(PORT19, yellow);
 vex::motor_group drive_r = vex::motor_group(drive_r1, drive_r2, drive_r3);
 vex::motor_group drive_l = vex::motor_group(drive_l1, drive_l2, drive_l3);
 vex::motor_group drive_full = vex::motor_group(drive_r1, drive_r2, drive_r3, drive_l1, drive_l2, drive_l3);
-vex::motor_group intakeFull = vex::motor_group(intakeLow, intakeHigh);
+vex::motor_group intakeFull = vex::motor_group(intake1, intake2, intakeHigh);
+vex::motor_group intakeLow = vex::motor_group(intake1, intake2);
 
 // Potentiometer for lever
 vex::potV2 lever_pot = vex::potV2(Brain.ThreeWirePort.E);

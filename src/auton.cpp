@@ -20,10 +20,10 @@ void autonomous(void) {
         vex::thread t1(intake);
         lift.set(0);
         tounge.set(1);
-        drive_straight(30.5, 70, 100, true, 0, 20);
+        drive_straight(28, 70, 100, true, 0, 40);
         finger.set(1);
-        drive_turn(90, 13, 40, 75, false, 20, 0);
-
+        drive_turn(80, 15, 55, 75, false, 40, 0);
+        target_heading = 90;   
         drive_full.spin(DIR_FWD, 3, VLT_VLT);
         wait(750, TIME_MSEC);
         hood.set(1);
@@ -32,15 +32,16 @@ void autonomous(void) {
             wait(300, TIME_MSEC);
             scoring = 4;
         });
-        drive_straight_toward_goal(800, 0);
+        drive_straight_toward_goal(1000, 0);
         tounge.set(0);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         t4.interrupt();
-        wait(800, TIME_MSEC);
+        wait(400, TIME_MSEC);
         
         // turning to middle goal
         drive_straight(5, 40, 120, true, 0, 15);
-        scoring = 1;
+        scoring = 6;
+        intake2.stop();
         drive_turn(135, 9.5, 30, 70, false, 15, 10);
         drive_straight(40,35,70, true, 10, 20);
         scoring = 2;
@@ -51,22 +52,18 @@ void autonomous(void) {
         scoring = 1;
         drive_turn(-55, 16, 60, 70, true, 10, 0);
         t1.interrupt();
-        drive_straight(37, 75, 100, true, 0, 20);
+        drive_straight(36.5, 75, 100, true, 0, 20);
         tounge.set(1);
-        drive_turn(-80, -26, 75, 100, false, 20, 2);
-        drive_straight(5, 30, 70, true, 0, 10);
+        drive_turn(-80, -29, 60, 100, false, 20, 2);
+        drive_straight(5, 30, 70, true, 2, 10);
 
         drive_full.spin(DIR_FWD, 3, VLT_VLT);
         wait(900, TIME_MSEC);
         // long goal
         tounge.set(0);
-        hood.set(0);
-        vex::thread t3([](){
-            wait(500, TIME_MSEC);
-            hood.set(0);
-            intakeFull.spin(DIR_FWD, 100, VEL_PCT);
-        });
         drive_straight_toward_goal(800, 0);
+        hood.set(0);
+        intakeFull.spin(DIR_FWD, 100, VEL_PCT);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         break;
     }
@@ -466,12 +463,14 @@ void intake() {
         }
         case 1: {
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-            intakeHigh.spin(DIR_FWD, 3, VLT_VLT);
+            intakeHigh.spin(DIR_FWD, 1, VLT_VLT);
             hood.set(1);
+            lift.set(0);
             break;
         }
         case 2: {
-            intakeLow.spin(DIR_REV, 40, VEL_PCT);
+            lift.set(1);
+            intakeLow.spin(DIR_REV, 30, VEL_PCT);
             intakeHigh.spin(DIR_REV, 100, VEL_PCT);
             hood.set(1);
             break;
@@ -479,8 +478,9 @@ void intake() {
         case 3: {
             lift.set(1);
             hood.set(1);
-            intakeHigh.spin(DIR_FWD, 60, VEL_PCT);
-            intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+            intakeHigh.spin(DIR_REV, 60, VEL_PCT);
+            intake1.spin(DIR_FWD, 100, VEL_PCT);
+            intake2.spin(DIR_FWD, 50, VEL_PCT);
             break;
         }
         case 4: {
@@ -493,13 +493,14 @@ void intake() {
             lift.set(0);
             hood.set(1);
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
-            intakeHigh.spin(DIR_FWD, 80, VEL_PCT);
+            intakeHigh.spin(DIR_FWD, 60, VEL_PCT);
             break;
         }
         case 6: {
-
-            break;
-        }
+            intake1.spin(DIR_FWD, 100, VEL_PCT);
+            hood.set(1);
+            lift.set(0);
+            break;        }
         case 7: {
             
             break;
