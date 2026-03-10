@@ -345,98 +345,85 @@ void vision_processing_task() {
 }
 
 void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool correct) {
-    
-    int CAMERA_CENTER_OFFSET;
-    
-    if (target_small_goal) {
-        CAMERA_CENTER_OFFSET = 0; // was -20
-    } else {
-        CAMERA_CENTER_OFFSET = 0; // was -5
-    }
+    const int TICKS_PER_SEC = 50;
+    const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
 
-    int TARGET_CENTER = 160 + CAMERA_CENTER_OFFSET;
+    // ~29 ips = 230 RPM, ~57 ips = 450 RPM (DRIVE_REV_TO_IN ≈ 7.66 in/rev)
+    float target_ips = target_small_goal ? 29.0f : 57.0f;
+    const float ipss = 125.0f;
+    float ips = 0.0f;
+    float dir_mod = -1.0f; // driving in reverse toward goals
 
-    PID dir_pid = target_small_goal ? 
-        PID(drive_smallgoal_kp, drive_smallgoal_ki, drive_smallgoal_kd) : 
-        PID(drive_biggoal_kp, drive_biggoal_ki, drive_biggoal_kd);
-
-    PID imu_pid = PID(5.0, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
-
-    PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
-    PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    PID pid_dir = PID(DRIVE_STRAIGHT_DIR_KP, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
 
     vex::timer t;
     t.clear();
 
-    float current_vel = 0;
-    float target_vel = 0;
-    float slew_rate = 5.0; 
-    int last_known_x = 160;   
-    int lost_frames = 100;
-    int goal_x = 160;
-    double dir_adj = 0;
-
     while (t.time(vex::msec) < duration_msec) {
-        if (imu.roll() <= -4 && target_small_goal == true) {
-            break; 
-        }
+        if (ips < target_ips)
+            ips += ipss / TICKS_PER_SEC;
+        else
+            ips = target_ips;
 
-        // Use threaded vision data
-        // Use threaded vision data
-        bool has_target = false;
-        int current_center_x = 160;
+        float vel_rpm = ips / DRIVE_REV_TO_IN * 60;
+        float dir_adj = pid_dir.adjust(target_heading, imu_rotation());
 
-        if (correct) {
-            vision_mutex.lock();
-            has_target = latest_vision_data.exists;
-            current_center_x = latest_vision_data.centerX;
-            vision_mutex.unlock();
+        drive_l.spin(DIR_FWD, dir_mod * vel_rpm + dir_adj, VEL_RPM);
+        drive_r.spin(DIR_FWD, dir_mod * vel_rpm - dir_adj, VEL_RPM);
 
-            if (has_target) {
-                goal_x = current_center_x;
-                last_known_x = goal_x; 
-                lost_frames = 0;
-            } else {
-                if (lost_frames < 10) {
-                    goal_x = last_known_x;
-                    lost_frames++;
-                }
-            }
-        }
-
-        if (!correct) {
-            current_vel = target_small_goal ? -230.0 : -450.0;
-            dir_adj = imu_pid.adjust(target_heading, imu_rotation());
-        } else if (has_target || lost_frames < 10) {
-            current_vel = target_small_goal ? -230.0 : -400.0;
-            
-            if (std::abs(TARGET_CENTER - goal_x) > 5) {
-                dir_adj = dir_pid.adjust(TARGET_CENTER, goal_x);
-            } else {
-                dir_adj = 0;
-            }
-            printf("Error: %d, Correction: %.2f\n", TARGET_CENTER - goal_x, dir_adj);
-        } else {
-            current_vel = -200.0 * 0.5;
-            dir_adj = imu_pid.adjust(0, imu_rotation());
-        }
-
-        if (current_vel < target_vel) {
-            current_vel += slew_rate;
-            if (current_vel > target_vel) current_vel = target_vel;
-        } else if (current_vel > target_vel) {
-            current_vel -= slew_rate;
-            if (current_vel < target_vel) current_vel = target_vel;
-        }
-
-        drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
-        drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
-        
-        wait(20, vex::msec);
+        wait(MSEC_PER_TICK, vex::msec);
     }
 
     drive_r.stop(vex::brakeType::brake);
     drive_l.stop(vex::brakeType::brake);
+
+    // --- old vision-based implementation ---
+    // int CAMERA_CENTER_OFFSET;
+    // if (target_small_goal) {
+    //     CAMERA_CENTER_OFFSET = 0; // was -20
+    // } else {
+    //     CAMERA_CENTER_OFFSET = 0; // was -5
+    // }
+    // int TARGET_CENTER = 160 + CAMERA_CENTER_OFFSET;
+    // PID dir_pid = target_small_goal ?
+    //     PID(drive_smallgoal_kp, drive_smallgoal_ki, drive_smallgoal_kd) :
+    //     PID(drive_biggoal_kp, drive_biggoal_ki, drive_biggoal_kd);
+    // PID imu_pid = PID(5.0, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
+    // PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    // PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
+    // vex::timer t; t.clear();
+    // float current_vel = 0; float target_vel = 0; float slew_rate = 5.0;
+    // int last_known_x = 160; int lost_frames = 100; int goal_x = 160; double dir_adj = 0;
+    // while (t.time(vex::msec) < duration_msec) {
+    //     if (imu.roll() <= -4 && target_small_goal == true) break;
+    //     bool has_target = false; int current_center_x = 160;
+    //     if (correct) {
+    //         vision_mutex.lock();
+    //         has_target = latest_vision_data.exists;
+    //         current_center_x = latest_vision_data.centerX;
+    //         vision_mutex.unlock();
+    //         if (has_target) { goal_x = current_center_x; last_known_x = goal_x; lost_frames = 0; }
+    //         else if (lost_frames < 10) { goal_x = last_known_x; lost_frames++; }
+    //     }
+    //     if (!correct) {
+    //         current_vel = target_small_goal ? -230.0 : -450.0;
+    //         dir_adj = imu_pid.adjust(target_heading, imu_rotation());
+    //     } else if (has_target || lost_frames < 10) {
+    //         current_vel = target_small_goal ? -230.0 : -400.0;
+    //         if (std::abs(TARGET_CENTER - goal_x) > 5) dir_adj = dir_pid.adjust(TARGET_CENTER, goal_x);
+    //         else dir_adj = 0;
+    //         printf("Error: %d, Correction: %.2f\n", TARGET_CENTER - goal_x, dir_adj);
+    //     } else {
+    //         current_vel = -200.0 * 0.5;
+    //         dir_adj = imu_pid.adjust(0, imu_rotation());
+    //     }
+    //     if (current_vel < target_vel) { current_vel += slew_rate; if (current_vel > target_vel) current_vel = target_vel; }
+    //     else if (current_vel > target_vel) { current_vel -= slew_rate; if (current_vel < target_vel) current_vel = target_vel; }
+    //     drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
+    //     drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
+    //     wait(20, vex::msec);
+    // }
+    // drive_r.stop(vex::brakeType::brake); drive_l.stop(vex::brakeType::brake);
 }
 
 // TODO: get rid of reversed and just use a negative outer_radius
