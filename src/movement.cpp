@@ -360,7 +360,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
         PID(drive_smallgoal_kp, drive_smallgoal_ki, drive_smallgoal_kd) : 
         PID(drive_biggoal_kp, drive_biggoal_ki, drive_biggoal_kd);
 
-    PID imu_pid = PID(correct ? 5.0 : DRIVE_STRAIGHT_DIR_KP, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
+    PID imu_pid = PID(5.0, DRIVE_STRAIGHT_DIR_KI, DRIVE_STRAIGHT_DIR_KD);
 
     PID rd = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
     PID ld = PID(DRIVE_STRAIGHT_DL_KP, DRIVE_STRAIGHT_DL_KI, DRIVE_STRAIGHT_DL_KD);
