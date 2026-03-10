@@ -349,10 +349,8 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
     int CAMERA_CENTER_OFFSET;
     
     if (target_small_goal) {
-        lift.set(1);
         CAMERA_CENTER_OFFSET = 0; // was -20
     } else {
-        lift.set(0); 
         CAMERA_CENTER_OFFSET = 0; // was -5
     }
 
@@ -379,7 +377,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
     double dir_adj = 0;
 
     while (t.time(vex::msec) < duration_msec) {
-        if (target_small_goal && imu.roll() <= -4) {
+        if (imu.roll() <= -4 && target_small_goal == true) {
             break; 
         }
 
@@ -407,7 +405,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
         }
 
         if (!correct) {
-            current_vel = target_small_goal ? -230.0 : -400.0;
+            current_vel = target_small_goal ? -230.0 : -450.0;
             dir_adj = imu_pid.adjust(target_heading, imu_rotation());
         } else if (has_target || lost_frames < 10) {
             current_vel = target_small_goal ? -230.0 : -400.0;
@@ -563,7 +561,7 @@ void turn_pid(float degrees, float ratio, int direction, int waitTime) {
     int time_still = 0;
     int time = totalTime.time();
     while (time_still < 60) {
-        if (within_range(imu_rotation(), target_heading, 2.0))
+        if (within_range(imu_rotation(), target_heading, 4.0))
             time_still += MSEC_PER_TICK;
         else
             time_still = 0;

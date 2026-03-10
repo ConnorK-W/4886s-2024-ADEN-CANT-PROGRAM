@@ -18,18 +18,30 @@ void test_drive_to_dist_value();
 void test_wall_follow();
 void test_distance_display();
 
+//#define TEST_FUNCS
+#ifdef TEST_FUNCS
+const bool run_main = false;
+#else
+const bool run_main = true;
+#endif
+
 int main() {
-    // NORMAL COMPETITION MODE
-    vex::competition Competition;
-    Competition.autonomous(autonomous);
-    Competition.drivercontrol(opcontrol);
-    pre_auton();
+    if (run_main) {
+        vex::competition Competition;
+        Competition.autonomous(autonomous);
+        Competition.drivercontrol(opcontrol);
+        pre_auton();
+    }
+    else {
+        imu.calibrate();
+        master.ButtonLeft.pressed(tune_fast_pid);
+        master.ButtonRight.pressed(autonomous);
+    }
 
-    // Tuning/test functions (commented out):
-    // tune_wall_follow_pid();   // Wall follow parameter tuning
-    // test_distance_display();  // Display distance sensor readings
-    // test_wall_follow();       // Simple one-shot test
 
+    while (true) {
+        wait(20, TIME_MSEC);
+    }
 }
 
 void test_drive_to_dist_value() {

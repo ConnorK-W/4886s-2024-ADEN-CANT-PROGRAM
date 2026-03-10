@@ -1,12 +1,12 @@
 // PID constants
 
 // drive_straight() consts acceleration
-#define DRIVE_STRAIGHT_DL_KP 0.155
+#define DRIVE_STRAIGHT_DL_KP 0.31
 #define DRIVE_STRAIGHT_DL_KI 0.0
-#define DRIVE_STRAIGHT_DL_KD 0.650
+#define DRIVE_STRAIGHT_DL_KD 1.50
 
 // drive_straight_toward_biggoal() consts acceleration = 12.0 | final_max_rpm = -300
-#define DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP (1.40) 
+#define DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP (1.60) 
 #define DRIVE_STRAIGHT_TOWARD_BIGGOAL_KI 0.0
 #define DRIVE_STRAIGHT_TOWARD_BIGGOAL_KD (0.0)
 
@@ -16,7 +16,7 @@
 #define DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KD (0.0)
 
 // Direction control
-#define DRIVE_STRAIGHT_DIR_KP 3.5
+#define DRIVE_STRAIGHT_DIR_KP 2.0
 #define DRIVE_STRAIGHT_DIR_KI 0.00
 #define DRIVE_STRAIGHT_DIR_KD 8.275
 

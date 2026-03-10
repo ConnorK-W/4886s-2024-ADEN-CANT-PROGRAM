@@ -38,7 +38,7 @@ void drive_linear(float inches, float target_ips, float ipss, float do_decel = t
  */
 void drive_arc(float degrees, float outer_radius, float max_ips, float ipss, bool do_decel, bool reversed);
 
-void turn_pid(float degrees, float ratio, int direction, int waitTime = 1000);
+void turn_pid(float degrees, float ratio, int direction, int waitTime =  1000);
 
 void straight_pid(float dist);
 
