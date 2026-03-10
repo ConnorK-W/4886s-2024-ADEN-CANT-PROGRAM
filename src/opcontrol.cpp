@@ -77,10 +77,6 @@ void opcontrol(void) {
         lift.set(1);
     }
     else if (BTN_A.pressing()){
-        if (scoring == 0){
-            intakeFull.spinFor(DIR_REV, 150, TIME_MSEC, 100, VEL_PCT);
-            scoring = 1;
-        }
         intake1.spin(DIR_FWD, 100, VEL_PCT);
         intake2.spin(DIR_FWD, 50, VEL_PCT);
         intakeHigh.spin(DIR_REV, 100, VEL_PCT);
