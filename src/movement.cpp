@@ -370,8 +370,8 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
             float vel_rpm = ips / DRIVE_REV_TO_IN * 60;
             float dir_adj = pid_dir.adjust(target_heading, imu_rotation());
 
-            drive_r.spin(DIR_FWD, dir_mod * vel_rpm + dir_adj, VEL_RPM);
-            drive_l.spin(DIR_FWD, dir_mod * vel_rpm - dir_adj, VEL_RPM);
+            drive_l.spin(DIR_FWD, dir_mod * vel_rpm + dir_adj, VEL_RPM);
+            drive_r.spin(DIR_FWD, dir_mod * vel_rpm - dir_adj, VEL_RPM);
 
             wait(MSEC_PER_TICK, vex::msec);
         }
