@@ -250,7 +250,10 @@ void autonomous(void) {
     }
 
     case LeftSimple: {
-    
+        turn_pid(30, -1, 1);
+        target_heading = 0;   
+        drive_straight_toward_goal(1000, 0, false);
+
         break;
     }
 
@@ -458,7 +461,7 @@ void intake() {
         }
         case 5: {
             lift.set(0);
-            hood.set(1);
+            hood.set(0);
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
             intakeHigh.spin(DIR_FWD, 60, VEL_PCT);
             break;
