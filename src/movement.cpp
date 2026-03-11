@@ -352,7 +352,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
         // Simple time-based drive straight with IMU heading correction
         // ~29 ips = 230 RPM, ~57 ips = 450 RPM (DRIVE_REV_TO_IN ≈ 7.66 in/rev)
         float target_ips = target_small_goal ? 29.0f : 57.0f;
-        const float ipss = 125.0f;
+        const float ipss = 75.0f;
         float ips = 0.0f;
         float dir_mod = -1.0f; // driving in reverse toward goals
 
