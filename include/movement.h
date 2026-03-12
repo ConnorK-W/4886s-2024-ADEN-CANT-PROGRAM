@@ -3,7 +3,7 @@
  * @param target_ips goal for velocity - positive
  * @param ipss acceleration - positive
  */
-void drive_straight(float inches, float target_ips, float ipss, bool do_decel = true, float start_ips = 0, float end_ips = 0);
+void drive_straight(float inches, float target_ips, float ipss, bool do_decel = true, float start_ips = 0, float end_ips = 2);
 
 /**
  * Drives straight towards a goal using vision tracking for a set duration.
@@ -73,7 +73,7 @@ void wiggle(int num_wiggles, float angle, int duration_msec);
 
 void vision_processing_task();
 
-void drive_straight_with_dist(float inches, float target_ips, float ipss, bool do_decel = true, float start_ips = 0, float end_ips = 0);
+void drive_straight_with_dist(float inches, float target_ips, float ipss, bool do_decel = true, float start_ips = 0, float end_ips = 2);
 
 /**
  * @brief Drives straight using PID on distance sensor reading
@@ -95,7 +95,7 @@ void drive_straight_to_dist_value(float target_dist_in, float target_ips, float 
  * @param start_ips Starting velocity
  * @param end_ips Final velocity
  */
-void drive_straight_wall_follow(float inches, float target_ips, float ipss, float target_wall_dist, bool do_decel = true, float start_ips = 0, float end_ips = 0);
+void drive_straight_wall_follow(float inches, float target_ips, float ipss, float target_wall_dist, bool do_decel = true, float start_ips = 0, float end_ips = 2);
 
 /**
  * @brief Backs up to tube position while maintaining 21.5" from left wall

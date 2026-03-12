@@ -282,7 +282,7 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel, f
 
     float vel_rpm;
 
-    while (ips >= 0 && std::abs(pos_drive_l() - pos_start_l) < std::abs(inches)) {
+    while (std::abs(pos_drive_l() - pos_start_l) < std::abs(inches)) {
         if (std::abs(pos) + stop_dist(ips, ipss, end_ips) >= std::abs(inches) && do_decel) {
             if (ips > end_ips)
                 ips -= ipss / TICKS_PER_SEC;

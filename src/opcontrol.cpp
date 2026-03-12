@@ -34,7 +34,7 @@ void opcontrol(void) {
         // Drive control
         opdrive(TSA, spd_mod, SENSITIVITY * sens_mod);
 
-        Brain.Screen.drawImageFromFile("Graduation.png", 0, 0);
+        Brain.Screen.drawImageFromFile("Xavier.png", 0, 0);
 
 
         // tounge
@@ -43,11 +43,11 @@ void opcontrol(void) {
         }
         if (BTN_L2.pressing()){
         hood.set(0 );
-    }
+        }
+        if (BTN_LEFT.PRESSED){
+            Brain.Screen.drawImageFromFile("Xavier.png", 0, 0);
 
-        B_SCRN.printAt(100, 200, "Arm position: %f", lever_pot.value(ROT_DEG));
-        B_SCRN.printAt(100, 220, "Arm current: %f", arm.current(PCT_PCT));
-
+        }
         
         // Toggles chase neutral post
         //if (BTN_RIGHT.PRESSED)
@@ -60,7 +60,8 @@ void opcontrol(void) {
 
     // Intake
     if (BTN_R1.pressing()){
-        intakeLow.spin(DIR_FWD, 100, VEL_PCT);
+        intake1.spin(DIR_FWD, 100, VEL_PCT);
+        intake2.spin(DIR_FWD, 30, VEL_PCT);
         intakeHigh.spin(DIR_FWD, 1, VLT_VLT);
     }
     else if (BTN_R2.pressing()){
