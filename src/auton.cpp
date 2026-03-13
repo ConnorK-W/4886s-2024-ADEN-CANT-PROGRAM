@@ -172,48 +172,41 @@ void autonomous(void) {
 
     case LeftComplex: {
         vex::thread t1(intake);
-        lift.set(1);
-        drive_straight(9, 75, 100, true, 0, 30);
-        vex::thread t2([](){
-            wait(500, TIME_MSEC);
-            tounge.set(1);
-        });
-        drive_turn(-55, -17, 15, 75, false, 30, 0);
-        t2.interrupt();
-        turn_pid(-80, -1, 1);
-        drive_straight(-12, 35, 40, true, 0, 10);
-        scoring = 3;
-        wait(700, TIME_MSEC);
-        scoring = 1;
-        lift.set(0);
-        drive_straight(36, 75, 100, true, 0, 30);
-        // tounge.set(1);
-
-        drive_turn(-45, -25, 40, 75, false, 30, 0);
-        drive_full.spin(DIR_FWD, 5, VLT_VLT);
-        wait(700, TIME_MSEC);
-        // long goal
+        drive_turn(90, 15, 50, 70, false);
         tounge.set(0);
-        vex::thread t3([](){
-            wait(500, TIME_MSEC);
-            scoring = 4;
-        });
-        drive_straight_toward_goal(1500, 0, false);
-
-        drive_turn(-90, -15, 30, 50, false, 0, 0);
-        scoring = 1;
-        t1.interrupt();
-        turn_pid(90, -1, 1);
-        drive_straight(-30, 75, 100, true, 0, 0);
-        drive_l.stop(vex::brakeType::hold);
-        drive_r.stop(vex::brakeType::hold);
-        drive_turn(30, 5, 10, 75, true, 0, 0);
-        //drive_turn(-90, -13.5, 50, 75, false);
-        /*
-t1.interrupt();
-turn_pid(90, -1, 1);
-drive_straight(-29, 75, 50);
-*/
+        drive_straight(35, 60, 70, true, 0, 15);
+        turn_pid(-90, -1, 1);
+        drive_full.spin(DIR_FWD, 4, VLT_VLT);
+        wait(2000, TIME_MSEC);
+        drive_full.stop();
+        wait(1000, TIME_MSEC);
+        drive_full.spin(DIR_REV, 4, VLT_VLT);
+        wait(200, TIME_MSEC);
+        drive_full.spin(DIR_FWD, 4, VLT_VLT);
+        wait(1000, TIME_MSEC);
+        drive_full.spin(DIR_REV, 2, VLT_VLT);
+        wait(200, TIME_MSEC);
+        drive_full.spin(DIR_FWD, 4, VLT_VLT);
+        wait(500, TIME_MSEC);
+        drive_full.spin(DIR_REV, 2, VLT_VLT);
+        wait(500, TIME_MSEC);
+        drive_full.spin(DIR_FWD, 4, VLT_VLT);
+        wait(500, TIME_MSEC);
+        drive_full.spin(DIR_REV, 12, VLT_VLT);
+        wait(700, TIME_MSEC);
+        drive_full.spin(DIR_FWD, 3, VLT_VLT);
+        wait(1000, TIME_MSEC);
+        drive_straight(-4, 60, 70, true, 0, 0);
+        turn_pid(125, -1, 1);
+        drive_straight(28, 60, 70, true, 0, 0);
+        turn_pid(-80, -1, 1);
+        drive_straight(-10, 60, 70, true, 0, 15);
+        scoring = 9;
+        drive_full.spin(DIR_REV, 4, VLT_VLT);
+        wait(1000, TIME_MSEC);
+        scoring = 10;
+        wait(5000, TIME_MSEC);
+        drive_straight(10, 60, 70, true, 0, 15);
         break;
     }
 
@@ -221,8 +214,9 @@ drive_straight(-29, 75, 50);
         vex::thread t1(intake);
         finger.set(1); // get finger out of way 
         tounge.set(1); // open tounge
-        drive_straight(29, 70, 100, true, 0, 10);
-        drive_turn(-90, -15, 40, 75, false, 10, 10);
+        drive_straight(31, 70, 100, true, 0, 10);
+        drive_turn(-80, -15, 60, 75, false, 10, 20);
+        target_heading = -90;
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
         wait(2000, TIME_MSEC);
 
@@ -232,7 +226,7 @@ drive_straight(-29, 75, 50);
         drive_straight(5,30,75, true, 0, 10);
         tounge.set(0);
         drive_turn(180, 12, 30, 75, false, 10, 0);
-        drive_straight(78, 70, 70, true, 0, 2);
+        drive_straight(85, 70, 70);
         turn_pid(-30, -1, 1);
         tounge.set(1);
         // drive_straight(-15, 50, 70); // straight
@@ -246,13 +240,13 @@ drive_straight(-29, 75, 50);
         drive_straight_toward_goal(3900, false, false);
         // second match load
         t2.interrupt();
-        drive_straight(20, 40, 100, false, 0, 15);
+        drive_straight(25, 40, 100, false, 0, 15);
         scoring = 1;
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
         wait(2000, TIME_MSEC);
         // score second goal
         // drive_straight(-35, 50, 70); // straight
-        drive_straight(-25, 70, 100, true, 0, 10);
+        drive_straight(-28, 70, 100, true, 0, 20);
         scoring = 4;
         drive_straight_toward_goal(2100, false, false);
         drive_straight(5, 10, 50, false);
@@ -262,8 +256,8 @@ drive_straight(-29, 75, 50);
 
         // second half legacy going over
         drive_turn(89, 15, 50, 70, false);
-        drive_straight(65, 60, 70, true, 0, 15);
-        drive_turn(-90, -19, 40, 75, false, 10, 10);
+        drive_straight(68, 60, 70, true, 0, 15);
+        drive_turn(-90, -19, 40, 75, false, 15, 10);
         scoring = 1;
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
         wait(2000, TIME_MSEC);
@@ -274,7 +268,7 @@ drive_straight(-29, 75, 50);
         drive_straight(5,30,75, true, 0, 5);
         tounge.set(0);
         drive_turn(180, 12, 30, 75, false);
-        drive_straight(78, 70, 70, true, 0, 2);
+        drive_straight(85, 70, 70);
         turn_pid(-30, -1, 1);
         tounge.set(1);
         // drive_straight(-15, 50, 70); // straight
@@ -282,7 +276,7 @@ drive_straight(-29, 75, 50);
         vex::thread t4([](){
             wait(1200, TIME_MSEC);
             scoring = 4;
-            target_heading = 2700;   
+            target_heading = 270;   
 
         });
         drive_straight_toward_goal(3900, false, false);
@@ -294,12 +288,12 @@ drive_straight(-29, 75, 50);
         // score second goal
 
         // drive_straight(-35, 50, 70); // straight
-        drive_straight(-25, 70, 100, true, 0, 10);
+        drive_straight(-28, 70, 100, true, 0, 20);
         scoring = 4;
         drive_straight_toward_goal(2100, false, false);
         tounge.set(0);
         scoring = 1;
-        drive_turn(80, 38, 50, 75, false);
+        drive_turn(90, 38, 50, 75, false);
         vex::thread t6([](){
             wait(800, TIME_MSEC);
             tounge.set(1);
@@ -387,6 +381,17 @@ void intake() {
         case 8: {
             intake1.spin(DIR_REV, 100, VEL_PCT);
             break;
+        }
+        case 9: {
+            intake1.spin(DIR_REV, 100, VEL_PCT);
+            intake2.spin(DIR_REV, 100, VEL_PCT);
+            intakeHigh.spin(DIR_REV, 30, VEL_PCT);
+            hood.set(0);
+        }
+        case 10: {
+            intake2.spin(DIR_FWD, 30, VEL_PCT);
+            intake1.spin(DIR_FWD, 100, VEL_PCT);
+
         }
         }
         wait(50, TIME_MSEC);

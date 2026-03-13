@@ -72,7 +72,7 @@ void opcontrol(void) {
         hood.set(0);
     }
     else if (BTN_B.pressing()){
-        intake1.spin(DIR_REV, 10, VEL_PCT);
+        intake1.spin(DIR_REV, 15, VEL_PCT);
         intake2.spin(DIR_REV, 100, VEL_PCT);
         intakeHigh.spin(DIR_REV, 30, VEL_PCT);
         lift.set(1);
@@ -83,13 +83,8 @@ void opcontrol(void) {
         intakeHigh.spin(DIR_REV, 100, VEL_PCT);
     }
     else if (BTN_X.pressing()){
-        if (scoring == 0){
-            tounge.set(1);
-            intakeFull.spinFor(DIR_REV, 150, TIME_MSEC, 100, VEL_PCT);
-            scoring = 1;
-        }
         intake1.spin(DIR_FWD, 100, VEL_PCT);
-        intake2.spin(DIR_FWD, 20, VEL_PCT);
+        intake2.spin(DIR_FWD, 30, VEL_PCT);
         intakeHigh.spin(DIR_REV, 30, VEL_PCT);
     }
     else {

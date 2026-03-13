@@ -2,7 +2,7 @@
 
 // drive_straight() consts acceleration
 #define DRIVE_STRAIGHT_DL_KP 0.4
-#define DRIVE_STRAIGHT_DL_KI 0.00
+#define DRIVE_STRAIGHT_DL_KI 0.01
 #define DRIVE_STRAIGHT_DL_KD 0.75
 
 // drive_straight_toward_biggoal() consts acceleration = 12.0 | final_max_rpm = -300
@@ -16,7 +16,7 @@
 #define DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KD (0.0)
 
 // Direction control
-#define DRIVE_STRAIGHT_DIR_KP 2.0
+#define DRIVE_STRAIGHT_DIR_KP 3.0
 #define DRIVE_STRAIGHT_DIR_KI 0.00
 #define DRIVE_STRAIGHT_DIR_KD 8.275
 
