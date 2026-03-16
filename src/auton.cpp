@@ -232,15 +232,11 @@ void autonomous(void) {
         drive_straight(-28, 70, 100, true, 0, 10);
         scoring = 4;
         drive_straight_toward_goal(2100, false, false);
-        scoring = 1;
-
 
         // second half legacy going over
         tounge.set(0);
-        scoring = 1;
-        tounge.set(0);
-        scoring = 1;
         drive_turn(85, 38.5, 50, 75, false, 0, 10);
+        scoring = 1;
         drive_full.spinFor(DIR_FWD, 2500, TIME_MSEC, 30, VEL_PCT);
         drive_full.spin(DIR_REV, 2, VLT_VLT);
         wait(1500, TIME_MSEC);
@@ -293,8 +289,8 @@ void autonomous(void) {
         scoring = 4;
         drive_straight_toward_goal(1100, false, false);
         tounge.set(0);
-        scoring = 4;
         drive_turn(85, 38.5, 50, 75, false);
+        scoring = 1;
         vex::thread t6([](){
             wait(800, TIME_MSEC);
             tounge.set(1);
