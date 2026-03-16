@@ -306,19 +306,18 @@ void autonomous(void) {
 
     }
 }
-
 void intake() {
     intakeLow.spin(DIR_FWD, 100, VEL_PCT);
     int antiJamTime = 0;
     while (true) {
         switch (scoring) {
-        case 0: {
-            intakeFull.stop();
-            hood.set(1);
+        case 0: {  
+            intakeFull.stop(); // stop intaking
+            hood.set(1); // hood set to closed
             break;
         }
-        case 1: {
-            intake1.spin(DIR_FWD, 100, VEL_PCT);
+        case 1: { // normal intaking; low intake 100%, high intake 1V (slow), closes hood, intake lift off
+            intake1.spin(DIR_FWD, 100, VEL_PCT); 
             intake2.spin(DIR_FWD, 30, VEL_PCT);
             intakeHigh.spin(DIR_FWD, 1, VLT_VLT);
             hood.set(1);
@@ -338,13 +337,13 @@ void intake() {
             
             break;
         }
-        case 2: {
+        case 2: { // outtaking slowly for lower middle; low reverse 30%, closes hood, intake lift on
             lift.set(1);
             intake1.spin(DIR_REV, 40, VEL_PCT);
             hood.set(1);
             break;
         }
-        case 3: {
+        case 3: { // not used currently
             lift.set(1);
             hood.set(1);
             intakeHigh.spin(DIR_REV, 60, VEL_PCT);
@@ -352,25 +351,25 @@ void intake() {
             intake2.spin(DIR_FWD, 50, VEL_PCT);
             break;
         }
-        case 4: {
+        case 4: { // long goal scoring; opens hood, full intake 100%, closes hood, intake lift off
             lift.set(0);
             hood.set(0);
             intakeFull.spin(DIR_FWD, 100, VEL_PCT);
             break;
         }
-        case 5: {
+        case 5: { // not used currently
             lift.set(0);
             hood.set(0);
             intakeLow.spin(DIR_FWD, 100, VEL_PCT);
             intakeHigh.spin(DIR_FWD, 60, VEL_PCT);
             break;
         }
-        case 6: {
+        case 6: { // this helps hold balls for lower middle goal scoring, intake lift off
             intake1.spin(DIR_FWD, 100, VEL_PCT);
             hood.set(1);
             lift.set(0);
             break;        }
-        case 7: {
+        case 7: { // not used currently
             lift.set(0);
             hood.set(0);
             wait(200, TIME_MSEC);
@@ -379,11 +378,11 @@ void intake() {
             break;
             break;
         }
-        case 8: {
+        case 8: { // not used currently
             intake1.spin(DIR_REV, 100, VEL_PCT);
             break;
         }
-        case 9: {
+        case 9: { // not used anymore
             intake1.spin(DIR_REV, 100, VEL_PCT);
             intake2.spin(DIR_REV, 100, VEL_PCT);
             intakeHigh.spin(DIR_REV, 30, VEL_PCT);
