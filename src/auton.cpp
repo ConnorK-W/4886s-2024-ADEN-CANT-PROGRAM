@@ -265,6 +265,7 @@ void autonomous(void) {
         tounge.set(0);
         drive_turn(180, 12, 30, 75, false);
         scoring = 1;
+        wait(50, TIME_MSEC);
         hood.set(1);
         drive_straight(85, 70, 70);
         turn_pid(-30, -1, 1);
