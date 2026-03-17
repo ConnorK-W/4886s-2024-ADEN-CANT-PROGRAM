@@ -25,15 +25,15 @@ void autonomous(void) {
         drive_turn(80, 15, 55, 75, false, 40, 0);
         target_heading = 90;   
         drive_full.spin(DIR_FWD, 3, VLT_VLT);
-        wait(750, TIME_MSEC);
+        wait(700, TIME_MSEC);
         hood.set(1);
+        tounge.set(0);
         // long goal
         vex::thread t4([](){
-            wait(300, TIME_MSEC);
+            wait(500, TIME_MSEC);
             scoring = 4;
         });
-        drive_straight_toward_goal(1000, 0);
-        tounge.set(0);
+        drive_straight_toward_goal(1000, 0, false);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         t4.interrupt();
         wait(400, TIME_MSEC);
@@ -50,12 +50,12 @@ void autonomous(void) {
         
         drive_straight(-3.5, 30, 50, true, 20, 10);
         scoring = 1;
-        drive_turn(-55, 16, 60, 70, true, 10, 0);
+        drive_turn(-55, 16, 40, 70, true, 10, 0);
         t1.interrupt();
-        drive_straight(41, 75, 100, true, 0, 20);
+        drive_straight(44, 75, 100, true, 0, 20);
         tounge.set(1);
-        drive_turn(-80, -31, 50, 100, false, 20, 10);
-        drive_straight(5, 30, 70, true, 10, 10);
+        drive_turn(-85, -32, 50, 100, false, 20, 10);
+        drive_straight(3, 30, 70, true, 10, 10);
 
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
         wait(900, TIME_MSEC);
@@ -99,7 +99,7 @@ void autonomous(void) {
 
     case RightComplex: {
         vex::thread t1(intake);
-        drive_turn(70, 50, 40, 75, false, 0, 0);
+        drive_turn(70, 45, 40, 75, false, 0, 0);
         tounge.set(1);
         wait(500, TIME_MSEC);
         drive_turn(-25, 35, 40, 75, true, 0, 0);
@@ -109,14 +109,14 @@ void autonomous(void) {
         scoring = 2;
         wait(1200, TIME_MSEC);
         scoring = 1;
-        drive_straight(-49, 75, 100, true, 0, 5);
+        drive_straight(-47, 75, 100, true, 0, 5);
         tounge.set(1);
 
         // long goal
         turn_pid(-135, -1, 1);
         drive_straight(5, 20, 120, true, 0, 15);
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
-        wait(850, TIME_MSEC);
+        wait(550, TIME_MSEC);
         // long goal
 
         tounge.set(0);
@@ -229,7 +229,7 @@ void autonomous(void) {
         wait(2500, TIME_MSEC);
         // score second goal
         // drive_straight(-35, 50, 70); // straight
-        drive_straight(-28, 70, 100, true, 0, 10);
+        drive_straight(-28, 70, 100, true, 0, 40);
         scoring = 4;
         drive_straight_toward_goal(2100, false, false);
 
@@ -263,9 +263,10 @@ void autonomous(void) {
         wait(2000, TIME_MSEC);
         drive_straight(5,30,75, true, 0, 5);
         tounge.set(0);
+        scoring = 1;
+        hood.set(1);
         drive_turn(180, 12, 30, 75, false);
         scoring = 1;
-        wait(50, TIME_MSEC);
         hood.set(1);
         drive_straight(85, 70, 70);
         turn_pid(-30, -1, 1);
@@ -288,7 +289,7 @@ void autonomous(void) {
         // drive_straight(-35, 50, 70); // straight
         drive_straight(-28, 70, 100, true, 0, 10);
         scoring = 4;
-        drive_straight_toward_goal(1100, false, false);
+        drive_straight_toward_goal(2000, false, false);
         tounge.set(0);
         drive_turn(85, 38.5, 50, 75, false);
         scoring = 1;
@@ -336,7 +337,9 @@ void intake() {
         }
         case 2: { // outtaking slowly for lower middle; low reverse 30%, closes hood, intake lift on
             lift.set(1);
-            intake1.spin(DIR_REV, 40, VEL_PCT);
+            intake1.spin(DIR_REV, 50, VEL_PCT);
+            intake2.spin(DIR_REV, 100, VEL_PCT);
+            intakeHigh.spin(DIR_REV, 100, VEL_PCT);
             hood.set(1);
             break;
         }
