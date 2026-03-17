@@ -99,17 +99,17 @@ void autonomous(void) {
 
     case RightComplex: {
         vex::thread t1(intake);
-        drive_turn(65, 44, 40, 75, false, 0, 10);
+        drive_turn(65, 46, 40, 75, false, 0, 10);
         tounge.set(1);
         wait(400, TIME_MSEC);
-        drive_turn(-20, 36, 40, 75, true, 0, 0);
+        drive_turn(-18, 36, 40, 75, true, 0, 0);
         tounge.set(0);
         turn_pid(-90, -1, 1);
         drive_straight(6, 75, 50, true, 0, 20);
         scoring = 2;
         wait(1200, TIME_MSEC);
         scoring = 1;
-        drive_straight(-47, 75, 100, true, 0, 5);
+        drive_straight(-47.5, 75, 100, true, 0, 5);
         tounge.set(1);
 
         // long goal
