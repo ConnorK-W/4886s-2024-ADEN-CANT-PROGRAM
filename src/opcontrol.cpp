@@ -28,13 +28,12 @@ void opcontrol(void) {
     lift.set(0);
     tounge.set(0);
     bool sort = 1;
+    Brain.Screen.drawImageFromFile("Xavier.png", 0, 0);
 
     while (1) {
         // master.rumble(".");
         // Drive control
         opdrive(TSA, spd_mod, SENSITIVITY * sens_mod);
-
-        Brain.Screen.drawImageFromFile("Xavier.png", 0, 0);
 
 
         // tounge
