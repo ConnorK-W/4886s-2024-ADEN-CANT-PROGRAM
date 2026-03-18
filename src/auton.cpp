@@ -102,14 +102,14 @@ void autonomous(void) {
         drive_turn(65, 46.7, 40, 75, false, 0, 10);
         tounge.set(1);
         wait(400, TIME_MSEC);
-        drive_turn(-18, 33, 40, 75, true, 0, 0);
+        drive_turn(-18.75, 33, 40, 75, true, 0, 0);
         tounge.set(0);
         turn_pid(-90, -1, 1);
         drive_straight(6, 75, 50, true, 0, 20);
         scoring = 2;
         wait(1200, TIME_MSEC);
         scoring = 1;
-        drive_straight(-48.5, 75, 100, true, 0, 5);
+        drive_straight(-49, 75, 100, true, 0, 5);
         tounge.set(1);
 
         // long goal
