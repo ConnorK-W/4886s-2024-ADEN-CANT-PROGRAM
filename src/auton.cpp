@@ -36,7 +36,7 @@ void autonomous(void) {
         drive_straight_toward_goal(1000, 0);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
         t4.interrupt();
-        wait(600, TIME_MSEC);
+        wait(650, TIME_MSEC);
         
         // turning to middle goal
         drive_straight(5, 40, 120, true, 0, 15);
@@ -46,7 +46,7 @@ void autonomous(void) {
         drive_straight(40,35,70, true, 10, 20);
         scoring = 2;
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(600, TIME_MSEC);
+        wait(700, TIME_MSEC);
         
         drive_straight(-3.5, 30, 50, true, 20, 10);
         scoring = 1;
@@ -58,7 +58,7 @@ void autonomous(void) {
         drive_straight(3, 30, 70, true, 10, 10);
 
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(900, TIME_MSEC);
+        wait(850, TIME_MSEC);
         // long goal
         tounge.set(0);
         drive_straight_toward_goal(800, 0);
@@ -337,7 +337,7 @@ void intake() {
         }
         case 2: { // outtaking slowly for lower middle; low reverse 30%, closes hood, intake lift on
             lift.set(1);
-            intake1.spin(DIR_REV, 50, VEL_PCT);
+            intake1.spin(DIR_REV, 37.5, VEL_PCT);
             intake2.spin(DIR_REV, 100, VEL_PCT);
             intakeHigh.spin(DIR_REV, 100, VEL_PCT);
             hood.set(1);
