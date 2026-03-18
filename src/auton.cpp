@@ -71,27 +71,31 @@ void autonomous(void) {
 
     case RightSimple: {
         vex::thread t1(intake);
-        drive_straight(12, 75, 100, true, 0, 15);
-        drive_turn(130, 17, 45, 75, false, 15, 5);
+        drive_straight(10, 75, 100, true, 0, 30);
+        vex::thread t2([](){
+            wait(300, TIME_MSEC);
+            tounge.set(1);
+        });
+        drive_turn(100, 13, 60, 100, false, 30, 15);
         tounge.set(1);
-        drive_turn(45, 50, 50, 75, false, 15, 15);
+        drive_turn(70, 44.25, 60, 75, false, 15, 15);
+        t2.interrupt();
         target_heading = 180;
-        drive_full.spin(DIR_FWD, 5, VLT_VLT);
-        wait(700, TIME_MSEC);
+        drive_full.spin(DIR_FWD, 4, VLT_VLT);
+        wait(900, TIME_MSEC);
         // long goal
 
         tounge.set(0);
         vex::thread t4([](){
-            wait(900, TIME_MSEC);
+            wait(800, TIME_MSEC);
             scoring = 4;
         });
-        drive_straight_toward_goal(2500, 0, false);
-        drive_straight(5, 75, 100, true, 0, 5);
+        drive_straight_toward_goal(2700, 0, false);
+        drive_straight(5,70,100, true, 0, 5);
         scoring = 1;
         t1.interrupt();
         hood.set(1);
-        drive_straight_toward_goal(10000, 0, false);        
-
+        drive_straight_toward_goal(1000, 0, false);        
 
         break;
     }
