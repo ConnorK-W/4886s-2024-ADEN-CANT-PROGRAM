@@ -22,7 +22,7 @@ void autonomous(void) {
         tounge.set(1);
         drive_straight(28, 70, 100, true, 0, 40);
         finger.set(1);
-        drive_turn(80, 15, 55, 75, false, 40, 0);
+        drive_turn(80, 15.5, 55, 75, false, 40, 0);
         target_heading = 90;   
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
         wait(700, TIME_MSEC);
@@ -54,7 +54,7 @@ void autonomous(void) {
         t1.interrupt();
         drive_straight(44, 75, 100, true, 0, 20);
         tounge.set(1);
-        drive_turn(-80, -32, 50, 100, false, 20, 10);
+        drive_turn(-80, -33.5, 50, 100, false, 20, 10);
         drive_straight(3, 30, 70, true, 10, 10);
 
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
@@ -102,7 +102,7 @@ void autonomous(void) {
         drive_turn(65, 46.7, 40, 75, false, 0, 10);
         tounge.set(1);
         wait(400, TIME_MSEC);
-        drive_turn(-18, 36, 40, 75, true, 0, 0);
+        drive_turn(-18, 33, 40, 75, true, 0, 0);
         tounge.set(0);
         turn_pid(-90, -1, 1);
         drive_straight(6, 75, 50, true, 0, 20);
