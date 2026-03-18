@@ -91,7 +91,7 @@ void autonomous(void) {
             scoring = 4;
         });
         drive_straight_toward_goal(2700, 0, false);
-        drive_straight(5,70,100, true, 0, 5);
+        drive_straight(5,70,125, true, 0, 15);
         scoring = 1;
         t1.interrupt();
         hood.set(1);
