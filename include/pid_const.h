@@ -6,7 +6,7 @@
 #define DRIVE_STRAIGHT_DL_KD 0.75
 
 // drive_straight_toward_biggoal() consts acceleration = 12.0 | final_max_rpm = -300
-#define DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP (1.70) 
+#define DRIVE_STRAIGHT_TOWARD_BIGGOAL_KP (2.0) 
 #define DRIVE_STRAIGHT_TOWARD_BIGGOAL_KI 0.0
 #define DRIVE_STRAIGHT_TOWARD_BIGGOAL_KD (0.0)
 
