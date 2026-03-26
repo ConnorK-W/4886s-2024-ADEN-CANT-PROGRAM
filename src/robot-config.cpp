@@ -11,36 +11,36 @@
 vex::brain Brain;
 vex::controller master;
 
-vex::motor drive_l1 = vex::motor(PORT1, DRIVE_INSERT, true);
-vex::motor drive_l2 = vex::motor(PORT2, DRIVE_INSERT, true);
-vex::motor drive_l3 = vex::motor(PORT3, DRIVE_INSERT, false);
+vex::motor drive_l1 = vex::motor(PORT11, DRIVE_INSERT, true);
+vex::motor drive_l2 = vex::motor(PORT12, DRIVE_INSERT, true);
+vex::motor drive_l3 = vex::motor(PORT13, DRIVE_INSERT, false);
 // vex::motor drive_r4 = vex::motor(PORT4, DRIVE_INSERT, true);
 
-vex::motor drive_r1 = vex::motor(PORT8, DRIVE_INSERT, false);
-vex::motor drive_r2 = vex::motor(PORT9, DRIVE_INSERT, true);
-vex::motor drive_r3 = vex::motor(PORT10, DRIVE_INSERT, false);
+vex::motor drive_r1 = vex::motor(PORT18, DRIVE_INSERT, true);
+vex::motor drive_r2 = vex::motor(PORT19, DRIVE_INSERT, false);
+vex::motor drive_r3 = vex::motor(PORT20, DRIVE_INSERT, false);
 // vex::motor drive_l4 = vex::motor(PORT8, DRIVE_INSERT, false);
 
 // Subsystem 3
-vex::motor intake1 = vex::motor(PORT20, INTAKE_INSERT, false);
-vex::motor intake2 = vex::motor(PORT11, INTAKE_INSERT, false);
-vex::motor intakeHigh = vex::motor(PORT14, INTAKE_INSERT, false);
-Arm arm = Arm(PORT15, vex::gearSetting::ratio18_1, true);
+vex::motor intake1 = vex::motor(PORT16, INTAKE_INSERT, false);
+vex::motor intake2 = vex::motor(PORT1, INTAKE_INSERT, false);
+vex::motor intakeHigh = vex::motor(PORT1, INTAKE_INSERT, false);
+Arm arm = Arm(PORT17, vex::gearSetting::ratio18_1, true);
 
 // 3 Wire Ports
-vex::digital_out finger = vex::digital_out(PORTE);
+vex::digital_out finger = vex::digital_out(PORTD);
 vex::digital_out tounge = vex::digital_out(PORTC);
 vex::digital_out lift = vex::digital_out(PORTA);
 vex::digital_out hood = vex::digital_out(PORTB);
 
 
 // Sensors
-vex::inertial imu = vex::inertial(PORT13);
-vex::optical colorSort = vex::optical(PORT15);
+vex::inertial imu = vex::inertial(PORT10);
+vex::optical colorSort = vex::optical(PORT1);
 vex::timer totalTime = vex::timer();
 
 vex::aivision::colordesc yellow = vex::aivision::colordesc(1, 255, 175, 83, 40.00, 0.30); // Increased tolerance for better detection in varying lighting
-vex::aivision aivis = vex::aivision(PORT17, yellow);
+vex::aivision aivis = vex::aivision(PORT9, yellow);
 
 vex::motor_group drive_r = vex::motor_group(drive_r1, drive_r2, drive_r3);
 vex::motor_group drive_l = vex::motor_group(drive_l1, drive_l2, drive_l3);
@@ -50,7 +50,6 @@ vex::motor_group intakeLow = vex::motor_group(intake1, intake2);
 
 // Potentiometer for lever
 vex::potV2 lever_pot = vex::potV2(Brain.ThreeWirePort.E);
-
 // Distance sensors
 vex::distance distance_left = vex::distance(PORT6);
 vex::distance distance_front = vex::distance(PORT7);

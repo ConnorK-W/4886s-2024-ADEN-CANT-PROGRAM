@@ -60,26 +60,19 @@ void opcontrol(void) {
     // Intake
     if (BTN_R1.pressing()){
         intake1.spin(DIR_FWD, 100, VEL_PCT);
-        intake2.spin(DIR_FWD, 30, VEL_PCT);
-        intakeHigh.spin(DIR_FWD, 1, VLT_VLT);
     }
     else if (BTN_R2.pressing()){
-        intakeFull.spin(DIR_REV, 100, VEL_PCT);
+        intake1.spin(DIR_REV, 100, VEL_PCT);
     }
     else if (BTN_L1.pressing()){
-        intakeFull.spin(DIR_FWD, 100, VEL_PCT);       
+        intake1.spin(DIR_FWD, 100, VEL_PCT);
         hood.set(0);
     }
     else if (BTN_B.pressing()){
         intake1.spin(DIR_REV, 15, VEL_PCT);
-        intake2.spin(DIR_REV, 100, VEL_PCT);
-        intakeHigh.spin(DIR_REV, 30, VEL_PCT);
-        lift.set(1);
     }
     else if (BTN_A.pressing()){
-        intake1.spin(DIR_FWD, 100, VEL_PCT);
-        intake2.spin(DIR_FWD, 50, VEL_PCT);
-        intakeHigh.spin(DIR_REV, 100, VEL_PCT);
+        lift.set(1);
     }
     else if (BTN_X.pressing()){
         intake1.spin(DIR_FWD, 100, VEL_PCT);
@@ -88,15 +81,21 @@ void opcontrol(void) {
     }
     else {
         lift.set(0);
-        scoring = 0;
     }
     if (!BTN_L1.pressing() && !BTN_L2.pressing() && !BTN_X.pressing() && !BTN_B.pressing() && !BTN_A.pressing()){
         hood.set(1);
+    }
+    if (!BTN_L1.pressing() && get_pot_value() > 4){
+        //intakeLow.spin(DIR_REV, 100, VEL_PCT);
+    }
+    else {
+        arm.stop();
     }
     if (!BTN_R1.pressing() && !BTN_R2.pressing() && !BTN_L1.pressing() && !BTN_B.pressing() && !BTN_X.pressing() && !BTN_A.pressing()){
         intakeFull.stop();
     }
 
+B_SCRN.printAt(100, 200, "Arm position: %f", lever_pot.value(PCT_PCT));
 
     }
 }

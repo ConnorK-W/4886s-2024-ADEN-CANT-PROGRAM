@@ -92,10 +92,10 @@ void autonomous(void) {
         });
         drive_straight_toward_goal(2400, 0, false);
         drive_straight(5,70,125, true, 0, 15);
-        scoring = 1;
+        scoring = 2;
         t1.interrupt();
         hood.set(1);
-        drive_straight_toward_goal(1000, 0, false);        
+        drive_straight_toward_goal(10000, 0, false);        
 
         break;
     }
