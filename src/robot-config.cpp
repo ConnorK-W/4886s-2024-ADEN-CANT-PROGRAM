@@ -25,13 +25,13 @@ vex::motor drive_r3 = vex::motor(PORT20, DRIVE_INSERT, false);
 vex::motor intake1 = vex::motor(PORT16, INTAKE_INSERT, false);
 vex::motor intake2 = vex::motor(PORT1, INTAKE_INSERT, false);
 vex::motor intakeHigh = vex::motor(PORT1, INTAKE_INSERT, false);
-Arm arm = Arm(PORT17, vex::gearSetting::ratio18_1, true);
+Arm arm = Arm(PORT17, vex::gearSetting::ratio36_1, true);
 
 // 3 Wire Ports
-vex::digital_out finger = vex::digital_out(PORTD);
-vex::digital_out tounge = vex::digital_out(PORTC);
-vex::digital_out lift = vex::digital_out(PORTA);
-vex::digital_out hood = vex::digital_out(PORTB);
+vex::digital_out intakeLift = vex::digital_out(PORTH);
+vex::digital_out tounge = vex::digital_out(PORTB);
+vex::digital_out lift = vex::digital_out(PORTC);
+vex::digital_out hood = vex::digital_out(PORTA);
 
 
 // Sensors

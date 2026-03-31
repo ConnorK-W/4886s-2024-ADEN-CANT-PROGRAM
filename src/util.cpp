@@ -113,7 +113,7 @@ void graph_pid() {
 
 double get_pot_value() {
     double val = lever_pot.angle(vex::percentUnits::pct);
-    double val_norm = (90.0 - val) * (100.0 / 50.0);
+    double val_norm = (91.0 - val) * (100.0 / 50.0);
 
     return val_norm;
 }

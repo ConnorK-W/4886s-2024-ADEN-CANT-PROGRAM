@@ -17,7 +17,7 @@ extern vex::motor intake2;
 extern vex::motor intakeHigh;
 extern Arm arm;
 
-extern vex::digital_out finger;
+extern vex::digital_out intakeLift;
 extern vex::digital_out tounge;
 extern vex::digital_out lift;
 extern vex::digital_out hood;

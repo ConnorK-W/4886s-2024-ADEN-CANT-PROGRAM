@@ -17,7 +17,6 @@ void test_potentiometer();
 void test_drive_to_dist_value();
 void test_wall_follow();
 void test_distance_display();
-void drive_toward_goal_1500();
 
 //#define TEST_FUNCS
 #ifdef TEST_FUNCS
@@ -26,43 +25,23 @@ const bool run_main = false;
 const bool run_main = true;
 #endif
 
-void test_potentiometer_raw() {
-    B_SCRN.clearScreen();
-    while (true) {
-        double raw = lever_pot.angle(vex::percentUnits::pct);
-        double norm = get_pot_value();
-
-        B_SCRN.setCursor(1, 1);
-        B_SCRN.print("Pct: %.2f   ", raw);
-        B_SCRN.setCursor(2, 1);
-        B_SCRN.print("Norm: %.2f   ", norm);
-
-        printf("pct: %.2f  norm: %.2f\n", raw, norm);
-
-        wait(100, vex::msec);
-    }
-}
-
 int main() {
-    test_potentiometer_raw();
+    if (run_main) {
+        vex::competition Competition;
+        Competition.autonomous(autonomous);
+        Competition.drivercontrol(opcontrol);
+        pre_auton();
+    }
+    else {
+        imu.calibrate();
+        master.ButtonLeft.pressed(tune_fast_pid);
+        master.ButtonRight.pressed(autonomous);
+    }
 
-    // imu.calibrate();
-    // while (imu.isCalibrating()) {
-    //     wait(20, vex::msec);
-    // }
-    // reset_imu_rotation();
 
-    // vex::thread vision_thread(vision_processing_task);
-
-    // master.ButtonA.pressed(drive_toward_goal_1500);
-
-    // while (true) {
-    //     wait(20, TIME_MSEC);
-    // }
-}
-
-void drive_toward_goal_1500() {
-    drive_straight_toward_goal(1500, false, true);
+    while (true) {
+        wait(20, TIME_MSEC);
+    }
 }
 
 void test_drive_to_dist_value() {
