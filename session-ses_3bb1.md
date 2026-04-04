@@ -2699,7 +2699,6 @@ Let me read the main.cpp file again and then update it.
 00046| }
 00047| 
 00048| void test_drive_straight_with_dist() {
-00049|     finger.set(1);
 00050|     drive_straight_with_dist(80, 60, 70, true, 0, 0);
 00051|     turn_pid(90 + offsettheta, -1, 1);
 

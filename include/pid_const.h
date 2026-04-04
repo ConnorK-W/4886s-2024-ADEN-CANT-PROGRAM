@@ -18,7 +18,7 @@
 // Direction control
 #define DRIVE_STRAIGHT_DIR_KP 3.0
 #define DRIVE_STRAIGHT_DIR_KI 0.00
-#define DRIVE_STRAIGHT_DIR_KD 8.275
+#define DRIVE_STRAIGHT_DIR_KD 8.0
 
 
 // drive_turn() consts

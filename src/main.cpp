@@ -111,7 +111,6 @@ void test_distance_display() {
 }
 
 void test_drive_straight_with_dist() {
-    finger.set(1);
     drive_straight_with_dist(80, 60, 70, true, 0, 0);
     turn_pid(90 + offsettheta, -1, 1);
     offsettheta = 0;

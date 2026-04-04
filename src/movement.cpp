@@ -759,13 +759,18 @@ void wiggle(int num_wiggles, float angle, int duration_msec) {
 }
 
 
-void Arm::pid_step(double target_val) {
+// Update your header file (.h) and this .cpp file
+void Arm::pid_step(double target_val, double max_speed) {
     pid.set_kP(arm_kp);
     pid.set_kI(arm_ki);
     pid.set_kD(arm_kd);
 
     double current_val = get_pot_value();
     double pid_val = pid.adjust(target_val, current_val);
+
+    // --- NEW: Limit the speed ---
+    if (pid_val > max_speed) pid_val = max_speed;
+    if (pid_val < -max_speed) pid_val = -max_speed;
 
     this->spin(vex::directionType::fwd, pid_val, vex::velocityUnits::pct);
 }

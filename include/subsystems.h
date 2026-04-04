@@ -12,5 +12,5 @@ class Arm : public vex::motor {
               {}
         
         void rotate_pid(double target_val);
-        void pid_step(double target_val);
+        void pid_step(double target_val, double max_speed = 100);
 };

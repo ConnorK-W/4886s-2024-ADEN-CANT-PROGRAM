@@ -44,7 +44,7 @@ void opcontrol(void) {
             case IntakeState::OUTTAKE:
                 intakeFull.spin(DIR_REV, 100, VEL_PCT);
                 arm.pid_step(0);
-                hood.set(0); // Set to 0 here for R2
+                hood.set(1);
                 break;
 
             case IntakeState::OUTTAKE_LIFT:
@@ -62,7 +62,7 @@ void opcontrol(void) {
 
             case IntakeState::SCORE_SLOW:
                 intakeFull.spin(DIR_FWD, 100, VEL_PCT);
-                arm.spin(DIR_FWD, 30, VEL_PCT);
+                arm.pid_step(99, 15);
                 hood.set(0);
                 break;
 
@@ -86,15 +86,10 @@ void opcontrol(void) {
         // --- STEP 3: INDEPENDENT SUBSYSTEMS & OVERRIDES ---
         
         // Lift Logic
-        if (BTN_A.pressing()) {
-            lift.set(1);
-            hood.set(0); // Dropping hood while lifting
-        } else {
-            lift.set(0);
-        }
+        if (BTN_A.PRESSED) lift.set(!lift.value());
 
-        // HARD OVERRIDE: R2 always sets hood to 0
-        if (BTN_R2.pressing()) {
+        // HARD OVERRIDE: L2 always sets hood to 0
+        if (BTN_L2.pressing()) {
             hood.set(0);
         }
 
