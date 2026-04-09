@@ -245,15 +245,16 @@ void autonomous(void) {
         drive_full.spin(DIR_FWD, 3, VLT_VLT);
         wait(1000, TIME_MSEC);
         // middle goal
-        tounge.set(0);
-        drive_turn(45, -23, 70, 75, true, 0, 40);
-        drive_straight_toward_goal(3000, true, true);
+        drive_turn(45, -27, 70, 75, true, 0, 40);
+        drive_straight(-25, 70, 100, true, 40, 30);
+        drive_straight_toward_goal(1000, true, true);
         lift.set(1);
         currentState = IntakeState::SCORE_MID; 
-        wait(500, TIME_MSEC);
+        wait(600, TIME_MSEC);
         currentState = IntakeState::INTAKE; 
         lift.set(0);
         drive_turn(80, 14, 70, 75, false, 0, 0);
+        tounge.set(0);
         drive_turn(-125, -13, 35, 100, false, 0, 0);
         drive_straight(-7, 30, 100, true, 0, 2);
         t1.interrupt();
