@@ -332,10 +332,10 @@ void vision_processing_task() {
         latest_vision_data.objectCount = aivis.objectCount;
 
         if (latest_vision_data.exists) {
-            // printf("Vision: Found! X:%d W:%d Cnt:%d\n", 
-            //     latest_vision_data.centerX, latest_vision_data.width, latest_vision_data.objectCount);
+            printf("VIS: X:%d W:%d H:%d Cnt:%d\n",
+                latest_vision_data.centerX, latest_vision_data.width, latest_vision_data.height, latest_vision_data.objectCount);
         } else {
-            // printf("Vision: No object found\n");
+            // printf("VIS: No object found\n");
         }
 
         vision_mutex.unlock();
@@ -389,16 +389,69 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
         float current_vel = 0;
         float target_vel = 0;
         float slew_rate = 5.0;
-        int last_known_x = 160;
-        int lost_frames = 100;
-        int goal_x = 160;
         double dir_adj = 0;
+
+        // Seed from current vision data so correction starts immediately
+        vision_mutex.lock();
+        bool has_initial = latest_vision_data.exists;
+        int last_known_x = has_initial ? latest_vision_data.centerX : 160;
+        int goal_x = last_known_x;
+        int lost_frames = has_initial ? 0 : 100;
+        vision_mutex.unlock();
+
+        // Pre-rotate toward goal before driving
+        if (has_initial && std::abs(TARGET_CENTER - goal_x) > 5) {
+            if (target_small_goal) {
+                // Small goal: rotate until within 30% of initial error with slight reverse
+                int initial_err = std::abs(TARGET_CENTER - goal_x);
+                int threshold = initial_err * 0.3;
+                if (threshold < 5) threshold = 5;
+                float pre_adj = dir_pid.adjust(TARGET_CENTER, goal_x);
+                float creep = -80.0;
+                vex::timer pre_t;
+                pre_t.clear();
+                while (pre_t.time(vex::msec) < 500) {
+                    vision_mutex.lock();
+                    if (latest_vision_data.exists) {
+                        goal_x = latest_vision_data.centerX;
+                        pre_adj = dir_pid.adjust(TARGET_CENTER, goal_x);
+                    }
+                    vision_mutex.unlock();
+                    drive_r.spin(DIR_FWD, creep + pre_adj, VEL_RPM);
+                    drive_l.spin(DIR_FWD, creep - pre_adj, VEL_RPM);
+                    if (std::abs(TARGET_CENTER - goal_x) <= threshold)
+                        break;
+                    wait(20, vex::msec);
+                }
+            } else {
+                // Big goal: quick 200ms pre-rotate
+                float pre_adj = dir_pid.adjust(TARGET_CENTER, goal_x) * 0.4;
+                vex::timer pre_t;
+                pre_t.clear();
+                while (pre_t.time(vex::msec) < 200) {
+                    vision_mutex.lock();
+                    if (latest_vision_data.exists) {
+                        goal_x = latest_vision_data.centerX;
+                        pre_adj = dir_pid.adjust(TARGET_CENTER, goal_x) * 0.4;
+                    }
+                    vision_mutex.unlock();
+                    drive_r.spin(DIR_FWD, pre_adj, VEL_RPM);
+                    drive_l.spin(DIR_FWD, -pre_adj, VEL_RPM);
+                    if (std::abs(TARGET_CENTER - goal_x) <= 5)
+                        break;
+                    wait(20, vex::msec);
+                }
+            }
+            dir_pid = target_small_goal ?
+                PID(drive_smallgoal_kp, drive_smallgoal_ki, drive_smallgoal_kd) :
+                PID(drive_biggoal_kp, drive_biggoal_ki, drive_biggoal_kd);
+        }
 
         vex::timer t;
         t.clear();
 
         while (t.time(vex::msec) < duration_msec) {
-            if (imu.roll() <= -4 && target_small_goal == true)
+            if (imu.roll() <= -6 && target_small_goal == true)
                 break;
 
             vision_mutex.lock();
@@ -421,7 +474,6 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
                     dir_adj = dir_pid.adjust(TARGET_CENTER, goal_x);
                 else
                     dir_adj = 0;
-                printf("Error: %d, Correction: %.2f\n", TARGET_CENTER - goal_x, dir_adj);
             } else {
                 current_vel = -200.0 * 0.5;
                 dir_adj = imu_pid.adjust(0, imu_rotation());
@@ -435,8 +487,15 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
                 if (current_vel < target_vel) current_vel = target_vel;
             }
 
-            drive_r.spin(DIR_FWD, current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) + dir_adj, VEL_RPM);
-            drive_l.spin(DIR_FWD, current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) - dir_adj, VEL_RPM);
+            float r_out = current_vel + rd.adjust(current_vel, drive_r.velocity(VEL_RPM)) + dir_adj;
+            float l_out = current_vel + ld.adjust(current_vel, drive_l.velocity(VEL_RPM)) - dir_adj;
+
+            drive_r.spin(DIR_FWD, r_out, VEL_RPM);
+            drive_l.spin(DIR_FWD, l_out, VEL_RPM);
+
+            printf("seen=%d cX=%d goalX=%d err=%d dir=%.2f vel=%.1f L=%.1f R=%.1f lost=%d\n",
+                has_target, current_center_x, goal_x, TARGET_CENTER - goal_x,
+                dir_adj, current_vel, l_out, r_out, lost_frames);
 
             wait(20, vex::msec);
         }

@@ -26,21 +26,17 @@ const bool run_main = true;
 #endif
 
 int main() {
-    if (run_main) {
-        vex::competition Competition;
-        Competition.autonomous(autonomous);
-        Competition.drivercontrol(opcontrol);
-        pre_auton();
-    }
-    else {
-        imu.calibrate();
-        master.ButtonLeft.pressed(tune_fast_pid);
-        master.ButtonRight.pressed(autonomous);
-    }
-
+    pre_auton();
 
     while (true) {
-        wait(20, TIME_MSEC);
+        if (master.ButtonA.pressing()) {
+            // drive_straight(-10, 75, 100, true, 0, 40);
+            drive_straight_toward_goal(1500, false, true);
+            while (master.ButtonA.pressing()) {
+                wait(20, vex::msec);
+            }
+        }
+        wait(20, vex::msec);
     }
 }
 

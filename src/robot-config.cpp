@@ -39,7 +39,7 @@ vex::inertial imu = vex::inertial(PORT10);
 vex::optical colorSort = vex::optical(PORT1);
 vex::timer totalTime = vex::timer();
 
-vex::aivision::colordesc yellow = vex::aivision::colordesc(1, 255, 175, 83, 40.00, 0.30); // Increased tolerance for better detection in varying lighting
+vex::aivision::colordesc yellow = vex::aivision::colordesc(1, 255, 175, 83, 20.00, 0.30);
 vex::aivision aivis = vex::aivision(PORT8, yellow);
 
 vex::motor_group drive_r = vex::motor_group(drive_r1, drive_r2, drive_r3);
