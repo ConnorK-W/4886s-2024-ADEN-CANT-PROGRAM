@@ -32,9 +32,9 @@
 
 
 // turn_pid() consts
-#define TURN_PID_KP 0.325
+#define TURN_PID_KP 0.6
 #define TURN_PID_KI 0.00
-#define TURN_PID_KD 1.25
+#define TURN_PID_KD 3.2
 
 // Arm PID consts
 #define ARM_KP 1.5

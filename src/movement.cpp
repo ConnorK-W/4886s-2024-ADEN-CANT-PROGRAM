@@ -626,8 +626,8 @@ void turn_pid(float degrees, float ratio, int direction, int waitTime) {
 
     int time_still = 0;
     int time = totalTime.time();
-    while (time_still < 60) {
-        if (within_range(imu_rotation(), target_heading, 4.0))
+    while (time_still < 40) {
+        if (within_range(imu_rotation(), target_heading, 2.0))
             time_still += MSEC_PER_TICK;
         else
             time_still = 0;
