@@ -37,6 +37,7 @@ void opcontrol(void) {
         switch (currentState) {
             case IntakeState::INTAKE:
                 intakeFull.spin(DIR_FWD, 100, VEL_PCT);
+                intakeLift.set(0);
                 arm.pid_step(0);
                 hood.set(1);
                 break;
@@ -74,7 +75,6 @@ void opcontrol(void) {
 
             case IntakeState::OFF:
                 intakeFull.stop();
-                intakeLift.set(0);
                 arm.pid_step(2);
                 hood.set(1);
                 if (get_pot_value() > 4) {
