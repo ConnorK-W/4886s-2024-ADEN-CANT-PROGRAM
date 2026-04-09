@@ -232,24 +232,45 @@ void autonomous(void) {
 
     case LeftComplex: {
         vex::thread t1(intake);
-        tounge.set(0);
-        currentState = IntakeState::INTAKE; 
-        drive_turn(85, 37, 50, 75, false, 0, 10);
-        drive_full.spinFor(DIR_FWD, 2500, TIME_MSEC, 30, VEL_PCT);
-        drive_full.spin(DIR_REV, 2, VLT_VLT);
+        drive_straight(11, 75, 100, true, 0, 15);
+        vex::thread t2([](){
+            wait(300, TIME_MSEC);
+            tounge.set(1);
+        });
+        drive_turn(-100, -13, 60, 100, false, 15, 0);
+        tounge.set(1);
+        drive_turn(-70, -40, 60, 75, false, 5, 15);
+        t2.interrupt();
+        target_heading = -180;
+        drive_full.spin(DIR_FWD, 3, VLT_VLT);
         wait(1000, TIME_MSEC);
-        drive_turn(70, 20, 30, 75, false);
-        turn_pid(180, -1, 1);
-        vex::thread t10([](){
-            wait(1200, TIME_MSEC);
-            currentState = IntakeState::SCORE; 
-            target_heading = 360;
+        // middle goal
+        tounge.set(0);
+        drive_turn(45, -23, 70, 75, true, 0, 40);
+        drive_straight_toward_goal(3000, true, true);
+        lift.set(1);
+        currentState = IntakeState::SCORE_MID; 
+        wait(500, TIME_MSEC);
+        currentState = IntakeState::INTAKE; 
+        lift.set(0);
+        drive_turn(80, 14, 70, 75, false, 0, 0);
+        drive_turn(-125, -13, 35, 100, false, 0, 0);
+        drive_straight(-7, 30, 100, true, 0, 2);
+        t1.interrupt();
+        intakeFull.stop();
+        hood.set(0);
+        drive_straight(35, 30, 100, true, 0, 0);
+        turn_pid(-35, -1, 1);
+        vex::thread t3([](){
+            wait(500, TIME_MSEC);
+            target_heading = -target_heading + 35;
+            wait(500, TIME_MSEC);
+            intakeFull.spin(DIR_FWD, 100, VEL_PCT);
+            arm.spin(DIR_FWD, 100, VEL_PCT);
 
         });
-        drive_straight_toward_goal(3900, false, false);
-        t10.interrupt();
-        tounge.set(1);
-        
+        drive_straight_toward_goal(3000, false, true);
+        t3.interrupt();
         break;
     }
 
