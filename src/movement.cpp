@@ -321,9 +321,12 @@ void drive_straight(float inches, float target_ips, float ipss, bool do_decel, f
 }
 
 void vision_processing_task() {
+    static char cmd_buf[64];
+    static int cmd_idx = 0;
+
     while (true) {
         aivis.takeSnapshot(yellow);
-        
+
         vision_mutex.lock();
         latest_vision_data.centerX = aivis.largestObject.centerX;
         latest_vision_data.exists = aivis.largestObject.exists;
@@ -334,12 +337,32 @@ void vision_processing_task() {
         if (latest_vision_data.exists) {
             printf("VIS: X:%d W:%d H:%d Cnt:%d\n",
                 latest_vision_data.centerX, latest_vision_data.width, latest_vision_data.height, latest_vision_data.objectCount);
-        } else {
-            // printf("VIS: No object found\n");
+        }
+        vision_mutex.unlock();
+
+        // Check for incoming color signature from tuning tool
+        int ch;
+        while ((ch = vexSerialReadChar(1)) != -1) {
+            if (ch == '\n') {
+                cmd_buf[cmd_idx] = '\0';
+                if (cmd_buf[0] == 'C') {
+                    int id, r, g, b, ha100, hs100;
+                    if (sscanf(cmd_buf, "C,%d,%d,%d,%d,%d,%d",
+                               &id, &r, &g, &b, &ha100, &hs100) == 6) {
+                        float hangle = ha100 / 100.0f;
+                        float hdsat  = hs100 / 100.0f;
+                        yellow = vex::aivision::colordesc(id, r, g, b, hangle, hdsat);
+                        aivis.set(yellow);
+                        printf("SIG: id=%d RGB(%d,%d,%d) h=%.1f s=%.2f\n",
+                               id, r, g, b, hangle, hdsat);
+                    }
+                }
+                cmd_idx = 0;
+            } else if (cmd_idx < 63) {
+                cmd_buf[cmd_idx++] = (char)ch;
+            }
         }
 
-        vision_mutex.unlock();
-        
         wait(20, vex::msec);
     }
 }
