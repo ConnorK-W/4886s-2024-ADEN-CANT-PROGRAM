@@ -49,7 +49,7 @@ void opcontrol(void) {
                 break;
 
             case IntakeState::OUTTAKE_LIFT:
-                intakeFull.spin(DIR_REV, 15, VEL_PCT);
+                intakeFull.spin(DIR_REV, 50, VEL_PCT);
                 arm.pid_step(0);
                 intakeLift.set(1);
                 hood.set(1);

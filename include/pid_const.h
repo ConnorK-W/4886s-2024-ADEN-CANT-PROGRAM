@@ -37,7 +37,7 @@
 #define TURN_PID_KD 3.2
 
 // Arm PID consts
-#define ARM_KP 1.5
+#define ARM_KP 1.3
 #define ARM_KI 0.0
 #define ARM_KD 0.0
 
