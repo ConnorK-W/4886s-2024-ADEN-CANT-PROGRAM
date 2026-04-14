@@ -176,7 +176,7 @@ void autonomous(void) {
         drive_full.spin(DIR_FWD, 3, VLT_VLT);
         wait(1000, TIME_MSEC);
         // middle goal
-        drive_turn(-45, 30, 70, 75, true, 0, 40);
+        drive_turn(-45, 32, 70, 75, true, 0, 40);
         tounge.set(0);
         turn_pid(-180, -1, 1);
         drive_straight(25, 70, 100, true, 40, 30);
@@ -185,7 +185,7 @@ void autonomous(void) {
         currentState = IntakeState::INTAKE;
         drive_straight(-35, 70, 100, true, 0, 10);
         t1.interrupt();
-        drive_turn(-135, 17.5, 70, 75, true, 0, 10);
+        drive_turn(-135, 18, 70, 75, true, 0, 10);
         drive_straight(-20, 30, 100, true, 10, 2);
         hood.set(0);
         drive_straight(38, 30, 20, true, 2, 3);

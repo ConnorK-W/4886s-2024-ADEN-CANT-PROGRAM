@@ -2,6 +2,35 @@
 #include "stddefs.h"
 #include "vex_thread.h"
 
+static float slew_drive(float current, float target,
+                        float forward_accel_step,
+                        float reverse_accel_step,
+                        float forward_decel_step,
+                        float reverse_decel_step) {
+    float delta = target - current;
+    float step = std::fabs(delta);
+
+    if (current > 0.0f && target > 0.0f) {
+        step = (std::fabs(target) < std::fabs(current)) ? forward_decel_step : std::fabs(delta);
+    } else if (current < 0.0f && target < 0.0f) {
+        step = (std::fabs(target) < std::fabs(current)) ? reverse_decel_step : std::fabs(delta);
+    } else if (current > 0.0f && target < 0.0f) {
+        step = forward_decel_step;
+    } else if (current < 0.0f && target > 0.0f) {
+        step = reverse_decel_step;
+    }
+
+    if (delta > step) return current + step;
+    if (delta < -step) return current - step;
+    return target;
+}
+
+static float clamp_voltage(float value) {
+    if (value > 12.0f) return 12.0f;
+    if (value < -12.0f) return -12.0f;
+    return value;
+}
+
 void opcontrol(void) {
     drive_l.stop(vex::brakeType::coast);
     drive_r.stop(vex::brakeType::coast);
@@ -14,6 +43,9 @@ void opcontrol(void) {
 
     float spd_mod = 1.0;
     float sens_mod = 1.0;
+    int hood_hold_until = 0;
+    constexpr int HOOD_HOLD_MSEC = 500;
+    bool skills_mode = false;
     
     lift.set(0);
     intakeLift.set(0);
@@ -33,6 +65,15 @@ void opcontrol(void) {
         else if (BTN_B.pressing())                  currentState = IntakeState::OUTTAKE_LIFT;
         else                                        currentState = IntakeState::OFF;
 
+        bool hood_score_active =
+            currentState == IntakeState::SCORE ||
+            currentState == IntakeState::SCORE_SLOW ||
+            currentState == IntakeState::HALF_SCORE;
+
+        if (hood_score_active) {
+            hood_hold_until = totalTime.time(vex::msec) + HOOD_HOLD_MSEC;
+        }
+
         // --- STEP 2: OUTPUT LOGIC ---
         switch (currentState) {
             case IntakeState::INTAKE:
@@ -49,7 +90,7 @@ void opcontrol(void) {
                 break;
 
             case IntakeState::OUTTAKE_LIFT:
-                intakeFull.spin(DIR_REV, 50, VEL_PCT);
+                intakeFull.spin(DIR_REV, 20, VEL_PCT);
                 arm.pid_step(0);
                 intakeLift.set(1);
                 hood.set(1);
@@ -57,7 +98,7 @@ void opcontrol(void) {
 
             case IntakeState::SCORE:
                 hood.set(0);
-                arm.pid_step(99);
+                arm.pid_step(99, skills_mode ? 25 : 100);
                 intakeFull.spin(DIR_FWD, 100, VEL_PCT);
                 break;
 
@@ -78,7 +119,7 @@ void opcontrol(void) {
                 arm.pid_step(2);
                 hood.set(1);
                 if (get_pot_value() > 4) {
-                    intakeFull.spin(DIR_REV, 30, VEL_PCT);
+                    intakeFull.spin(DIR_REV, 45, VEL_PCT);
                 }
                 break;
         }
@@ -88,8 +129,13 @@ void opcontrol(void) {
         // Lift Logic
         if (BTN_A.PRESSED) lift.set(!lift.value());
 
+        if (BTN_LEFT.PRESSED) skills_mode = !skills_mode;
+
         // HARD OVERRIDE: L2 always sets hood to 0
         if (BTN_L2.pressing()) {
+            hood.set(0);
+            hood_hold_until = totalTime.time(vex::msec) + HOOD_HOLD_MSEC;
+        } else if (totalTime.time(vex::msec) < hood_hold_until) {
             hood.set(0);
         }
 
@@ -114,8 +160,26 @@ void opdrive(int control_mode, float drive_mod, float turn_mod) {
     case TSA:
         float lspeed = LEFT_STICK_Y;
         float rspeed = (RIGHT_STICK_X * turn_mod);
-        drive_r.spin(DIR_FWD, (lspeed - rspeed) * drive_mod / 8, VLT_VLT);
-        drive_l.spin(DIR_FWD, (lspeed + rspeed) * drive_mod / 8, VLT_VLT);
+        float target_forward = lspeed * drive_mod / 8;
+        float turn_voltage = rspeed * drive_mod / 8;
+
+        static float applied_forward = 0.0f;
+        constexpr float FORWARD_ACCEL_STEP = 12.0f;
+        constexpr float REVERSE_ACCEL_STEP = 12.0f;
+        constexpr float FORWARD_DECEL_STEP = 1.00f;
+        constexpr float REVERSE_DECEL_STEP = 2.40f;
+
+        applied_forward = slew_drive(
+            applied_forward,
+            target_forward,
+            FORWARD_ACCEL_STEP,
+            REVERSE_ACCEL_STEP,
+            FORWARD_DECEL_STEP,
+            REVERSE_DECEL_STEP
+        );
+
+        drive_r.spin(DIR_FWD, clamp_voltage(applied_forward - turn_voltage), VLT_VLT);
+        drive_l.spin(DIR_FWD, clamp_voltage(applied_forward + turn_voltage), VLT_VLT);
         break;
     }
 }
