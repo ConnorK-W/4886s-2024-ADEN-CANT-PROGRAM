@@ -10,10 +10,12 @@
 #define AWP 0
 #define AWPPush 1
 #define RightSimple 2
-#define RightComplex 3
-#define LeftSimple 4
-#define LeftComplex 5
-#define SKILLS 6
+#define RightStop 3
+#define RightComplex 4
+#define LeftSimple 5
+#define LeftStop 6
+#define LeftComplex 7
+#define SKILLS 8
 
 
 // Operator control modes

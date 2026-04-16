@@ -131,32 +131,52 @@ void autonomous(void) {
 
     case RightSimple: {
         vex::thread t1(intake);
-        drive_straight(9, 75, 125, true, 0, 40);
-        vex::thread t2([](){
-            wait(300, TIME_MSEC);
-            tounge.set(1);
-        });
-        drive_turn(100, 15, 60, 100, false, 40, 15);
+        lift.set(0);
         tounge.set(1);
-        drive_turn(70, 43.5, 60, 75, false, 15, 15);
-        t2.interrupt();
-        target_heading = 180;
+        drive_straight(14, 70, 100, true, 0, 40);
+        drive_turn(80, 15.5, 65, 75, false, 40, 0);
+        target_heading = 90;
         drive_full.spin(DIR_FWD, 4, VLT_VLT);
-        wait(900, TIME_MSEC);
-        // long goal
-
+        wait(600, TIME_MSEC);
         tounge.set(0);
+        // long goal
         vex::thread t4([](){
-            wait(800, TIME_MSEC);
+            wait(1000, TIME_MSEC);
             currentState = IntakeState::SCORE; 
+            wait(800, TIME_MSEC);
+            currentState = IntakeState::INTAKE;
         });
-        drive_straight_toward_goal(2400, 0, false);
-        drive_straight(5,70,125, true, 0, 15);
-        currentState = IntakeState::OUTTAKE; 
+        drive_straight_toward_goal(1300, false, false);
+        drive_full.spin(DIR_REV, 50, VEL_PCT);
+        drive_turn(135, 14, 35, 125, false, 0, 0);
+        vex::thread t2([](){
+            wait(500, TIME_MSEC);
+            tounge.set(1);
+            wait(400, TIME_MSEC);
+            tounge.set(0);
+            wait(400, TIME_MSEC);
+            currentState = IntakeState::OUTTAKE_LIFT;
+        });
+        drive_straight(30, 20, 50, true, 10, 30);
+        t4.interrupt();
+        wait(1000, TIME_MSEC);
         t1.interrupt();
-        hood.set(1);
-        drive_straight_toward_goal(10000, 0, true);        
+        t2.interrupt();
+        hood.set(0);
+        drive_straight(-28, 70, 100, true, 10, 5);
+        turn_pid(65, -1, 1);
+        vex::thread t3([](){
+            wait(700, TIME_MSEC);
+            target_heading = target_heading -20;
+        });
+        drive_straight(25, 30, 100, true, 0, 5);
+        t3.interrupt();
 
+        break;
+    }
+
+    case RightStop: {
+        
         break;
     }
 
@@ -176,28 +196,30 @@ void autonomous(void) {
         drive_full.spin(DIR_FWD, 3, VLT_VLT);
         wait(1000, TIME_MSEC);
         // middle goal
-        drive_turn(-45, 32, 70, 75, true, 0, 40);
+        drive_turn(-45, 28, 70, 75, true, 0, 10);
         tounge.set(0);
         turn_pid(-180, -1, 1);
-        drive_straight(25, 70, 100, true, 40, 30);
+        drive_straight(33, 70, 100, true, 40, 30);
         currentState = IntakeState::OUTTAKE_LIFT; 
-        wait(700, TIME_MSEC);
-        currentState = IntakeState::INTAKE;
+        drive_full.spin(DIR_FWD, 5, VLT_VLT);
+        wait(1000, TIME_MSEC);
+        currentState = IntakeState::OFF;
         drive_straight(-35, 70, 100, true, 0, 10);
         t1.interrupt();
-        drive_turn(-135, 18, 70, 75, true, 0, 10);
-        drive_straight(-20, 30, 100, true, 10, 2);
-        hood.set(0);
-        drive_straight(38, 30, 20, true, 2, 3);
-        turn_pid(-35, -1, 1);
-        vex::thread t3([](){
+        drive_turn(-135, 19, 70, 75, true, 10, 10);
+            vex::thread t3([](){
+            target_heading = target_heading - 15;
             wait(500, TIME_MSEC);
-            target_heading = -target_heading + 35;
-            wait(500, TIME_MSEC);
+            target_heading = target_heading + 15;
+            wait(4000, TIME_MSEC);
             intakeFull.spin(DIR_FWD, 100, VEL_PCT);
             arm.spin(DIR_FWD, 100, VEL_PCT);
 
         });
+        drive_straight(-15, 30, 100, true, 10, 5);
+        hood.set(0);
+        drive_straight(38, 30, 100, true, 5, 5);
+        turn_pid(-35, -1, 1);
         drive_straight_toward_goal(3000, false, true);
         t3.interrupt();
 
@@ -250,6 +272,30 @@ void autonomous(void) {
         break;
     }
 
+    case LeftStop: {
+        vex::thread t1(intake);
+        lift.set(0);
+        tounge.set(1);
+        drive_straight(13, 70, 100, true, 0, 40);
+        drive_turn(-80, -15.5, 65, 75, false, 40, 0);
+        target_heading = -90;
+        drive_full.spin(DIR_FWD, 3, VLT_VLT);
+        wait(800, TIME_MSEC);
+        tounge.set(0);
+        vex::thread t4([](){
+            wait(800, TIME_MSEC);
+            currentState = IntakeState::SCORE;
+            wait(800, TIME_MSEC);
+            currentState = IntakeState::INTAKE;
+        });
+        drive_straight_toward_goal(1300, false, false);
+        t4.interrupt();
+        currentState = IntakeState::OFF;
+        t1.interrupt();
+        drive_full.stop();
+        break;
+    }
+
     case LeftComplex: {
         vex::thread t1(intake);
         drive_straight(11, 75, 100, true, 0, 15);
@@ -284,7 +330,7 @@ void autonomous(void) {
         turn_pid(-35, -1, 1);
         vex::thread t3([](){
             wait(500, TIME_MSEC);
-            target_heading = -target_heading + 35;
+            target_heading = target_heading + 35;
             wait(500, TIME_MSEC);
             intakeFull.spin(DIR_FWD, 100, VEL_PCT);
             arm.spin(DIR_FWD, 100, VEL_PCT);

@@ -351,8 +351,8 @@ void vision_processing_task() {
                                &id, &r, &g, &b, &ha100, &hs100) == 6) {
                         float hangle = ha100 / 100.0f;
                         float hdsat  = hs100 / 100.0f;
-                        yellow = vex::aivision::colordesc(id, r, g, b, hangle, hdsat);
-                        aivis.set(yellow);
+                        vex::aivision::colordesc tuned_yellow(id, r, g, b, hangle, hdsat);
+                        aivis.set(tuned_yellow);
                         printf("SIG: id=%d RGB(%d,%d,%d) h=%.1f s=%.2f\n",
                                id, r, g, b, hangle, hdsat);
                     }

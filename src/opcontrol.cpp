@@ -44,14 +44,55 @@ void opcontrol(void) {
     float spd_mod = 1.0;
     float sens_mod = 1.0;
     int hood_hold_until = 0;
+    int ignore_lift_toggle_until = 0;
     constexpr int HOOD_HOLD_MSEC = 500;
     bool skills_mode = false;
+    bool prev_auton_combo_pressed = false;
+    bool prev_middle_high_pressed = false;
     
     lift.set(0);
     intakeLift.set(0);
     Brain.Screen.drawImageFromFile("Xavier.png", 0, 0);
 
     while (1) {
+        bool auton_combo_pressed = BTN_RIGHT.pressing() && BTN_X.pressing();
+        bool middle_high_pressed = BTN_RIGHT.pressing() && BTN_A.pressing();
+        bool auton_combo_started = auton_combo_pressed && !prev_auton_combo_pressed;
+        bool middle_high_started = middle_high_pressed && !prev_middle_high_pressed;
+        prev_auton_combo_pressed = auton_combo_pressed;
+        prev_middle_high_pressed = middle_high_pressed;
+
+        if (auton_combo_started) {
+            drive_l.stop(vex::brakeType::coast);
+            drive_r.stop(vex::brakeType::coast);
+            intakeFull.stop();
+            arm.stop(vex::brakeType::brake);
+
+            autonomous();
+            continue;
+        }
+
+        if (middle_high_started && skills_mode == true) {
+            tounge.set(1);
+            intakeFull.spin(DIR_REV, 20, VEL_PCT);
+            lift.set(1);
+            hood.set(0);
+            drive_full.spin(DIR_REV, 3, VLT_VLT);
+            wait(500, TIME_MSEC);
+            drive_full.stop();
+            intakeFull.spin(DIR_FWD, 100, VEL_PCT);
+            wait(1000, TIME_MSEC);
+            arm.pid_step(99, 15);
+            wait(2000, TIME_MSEC);
+            tounge.set(0);
+            drive_full.spin(DIR_FWD, 5, VLT_VLT);
+            wait(500, TIME_MSEC);
+            drive_full.stop();
+            lift.set(1);
+            continue;
+        }
+
+
         opdrive(TSA, spd_mod, SENSITIVITY * sens_mod);
 
         // --- STEP 1: INPUT LOGIC ---
@@ -59,7 +100,7 @@ void opcontrol(void) {
 
         if (BTN_L1.pressing() && BTN_L2.pressing()) currentState = IntakeState::HALF_SCORE;
         else if (BTN_L1.pressing())                 currentState = IntakeState::SCORE;
-        else if (BTN_X.pressing())                  currentState = IntakeState::SCORE_SLOW;
+        else if (BTN_X.pressing() && !BTN_RIGHT.pressing()) currentState = IntakeState::SCORE_SLOW;
         else if (BTN_R1.pressing())                 currentState = IntakeState::INTAKE;
         else if (BTN_R2.pressing())                 currentState = IntakeState::OUTTAKE;
         else if (BTN_B.pressing())                  currentState = IntakeState::OUTTAKE_LIFT;
@@ -127,14 +168,18 @@ void opcontrol(void) {
         // --- STEP 3: INDEPENDENT SUBSYSTEMS & OVERRIDES ---
         
         // Lift Logic
-        if (BTN_A.PRESSED) lift.set(!lift.value());
+        if (BTN_A.PRESSED &&
+            !BTN_RIGHT.pressing() &&
+            totalTime.time(vex::msec) >= ignore_lift_toggle_until) {
+            lift.set(!lift.value());
+        }
 
-        if (BTN_LEFT.PRESSED) skills_mode = !skills_mode;
+        if (BTN_LEFT.PRESSED && !BTN_X.pressing()) skills_mode = !skills_mode;
 
-        // HARD OVERRIDE: L2 always sets hood to 0
+        // L2 should move the hood immediately without extending score hold timing.
         if (BTN_L2.pressing()) {
             hood.set(0);
-            hood_hold_until = totalTime.time(vex::msec) + HOOD_HOLD_MSEC;
+            hood_hold_until = 0;
         } else if (totalTime.time(vex::msec) < hood_hold_until) {
             hood.set(0);
         }

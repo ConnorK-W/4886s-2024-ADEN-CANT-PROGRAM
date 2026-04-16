@@ -1,8 +1,8 @@
 // PID constants
 
 // drive_straight() consts acceleration
-#define DRIVE_STRAIGHT_DL_KP 0.4
-#define DRIVE_STRAIGHT_DL_KI 0.01
+#define DRIVE_STRAIGHT_DL_KP 0.6
+#define DRIVE_STRAIGHT_DL_KI 0.00
 #define DRIVE_STRAIGHT_DL_KD 0.75
 
 // drive_straight_toward_biggoal() consts acceleration = 12.0 | final_max_rpm = -300
