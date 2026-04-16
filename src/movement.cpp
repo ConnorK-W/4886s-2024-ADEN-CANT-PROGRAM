@@ -411,7 +411,7 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
 
         float current_vel = 0;
         float target_vel = 0;
-        float slew_rate = 5.0;
+        float slew_rate = 3.5;
         double dir_adj = 0;
 
         // Seed from current vision data so correction starts immediately
