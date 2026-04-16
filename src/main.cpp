@@ -8,6 +8,9 @@
 /*----------------------------------------------------------------------------*/
 
 #include "../include/main.h"
+#include "stddefs.h"
+#include "vex_global.h"
+#include "vex_units.h"
 
 void test_aivision();
 void test_vision();

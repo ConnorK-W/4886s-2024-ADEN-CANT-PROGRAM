@@ -4,3 +4,4 @@ compile_commands.json
 /.cache
 tools/.venv/
 .claude/
+__pycache__/

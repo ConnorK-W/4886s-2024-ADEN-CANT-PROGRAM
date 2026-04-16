@@ -18,7 +18,7 @@ vex::motor drive_l3 = vex::motor(PORT13, DRIVE_INSERT, false);
 
 vex::motor drive_r1 = vex::motor(PORT18, DRIVE_INSERT, true);
 vex::motor drive_r2 = vex::motor(PORT19, DRIVE_INSERT, false);
-vex::motor drive_r3 = vex::motor(PORT20, DRIVE_INSERT, false);
+vex::motor drive_r3 = vex::motor(PORT15, DRIVE_INSERT, false);
 // vex::motor drive_l4 = vex::motor(PORT8, DRIVE_INSERT, false);
 
 // Subsystem 3
