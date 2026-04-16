@@ -298,6 +298,7 @@ void autonomous(void) {
 
     case LeftComplex: {
         vex::thread t1(intake);
+        lift.set(1);
         drive_straight(11, 75, 100, true, 0, 15);
         vex::thread t2([](){
             wait(300, TIME_MSEC);
@@ -309,24 +310,26 @@ void autonomous(void) {
         t2.interrupt();
         target_heading = -180;
         drive_full.spin(DIR_FWD, 3, VLT_VLT);
-        wait(1000, TIME_MSEC);
+        wait(750, TIME_MSEC);
         // middle goal
-        drive_turn(45, -27, 70, 75, true, 0, 40);
+        drive_turn(45, -33, 70, 75, true, 0, 40);
         drive_straight(-25, 70, 100, true, 40, 30);
         drive_straight_toward_goal(1000, true, true);
         lift.set(1);
+        tounge.set(1);
         currentState = IntakeState::SCORE_MID; 
-        wait(600, TIME_MSEC);
+        wait(800, TIME_MSEC);
         currentState = IntakeState::INTAKE; 
         lift.set(0);
-        drive_turn(80, 14, 70, 75, false, 0, 0);
+
+        drive_turn(80, 12, 70, 75, false, 0, 3);
         tounge.set(0);
-        drive_turn(-125, -13, 35, 100, false, 0, 0);
-        drive_straight(-7, 30, 100, true, 0, 2);
+        drive_turn(-125, -13.5, 35, 100, false, 0, 3);
+        drive_straight(-7, 60, 100, true, 0, 2);
+        hood.set(0);
         t1.interrupt();
         intakeFull.stop();
-        hood.set(0);
-        drive_straight(35, 30, 100, true, 0, 0);
+        drive_straight(35, 60, 100, true, 0, 3);
         turn_pid(-35, -1, 1);
         vex::thread t3([](){
             wait(500, TIME_MSEC);
@@ -336,8 +339,13 @@ void autonomous(void) {
             arm.spin(DIR_FWD, 100, VEL_PCT);
 
         });
-        drive_straight_toward_goal(3000, false, true);
+        drive_straight_toward_goal(1150, false, false);
         t3.interrupt();
+
+        drive_turn(-135, -11.5, 75, 125, false, 0, 3);
+        hood.set(1);
+        turn_pid(180, -1, 1);
+        drive_straight(-30,  75, 100, true, 0, 20);
         break;
     }
 
@@ -507,6 +515,7 @@ void intake() {
                 break;
 
             case IntakeState::SCORE_MID:
+                hood.set(0);
                 intakeFull.spin(DIR_FWD, 100, VEL_PCT);
                 arm.spin(DIR_FWD, 20, VEL_PCT);
                 break;
