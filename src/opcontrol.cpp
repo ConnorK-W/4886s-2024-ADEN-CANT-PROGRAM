@@ -68,6 +68,11 @@ void opcontrol(void) {
             intakeFull.stop();
             arm.stop(vex::brakeType::brake);
 
+            imu.calibrate();
+            while (imu.isCalibrating()) {
+                wait(20, vex::msec);
+            }
+            wait(500, vex::msec);
             autonomous();
             continue;
         }
