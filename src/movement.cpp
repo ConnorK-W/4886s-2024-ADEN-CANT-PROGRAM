@@ -539,16 +539,8 @@ void drive_straight_toward_goal(int duration_msec, bool target_small_goal, bool 
 void drive_turn(float degrees, float outer_radius, float target_ips, float ipss, bool reversed, float start_ips, float end_ips) {
     const int TICKS_PER_SEC = 50;
     const int MSEC_PER_TICK = 1000 / TICKS_PER_SEC;
-    const int EXTRA_STOP_TIME_MS = 1000;
 
     target_heading += degrees; // update target heading
-
-    const float arc_length_in = std::abs(degrees) / RAD_TO_DEG * std::abs(outer_radius);
-    const int stop_time_ms = (target_ips > 0)
-        ? static_cast<int>((arc_length_in / target_ips) * 1000.0f) + EXTRA_STOP_TIME_MS
-        : EXTRA_STOP_TIME_MS;
-    vex::timer stop_timer;
-    stop_timer.clear();
 
     // PID pid_drive_l = PID(move_kp, move_ki, move_kd);
     // PID pid_drive_r = PID(move_kp, move_ki, move_kd);
@@ -574,17 +566,6 @@ void drive_turn(float degrees, float outer_radius, float target_ips, float ipss,
 
 
     while (ips >= 0) {
-        if (stop_timer.time(vex::msec) >= stop_time_ms) {
-            if (end_ips == 0) {
-                drive_l.stop(vex::brakeType::brake);
-                drive_r.stop(vex::brakeType::brake);
-            } else {
-                drive_l.stop(vex::brakeType::coast);
-                drive_r.stop(vex::brakeType::coast);
-            }
-            return;
-        }
-
         // Update values
         pos_l = pos_drive_l() - pos_start_l;
         pos_r = pos_drive_r() - pos_start_r;

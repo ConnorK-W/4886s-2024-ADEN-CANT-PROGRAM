@@ -144,7 +144,7 @@ void autonomous(void) {
         });
         drive_straight_toward_goal(1300, false, false);
         drive_full.spin(DIR_REV, 50, VEL_PCT);
-        drive_turn(120, 12.8, 55, 125, false, 0, 20);
+        drive_turn(120, 12.3, 55, 125, false, 0, 20);
         target_heading = 225;
         vex::thread t2([](){
             wait(200, TIME_MSEC);
@@ -156,7 +156,7 @@ void autonomous(void) {
         });
         drive_straight(30, 40, 50, true, 20, 30);
         t4.interrupt();
-        wait(1000, TIME_MSEC);
+        wait(1200, TIME_MSEC);
         t1.interrupt();
         t2.interrupt();
         hood.set(0);
@@ -198,7 +198,7 @@ void autonomous(void) {
         drive_turn(-45, 28, 70, 75, true, 0, 10);
         tounge.set(0);
         turn_pid(-180, -1, 1);
-        drive_straight(30, 70, 100, true, 40, 30);
+        drive_straight(27, 70, 100, true, 40, 30);
         currentState = IntakeState::OUTTAKE_LIFT; 
         drive_full.spin(DIR_FWD, 5, VLT_VLT);
         wait(1000, TIME_MSEC);

@@ -72,8 +72,13 @@ void opcontrol(void) {
             while (imu.isCalibrating()) {
                 wait(20, vex::msec);
             }
-            wait(500, vex::msec);
+            wait(700, vex::msec);
             autonomous();
+
+            drive_l.stop(vex::brakeType::coast);
+            drive_r.stop(vex::brakeType::coast);
+            intakeFull.stop();
+            arm.stop(vex::brakeType::brake);
             continue;
         }
 
