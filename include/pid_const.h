@@ -16,7 +16,7 @@
 #define DRIVE_STRAIGHT_TOWARD_SMALLGOAL_KD (0.0)
 
 // Direction control
-#define DRIVE_STRAIGHT_DIR_KP 2.2
+#define DRIVE_STRAIGHT_DIR_KP 2.0
 #define DRIVE_STRAIGHT_DIR_KI 0.00
 #define DRIVE_STRAIGHT_DIR_KD 8.275
 
@@ -32,7 +32,7 @@
 
 
 // turn_pid() consts
-#define TURN_PID_KP 0.6
+#define TURN_PID_KP 0.65
 #define TURN_PID_KI 0.00
 #define TURN_PID_KD 3.2
 
