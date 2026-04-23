@@ -80,7 +80,7 @@ void autonomous(void) {
         hood.set(1);
         // long goal
         vex::thread t4([](){
-            wait(1000, TIME_MSEC);
+            wait(800, TIME_MSEC);
             currentState = IntakeState::SCORE; 
             wait(1000, TIME_MSEC);
             currentState = IntakeState::INTAKE; 
@@ -92,14 +92,14 @@ void autonomous(void) {
         drive_turn(90, 5, 60, 150, false, 0, 12);
         t4.interrupt();
         lift.set(1);
-        drive_straight(50, 45, 70, true, 25, 20);
+        drive_straight(49, 45, 70, true, 25, 20);
         tounge.set(1);
         drive_turn(-45, -19, 50, 100, false, 20, 10);
         vex::thread t2([](){
             wait(800, TIME_MSEC);
             hood.set(0);
             currentState = IntakeState::SCORE_MID_SLOW; 
-            wait(1200, TIME_MSEC);
+            wait(1300, TIME_MSEC);
             currentState = IntakeState::INTAKE;
 
         });
@@ -116,7 +116,7 @@ void autonomous(void) {
         t1.interrupt();
         t2.interrupt();
         vex::thread t5([](){
-            wait(1000, TIME_MSEC);
+            wait(800, TIME_MSEC);
             hood.set(0);
             intakeFull.spin(DIR_FWD, 100, VEL_PCT);
             arm.spin(DIR_FWD, 100, VEL_PCT);
@@ -176,7 +176,50 @@ void autonomous(void) {
     }
 
     case RightStop: {
-        
+        vex::thread t1(intake);
+        lift.set(0);
+        tounge.set(1);
+        drive_straight(14.5, 70, 100, true, 0, 40);
+        drive_turn(70, 15.5, 65, 75, false, 40, 0);
+        target_heading = 90;
+        drive_full.spin(DIR_FWD, 4, VLT_VLT);
+        wait(700, TIME_MSEC);
+        tounge.set(0);
+        // long goal
+        vex::thread t4([](){
+            wait(1000, TIME_MSEC);
+            currentState = IntakeState::SCORE; 
+            wait(800, TIME_MSEC);
+            currentState = IntakeState::INTAKE;
+        });
+        drive_straight_toward_goal(1300, false, false);
+        drive_full.spin(DIR_REV, 50, VEL_PCT);
+        drive_turn(120, 12.3, 55, 125, false, 0, 20);
+        target_heading = 225;
+        vex::thread t2([](){
+            wait(200, TIME_MSEC);
+            tounge.set(1);
+            wait(400, TIME_MSEC);
+            tounge.set(0);
+            wait(600, TIME_MSEC);
+            currentState = IntakeState::OUTTAKE_LIFT;
+        });
+        drive_straight(30, 40, 50, true, 20, 30);
+        t4.interrupt();
+        wait(5200, TIME_MSEC);
+        t1.interrupt();
+        t2.interrupt();
+        hood.set(0);
+        drive_straight(-28, 70, 100, true, 10, 5);
+        turn_pid(65, -1, 1);
+        vex::thread t3([](){
+            wait(700, TIME_MSEC);
+            target_heading = target_heading -20;
+        });
+        drive_straight(25, 30, 100, true, 0, 5);
+        t3.interrupt();
+        drive_full.setStopping(vex::hold);
+        wait(10000, TIME_MSEC);
         break;
     }
 
