@@ -1,7 +1,7 @@
 #include "../include/main.h"
 
 // Which auton will run
-int auton_mode = RightWing;
+int auton_mode = LeftStop;
 // Heading robot should follow
 float target_heading = 0;
 // Offset angle from distance sensor drift correction

@@ -340,26 +340,7 @@ void autonomous(void) {
     }
 
     case LeftStop: {
-        vex::thread t1(intake);
-        lift.set(0);
-        tounge.set(1);
-        drive_straight(13, 70, 100, true, 0, 40);
-        drive_turn(-80, -15.5, 65, 75, false, 40, 0);
-        target_heading = -90;
-        drive_full.spin(DIR_FWD, 3, VLT_VLT);
-        wait(800, TIME_MSEC);
-        tounge.set(0);
-        vex::thread t4([](){
-            wait(800, TIME_MSEC);
-            currentState = IntakeState::SCORE;
-            wait(800, TIME_MSEC);
-            currentState = IntakeState::INTAKE;
-        });
-        drive_straight_toward_goal(1300, false, false);
-        t4.interrupt();
-        currentState = IntakeState::OFF;
-        t1.interrupt();
-        drive_full.stop();
+        drive_straight(2, 70, 100, true, 0, 0);
         break;
     }
 
