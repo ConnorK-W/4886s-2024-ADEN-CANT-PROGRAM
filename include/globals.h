@@ -10,7 +10,7 @@
 #define AWP 0
 #define AWPPush 1
 #define RightSimple 2
-#define RightStop 3
+#define RightWing 3
 #define RightComplex 4
 #define LeftSimple 5
 #define LeftStop 6

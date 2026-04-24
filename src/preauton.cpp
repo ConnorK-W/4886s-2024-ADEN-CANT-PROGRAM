@@ -9,7 +9,7 @@ void pre_auton(void) {
     vex::thread vision_thread(vision_processing_task);
 
     int *sides;
-    const char *autons[9] = {"AWP", "AWP Push", "Right Simple", "Right Stop", "Right Complex", "Left Simple", "Left Stop", "Left Complex", "Skills"};
+    const char *autons[9] = {"AWP", "AWP Push", "Right Simple", "Right Wing", "Right Complex", "Left Simple", "Left Stop", "Left Complex", "Skills"};
 
     // Create GUI - none of this is important, just for looks
     B_SCRN.clearScreen();
