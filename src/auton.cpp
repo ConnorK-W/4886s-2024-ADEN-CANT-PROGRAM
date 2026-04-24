@@ -172,11 +172,11 @@ void autonomous(void) {
         t1.interrupt();
         t2.interrupt();
         hood.set(0);
-        drive_straight(-30, 70, 100, true, 10, 5);
-        turn_pid(65, -1, 1);
+        drive_straight(-31, 70, 100, true, 10, 5);
+        turn_pid(63, -1, 1);
         vex::thread t3([](){
             wait(700, TIME_MSEC);
-            target_heading = target_heading -20;
+            target_heading = target_heading -18;
         });
         drive_straight(28, 60, 120, true, 0, 0);
         t3.interrupt();
